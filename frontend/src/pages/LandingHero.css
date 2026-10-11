@@ -1,26 +1,20 @@
 /* ==========================================================================
-   LANDING HERO: CINEMATIC "FROM CHAOS TO CLARITY" MOVIE EXPERIENCE
-   Scene 1 (Dark Abyss) -> Scene 2 (Hyper-warp Funnel) -> Scene 3 (Crisp Light Theme Workspace)
+   LANDING HERO: EXTRAORDINARY LIGHT THEME CINEMATIC STORY
+   100% Light Theme Throughout (Crisp #f8fafc canvas, Pure White #ffffff cards, Dark Slate text)
+   Transformation: Chaotic Feedback Dots -> Fluid Streamlines -> Structured Clean Grid
    ========================================================================== */
 
 .landing-hero-root {
   position: relative;
   width: 100%;
   min-height: 300vh;
-  /* Dynamic background transition driven by GSAP */
-  background-color: #050811;
-  color: #f8fafc;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
-  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s ease;
-}
-
-.landing-hero-root.light-mode-active {
   background-color: #f8fafc;
   color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
 }
 
-/* Fixed Navigation Header with Dynamic Contrast */
+/* Luminous Navigation Header */
 .landing-hero-nav {
   position: fixed;
   top: 0;
@@ -32,17 +26,11 @@
   justify-content: space-between;
   padding: 0 2.5rem;
   z-index: 100;
-  background: rgba(5, 8, 17, 0.7);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.landing-hero-root.light-mode-active .landing-hero-nav {
-  background: rgba(255, 255, 255, 0.88);
   border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
 }
 
 .landing-brand {
@@ -57,11 +45,11 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.5);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
   transition: transform 0.2s ease;
 }
 
@@ -73,11 +61,6 @@
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #ffffff;
-  transition: color 0.5s ease;
-}
-
-.landing-hero-root.light-mode-active .brand-title {
   color: #0f172a;
 }
 
@@ -87,17 +70,10 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0.25rem 0.55rem;
-  background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.4);
-  color: #a5b4fc;
-  border-radius: 9999px;
-  transition: all 0.5s ease;
-}
-
-.landing-hero-root.light-mode-active .brand-tag {
   background: #eef2ff;
-  border-color: #c7d2fe;
+  border: 1px solid #c7d2fe;
   color: #4f46e5;
+  border-radius: 9999px;
 }
 
 .nav-actions {
@@ -111,19 +87,12 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: #475569;
   padding: 0.45rem 0.95rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.5s ease;
-}
-
-.landing-hero-root.light-mode-active .nav-pill-badge {
   background: #ffffff;
-  border-color: #e2e8f0;
-  color: #475569;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .pulse-dot {
@@ -131,7 +100,7 @@
   height: 8px;
   border-radius: 50%;
   background: #10b981;
-  box-shadow: 0 0 10px #10b981;
+  box-shadow: 0 0 8px #10b981;
   animation: pulse-glow 2s infinite ease-in-out;
 }
 
@@ -148,20 +117,21 @@
   font-size: 0.88rem;
   font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #4f46e5;
+  border: 1px solid #4338ca;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+  transition: all 0.2s ease;
 }
 
 .btn-launch-nav:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.55);
+  transform: translateY(-1px);
+  background: #4338ca;
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
 }
 
-/* Fixed WebGL Canvas Container */
+/* Fixed WebGL Canvas Behind Content */
 .canvas-container {
   position: fixed;
   top: 0;
@@ -192,7 +162,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 6rem 3.5rem;
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
   box-sizing: border-box;
   pointer-events: auto;
@@ -204,71 +174,47 @@
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 1.5rem;
   padding: 0.4rem 0.95rem;
   border-radius: 9999px;
   width: fit-content;
-  backdrop-filter: blur(8px);
 }
 
-.badge-dark-abyss {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+.badge-crimson {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
 }
 
-.badge-neon-warp {
-  background: rgba(6, 182, 212, 0.15);
-  border: 1px solid rgba(6, 182, 212, 0.4);
-  color: #67e8f9;
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+.badge-indigo {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #4f46e5;
 }
 
-.badge-light-clarity {
+.badge-emerald {
   background: #ecfdf5;
   border: 1px solid #a7f3d0;
   color: #059669;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.1);
 }
 
 .stage-title {
-  font-size: clamp(2.5rem, 5.5vw, 4.4rem);
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.035em;
-  max-width: 900px;
-  margin-bottom: 1.5rem;
-  transition: color 0.5s ease;
-}
-
-.title-glow-dark {
-  color: #ffffff;
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
-}
-
-.title-glow-neon {
-  background: linear-gradient(135deg, #ffffff 40%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.title-light-clarity {
+  max-width: 880px;
+  margin-bottom: 1.35rem;
   color: #0f172a;
 }
 
 .stage-subtitle {
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
   line-height: 1.65;
   max-width: 740px;
   margin-bottom: 2.25rem;
-  color: #94a3b8;
-  transition: color 0.5s ease;
-}
-
-.landing-hero-root.light-mode-active .stage-subtitle {
   color: #475569;
 }
 
@@ -281,26 +227,19 @@
 }
 
 .hud-chip {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 1.25rem 1.6rem;
   min-width: 210px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: all 0.25s ease;
 }
 
 .hud-chip:hover {
-  transform: translateY(-3px);
-  border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.2);
-}
-
-.landing-hero-root.light-mode-active .hud-chip {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .hud-chip-label {
@@ -308,28 +247,20 @@
   color: #64748b;
   text-transform: uppercase;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   margin-bottom: 0.4rem;
 }
 
 .hud-chip-val {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  color: #ffffff;
-}
-
-.landing-hero-root.light-mode-active .hud-chip-val {
   color: #0f172a;
 }
 
 .hud-chip-sub {
   font-size: 0.75rem;
-  color: #94a3b8;
-  margin-top: 0.25rem;
-}
-
-.landing-hero-root.light-mode-active .hud-chip-sub {
   color: #64748b;
+  margin-top: 0.25rem;
 }
 
 /* Scene 3: Pristine 3-Card Kanban Emergence Grid (Clean, Zero Overlap) */
@@ -445,17 +376,18 @@
   font-size: 1.05rem;
   font-weight: 700;
   color: #ffffff;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: #4f46e5;
   border: 1px solid #4338ca;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-launch-hero:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 16px 35px rgba(79, 70, 229, 0.45);
+  background: #4338ca;
+  box-shadow: 0 16px 35px rgba(79, 70, 229, 0.4);
 }
 
 .btn-secondary-hero {
