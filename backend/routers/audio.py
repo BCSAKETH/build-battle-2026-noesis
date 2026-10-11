@@ -5,12 +5,18 @@ Features: Multilingual Voice Capture (Telugu, Hindi, English) with modern google
 """
 
 import os
+import sys
 import json
 import base64
 from typing import Optional, Dict, Any
 from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
+
+# Ensure backend directory is in sys.path
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 
 # Shared Auth dependency
 from server import get_current_user, SUPABASE_URL, SUPABASE_ANON_KEY

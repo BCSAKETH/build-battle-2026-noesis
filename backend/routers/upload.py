@@ -5,6 +5,7 @@ Features: Multi-Tenant Multipart CSV Ingestion with Groq Llama-3 Auto-Mapping
 """
 
 import os
+import sys
 import io
 import json
 import urllib.request
@@ -12,6 +13,11 @@ from typing import List, Dict, Any, Optional
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from dotenv import load_dotenv
+
+# Ensure backend directory is in sys.path
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 
 # Shared Auth dependency
 from server import get_current_user, SUPABASE_URL, SUPABASE_ANON_KEY
