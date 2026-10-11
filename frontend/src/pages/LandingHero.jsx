@@ -412,7 +412,7 @@ export default function LandingHero({ onLaunchWorkspace }) {
 
           <button
             className="btn-launch-engine"
-            onClick={() => setShowSplitAuth(true)}
+            onClick={() => onLaunchWorkspace('executive')}
           >
             <span>Launch Workspace</span>
             <ArrowRight size={14} />
@@ -573,7 +573,7 @@ export default function LandingHero({ onLaunchWorkspace }) {
             <div className="final-cta-cluster">
               <button
                 className="btn-enter-noesis"
-                onClick={() => setShowSplitAuth(true)}
+                onClick={() => onLaunchWorkspace('executive')}
               >
                 <span>Enter NOESIS Decision Engine</span>
                 <ArrowRight size={18} />
