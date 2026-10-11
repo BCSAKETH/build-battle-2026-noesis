@@ -5,57 +5,84 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
 import NoesisLogo from '../components/NoesisLogo';
+import { supabase } from '../supabase';
 import {
   ShieldAlert,
   ArrowRight,
-  Sparkles,
   Cpu,
   CheckCircle2,
+  AlertTriangle,
   Lock,
-  ChevronRight,
-  TrendingDown,
+  Mail,
+  UserCheck,
+  X,
+  Sparkles,
   Layers,
-  Zap,
+  ChevronRight,
   Activity,
-  AlertTriangle
+  Zap,
+  HelpCircle
 } from 'lucide-react';
 import './LandingHero.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Raw customer feedback complaint snippets for floating 3D text in Scene 1
-const RAW_COMPLAINTS = [
-  '⚠️ My account was hacked! ($4,500 wire stolen)',
-  '⚠️ Scammed by unverified seller, zero delivery',
-  '⏳ My delivery is 8 days late! Where is it?',
-  '💥 The app crashed at checkout during payment',
-  '⚠️ Counterfeit luxury item delivered by merchant',
-  '⏳ Customer service is unresponsive for 72+ hours',
-  '💥 Refund denied with zero explanation given',
-  '⚠️ Off-platform payment demanded via private chat'
+// 8 Representative Raw Complaints for Interactive 3D Raycasting & 2D Bubbles
+const COMPLAINT_SIGNALS = [
+  { id: 1, text: '🚨 My account was hacked! $45,000 escrow wire stolen via unverified seller!', category: 'Fraud & Scam', severity: 'P0 Critical', color: '#F43F5E' },
+  { id: 2, text: '⚠️ Fake merchant counterfeit replica delivered instead of luxury watch', category: 'Fraud & Scam', severity: 'P0 Critical', color: '#F43F5E' },
+  { id: 3, text: '⏳ Support queue completely unresponsive for 72+ hours during checkout outage', category: 'Customer Service', severity: 'P1 High', color: '#F59E0B' },
+  { id: 4, text: '📦 Shipment tracking stalled at regional carrier node for 9 business days', category: 'Operational Issues', severity: 'P1 High', color: '#F59E0B' },
+  { id: 5, text: '💥 Mobile checkout app crashed on payment token validation', category: 'Product Feedback', severity: 'P2 Medium', color: '#4F46E5' },
+  { id: 6, text: '💡 Please add dark mode and bulk export button to billing dashboard', category: 'Product Feedback', severity: 'P3 Low', color: '#4F46E5' },
+  { id: 7, text: '📦 Outer delivery box had slight cardboard tear but contents intact', category: 'Operational Issues', severity: 'P3 Low', color: '#64748B' },
+  { id: 8, text: '✨ Proactive SMS delivery update arrived 2 hours before courier arrived!', category: 'Resolved / Retention', severity: 'P4 Safe', color: '#10B981' }
 ];
 
 export default function LandingHero({ onLaunchWorkspace }) {
   const mountRef = useRef(null);
-  const scrollTrackRef = useRef(null);
+  const pinContainerRef = useRef(null);
+  const stage1Ref = useRef(null);
   const { t } = useTranslation();
 
+  // Scroll and Interactive State
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeZone, setActiveZone] = useState('zone1'); // 'zone1' | 'zone2' | 'zone3'
+  const [hoveredParticleText, setHoveredParticleText] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+
+  // Split-Screen Auth Modal State (Stage 3)
+  const [showSplitAuth, setShowSplitAuth] = useState(false);
+  const [authRole, setAuthRole] = useState('executive');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  // Three.js Scene References
+  const threeRef = useRef({
+    scene: null,
+    camera: null,
+    renderer: null,
+    particleSystem: null,
+    raycaster: new THREE.Raycaster(),
+    mouse: new THREE.Vector2(-999, -999)
+  });
 
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
 
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let width = container.clientWidth || window.innerWidth;
+    let height = container.clientHeight || window.innerHeight;
 
-    // --- 1. THREE.JS SCENE SETUP (100% PURE LIGHT THEME CANVAS) ---
+    // --- 1. THREE.JS SCENE INITIALIZATION ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafc); // Crisp Slate-50 canvas throughout
-    scene.fog = new THREE.FogExp2(0xf8fafc, 0.02);
+    scene.background = new THREE.Color(0xf8fafc); // Crisp Executive Slate-50 canvas
+    scene.fog = new THREE.FogExp2(0xf8fafc, 0.018);
 
-    const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 22);
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 24);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -69,487 +96,662 @@ export default function LandingHero({ onLaunchWorkspace }) {
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Bright Ambient & Key Lighting for crisp light theme
+    // Ambient & Directional Key Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
-
-    const keyLight = new THREE.DirectionalLight(0x4f46e5, 1.0);
-    keyLight.position.set(6, 10, 12);
+    const keyLight = new THREE.DirectionalLight(0x4f46e5, 1.2);
+    keyLight.position.set(10, 15, 15);
     scene.add(keyLight);
 
-    // --- 2. 1,200 RAW FEEDBACK DOTS ENGINE (CHAOS -> FUNNEL -> STRUCTURED CRYSTAL GRID) ---
-    const particleCount = 1200;
-    const particleGeometry = new THREE.BufferGeometry();
+    // --- 2. 1,500 PARTICLES: 3-STAGE HORIZONTAL PIPELINE ---
+    const particleCount = 1500;
+    const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
-    const chaoticTargets = new Float32Array(particleCount * 3);
-    const funnelTargets = new Float32Array(particleCount * 3);
-    const structuredGridTargets = new Float32Array(particleCount * 3);
 
-    // Palette calibrated for crisp light background
-    const colDustySlate = new THREE.Color(0x64748b); // Unstructured noise
-    const colRawCrimson = new THREE.Color(0xe11d48); // High-friction complaint
-    const colRawAmber = new THREE.Color(0xd97706);   // SLA delay friction
-    const colIndigo = new THREE.Color(0x4f46e5);     // Adaption processing stream
-    const colRose = new THREE.Color(0xe11d48);       // Structured Critical Fraud
-    const colAmber = new THREE.Color(0xd97706);      // Structured SLA Warning
-    const colEmerald = new THREE.Color(0x059669);    // Structured Resolved Safe
+    // Target positions along X-Axis
+    const chaosTargets = new Float32Array(particleCount * 3);      // Left: X in [-15, -5]
+    const funnelTargets = new Float32Array(particleCount * 3);     // Center: X in [-5, +5], Y,Z -> 0
+    const structuredTargets = new Float32Array(particleCount * 3); // Right: X in [+5, +15], Rigid Grid
+
+    // Color definitions
+    const colSlate = new THREE.Color(0x64748b);
+    const colRose = new THREE.Color(0xf43f5e);   // Fraud P0
+    const colAmber = new THREE.Color(0xf59e0b);  // Support SLA
+    const colIndigo = new THREE.Color(0x4f46e5); // Tech & Systems
+    const colEmerald = new THREE.Color(0x10b981);// Resolved
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
 
-      // Phase 1 (0-33%): Complete Chaotic Feedback Cloud
-      const cx = (Math.random() - 0.5) * 34;
-      const cy = (Math.random() - 0.5) * 22;
-      const cz = (Math.random() - 0.5) * 24;
-      positions[i3] = cx;
-      positions[i3 + 1] = cy;
-      positions[i3 + 2] = cz;
-      chaoticTargets[i3] = cx;
-      chaoticTargets[i3 + 1] = cy;
-      chaoticTargets[i3 + 2] = cz;
+      // STAGE 2A: LEFT ZONE (Chaos: X in [-15, -5])
+      const cX = -15 + Math.random() * 10;
+      const cY = (Math.random() - 0.5) * 14;
+      const cZ = (Math.random() - 0.5) * 12;
+      chaosTargets[i3] = cX;
+      chaosTargets[i3 + 1] = cY;
+      chaosTargets[i3 + 2] = cZ;
 
-      // Phase 2 (33-66%): Fluid Streamlines Funneling into Central Processing Channel
-      const theta = (i / particleCount) * Math.PI * 8; // Spiral streamlines
-      const radius = 1.0 + Math.pow(Math.random(), 1.5) * 4.5;
-      const zF = ((i % 40) - 20) * 0.7;
-      funnelTargets[i3] = Math.cos(theta) * radius;
-      funnelTargets[i3 + 1] = Math.sin(theta) * radius;
-      funnelTargets[i3 + 2] = zF;
+      // STAGE 2B: CENTER FUNNEL (X in [-5, +5], converging to origin)
+      const fX = -5 + (i / particleCount) * 10;
+      const angle = (i * 0.15);
+      const radius = 0.5 + Math.pow(Math.random(), 2) * 3.5;
+      funnelTargets[i3] = fX;
+      funnelTargets[i3 + 1] = Math.sin(angle) * radius * (1 - Math.abs(fX) / 6);
+      funnelTargets[i3 + 2] = Math.cos(angle) * radius * (1 - Math.abs(fX) / 6);
 
-      // Phase 3 (66-100%): Pristine Structured Mathematical Matrix (3 Clean Semantic Columns)
-      const column = i % 3; // 0 = Rose (Fraud), 1 = Amber (Support), 2 = Emerald (Resolved)
-      const colX = (column - 1) * 11.5;
-      const rowY = Math.floor(i / 3) % 25; // 25 rows
-      const gridY = (rowY - 12) * 0.85;
-      const depthZ = -4.0 + (Math.floor(i / 75) % 4) * 0.5; // Multi-layer depth behind cards
-      structuredGridTargets[i3] = colX + ((i % 5) - 2) * 0.55;
-      structuredGridTargets[i3 + 1] = gridY;
-      structuredGridTargets[i3 + 2] = depthZ;
+      // STAGE 2C: RIGHT STRUCTURED GRID (X in [+5, +15], 3 Clean Columns)
+      const colIdx = i % 3; // 0: Rose (Fraud), 1: Amber (Ops), 2: Emerald (Resolved)
+      const gridX = 6.5 + colIdx * 3.6;
+      const rowIdx = Math.floor(i / 3) % 30;
+      const gridY = 8 - rowIdx * 0.55;
+      const depthLayer = -2.5 + ((i % 5) * 0.4);
+      structuredTargets[i3] = gridX + ((i % 4) - 1.5) * 0.3;
+      structuredTargets[i3 + 1] = gridY;
+      structuredTargets[i3 + 2] = depthLayer;
 
-      // Initial Phase 1 colors (scattered raw feedback tickets)
-      const randType = Math.random();
-      const baseCol = randType > 0.6 ? colRawCrimson : randType > 0.3 ? colDustySlate : colRawAmber;
-      colors[i3] = baseCol.r;
-      colors[i3 + 1] = baseCol.g;
-      colors[i3 + 2] = baseCol.b;
+      // Initial positions start at Chaos targets
+      positions[i3] = cX;
+      positions[i3 + 1] = cY;
+      positions[i3 + 2] = cZ;
+
+      // Initial color: Dull slate with sporadic crimson sparks
+      if (Math.random() < 0.12) {
+        colors[i3] = colRose.r;
+        colors[i3 + 1] = colRose.g;
+        colors[i3 + 2] = colRose.b;
+      } else {
+        colors[i3] = colSlate.r;
+        colors[i3 + 1] = colSlate.g;
+        colors[i3 + 2] = colSlate.b;
+      }
     }
 
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Crisp high-resolution radial dot texture
+    // Crisp circular point texture
     const pCanvas = document.createElement('canvas');
     pCanvas.width = 64;
     pCanvas.height = 64;
     const pCtx = pCanvas.getContext('2d');
-    const pGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 30);
-    pGrad.addColorStop(0, 'rgba(15, 23, 42, 1)');
-    pGrad.addColorStop(0.35, 'rgba(79, 70, 229, 0.85)');
-    pGrad.addColorStop(1, 'rgba(79, 70, 229, 0)');
-    pCtx.fillStyle = pGrad;
+    const radGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 30);
+    radGrad.addColorStop(0, 'rgba(15, 23, 42, 1)');
+    radGrad.addColorStop(0.35, 'rgba(79, 70, 229, 0.9)');
+    radGrad.addColorStop(1, 'rgba(79, 70, 229, 0)');
+    pCtx.fillStyle = radGrad;
     pCtx.beginPath();
     pCtx.arc(32, 32, 30, 0, Math.PI * 2);
     pCtx.fill();
+    const pointTexture = new THREE.CanvasTexture(pCanvas);
 
-    const particleTexture = new THREE.CanvasTexture(pCanvas);
-
-    const particleMaterial = new THREE.PointsMaterial({
+    const material = new THREE.PointsMaterial({
       size: 0.45,
-      vertexColors: true,
-      map: particleTexture,
+      map: pointTexture,
       transparent: true,
-      opacity: 0.9,
-      depthWrite: false
+      vertexColors: true,
+      alphaTest: 0.02,
+      depthWrite: false,
+      blending: THREE.NormalBlending
     });
 
-    const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+    const particleSystem = new THREE.Points(geometry, material);
     scene.add(particleSystem);
 
-    // --- 3. FLOATING 3D COMPLAINT BILLBOARDS (SCENE 1 ONLY) ---
-    const billboardsGroup = new THREE.Group();
-    const billboardSprites = [];
-
-    RAW_COMPLAINTS.forEach((txt, idx) => {
-      const bCanvas = document.createElement('canvas');
-      bCanvas.width = 512;
-      bCanvas.height = 110;
-      const bCtx = bCanvas.getContext('2d');
-
-      // Crisp White Glass Pill with subtle color border
-      bCtx.fillStyle = '#ffffff';
-      bCtx.strokeStyle = txt.includes('hacked') || txt.includes('Scammed') ? '#e11d48' : '#cbd5e1';
-      bCtx.lineWidth = 3;
-      bCtx.beginPath();
-      bCtx.roundRect(8, 8, 496, 94, 20);
-      bCtx.fill();
-      bCtx.stroke();
-
-      bCtx.font = 'bold 22px -apple-system, sans-serif';
-      bCtx.fillStyle = '#0f172a';
-      bCtx.fillText(txt, 24, 58);
-
-      const bTex = new THREE.CanvasTexture(bCanvas);
-      const bMat = new THREE.SpriteMaterial({
-        map: bTex,
-        transparent: true,
-        opacity: 0.95
-      });
-      const sprite = new THREE.Sprite(bMat);
-
-      const sx = (Math.random() - 0.5) * 20;
-      const sy = (Math.random() - 0.5) * 14;
-      const sz = 2 + (Math.random() - 0.5) * 12;
-      sprite.position.set(sx, sy, sz);
-      sprite.scale.set(4.6, 1.05, 1);
-
-      billboardsGroup.add(sprite);
-      billboardSprites.push({
-        sprite,
-        origin: new THREE.Vector3(sx, sy, sz),
-        driftSpeed: 0.2 + Math.random() * 0.3
-      });
-    });
-    scene.add(billboardsGroup);
-
-    // --- 4. INTERACTIVE MOUSE PARALLAX & DISPERSION ---
-    const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-    const onPointerMove = (e) => {
-      mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+    threeRef.current = {
+      scene,
+      camera,
+      renderer,
+      particleSystem,
+      raycaster: new THREE.Raycaster(),
+      mouse: new THREE.Vector2(-999, -999)
     };
-    window.addEventListener('mousemove', onPointerMove);
 
-    // --- 5. GSAP SCROLLTRIGGER ORCHESTRATION ---
-    const animState = { progress: 0 };
+    // --- 3. MOUSE INTERACTIVITY & RAYCASTING ---
+    const handleMouseMove = (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const mouseY = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      threeRef.current.mouse.set(mouseX, mouseY);
+      setTooltipPos({ x: e.clientX, y: e.clientY });
+    };
 
-    const st = ScrollTrigger.create({
-      trigger: scrollTrackRef.current,
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // --- 4. GSAP SCROLLTRIGGER PIN & METAMORPHOSIS ---
+    const pinPin = ScrollTrigger.create({
+      trigger: pinContainerRef.current,
       start: 'top top',
-      end: 'bottom bottom',
-      scrub: 1.2,
+      end: '+=300%',
+      pin: true,
+      scrub: 1,
       onUpdate: (self) => {
         const p = self.progress;
-        animState.progress = p;
         setScrollProgress(p);
 
-        const posAttr = particleGeometry.attributes.position;
-        const colAttr = particleGeometry.attributes.color;
+        // Zone state indicator
+        if (p < 0.35) {
+          setActiveZone('zone1'); // 2D Narrative & Left Chaos
+        } else if (p < 0.70) {
+          setActiveZone('zone2'); // Center Funnel Convergence
+        } else {
+          setActiveZone('zone3'); // Structured Equilibrium & Auth
+        }
+
+        // Particle Metamorphosis based on Scroll Progress (0.0 -> 1.0)
+        const posAttr = particleSystem.geometry.attributes.position;
+        const colAttr = particleSystem.geometry.attributes.color;
 
         for (let i = 0; i < particleCount; i++) {
           const i3 = i * 3;
-          let tx, ty, tz;
+          let curX, curY, curZ;
+          let r, g, b;
 
-          if (p < 0.5) {
-            // Phase 1 -> Phase 2 (Chaos -> Streamlines)
-            const t = p * 2.0;
-            tx = THREE.MathUtils.lerp(chaoticTargets[i3], funnelTargets[i3], t);
-            ty = THREE.MathUtils.lerp(chaoticTargets[i3 + 1], funnelTargets[i3 + 1], t);
-            tz = THREE.MathUtils.lerp(chaoticTargets[i3 + 2], funnelTargets[i3 + 2], t);
+          const colType = i % 4;
+          const targetCol = colType === 0 ? colRose : colType === 1 ? colAmber : colType === 2 ? colIndigo : colEmerald;
 
-            // Morph into Adaption Indigo stream
-            colAttr.array[i3] = THREE.MathUtils.lerp(colors[i3], colIndigo.r, t * 0.85);
-            colAttr.array[i3 + 1] = THREE.MathUtils.lerp(colors[i3 + 1], colIndigo.g, t * 0.85);
-            colAttr.array[i3 + 2] = THREE.MathUtils.lerp(colors[i3 + 2], colIndigo.b, t * 0.85);
+          if (p <= 0.35) {
+            // Stage 1 -> Stage 2A: Left Chaos Cloud
+            const t = p / 0.35;
+            curX = chaosTargets[i3] + Math.sin(i * 0.1) * 0.5;
+            curY = chaosTargets[i3 + 1] + Math.cos(i * 0.1) * 0.5;
+            curZ = chaosTargets[i3 + 2];
+
+            r = colSlate.r;
+            g = colSlate.g;
+            b = colSlate.b;
+          } else if (p <= 0.70) {
+            // Stage 2B: Acceleration into Center Funnel & Color Transition
+            const t = (p - 0.35) / 0.35;
+            curX = THREE.MathUtils.lerp(chaosTargets[i3], funnelTargets[i3], t);
+            curY = THREE.MathUtils.lerp(chaosTargets[i3 + 1], funnelTargets[i3 + 1], t);
+            curZ = THREE.MathUtils.lerp(chaosTargets[i3 + 2], funnelTargets[i3 + 2], t);
+
+            r = THREE.MathUtils.lerp(colSlate.r, targetCol.r, t);
+            g = THREE.MathUtils.lerp(colSlate.g, targetCol.g, t);
+            b = THREE.MathUtils.lerp(colSlate.b, targetCol.b, t);
           } else {
-            // Phase 2 -> Phase 3 (Streamlines -> Clean Structured Matrix Grid)
-            const t = (p - 0.5) * 2.0;
-            tx = THREE.MathUtils.lerp(funnelTargets[i3], structuredGridTargets[i3], t);
-            ty = THREE.MathUtils.lerp(funnelTargets[i3 + 1], structuredGridTargets[i3 + 1], t);
-            tz = THREE.MathUtils.lerp(funnelTargets[i3 + 2], structuredGridTargets[i3 + 2], t);
+            // Stage 2C: Locking into Right Rigid Structured Grid
+            const t = (p - 0.70) / 0.30;
+            curX = THREE.MathUtils.lerp(funnelTargets[i3], structuredTargets[i3], t);
+            curY = THREE.MathUtils.lerp(funnelTargets[i3 + 1], structuredTargets[i3 + 1], t);
+            curZ = THREE.MathUtils.lerp(funnelTargets[i3 + 2], structuredTargets[i3 + 2], t);
 
-            // Snap into Structured Semantic Colors (Rose, Amber, Emerald)
-            const colIdx = i % 3;
-            const targetColor = colIdx === 0 ? colRose : colIdx === 1 ? colAmber : colEmerald;
-            colAttr.array[i3] = THREE.MathUtils.lerp(colIndigo.r, targetColor.r, t);
-            colAttr.array[i3 + 1] = THREE.MathUtils.lerp(colIndigo.g, targetColor.g, t);
-            colAttr.array[i3 + 2] = THREE.MathUtils.lerp(colIndigo.b, targetColor.b, t);
+            r = targetCol.r;
+            g = targetCol.g;
+            b = targetCol.b;
           }
 
-          posAttr.array[i3] = tx;
-          posAttr.array[i3 + 1] = ty;
-          posAttr.array[i3 + 2] = tz;
+          posAttr.array[i3] = curX;
+          posAttr.array[i3 + 1] = curY;
+          posAttr.array[i3 + 2] = curZ;
+
+          colAttr.array[i3] = r;
+          colAttr.array[i3 + 1] = g;
+          colAttr.array[i3 + 2] = b;
         }
+
         posAttr.needsUpdate = true;
         colAttr.needsUpdate = true;
 
-        // Billboards fade out as scroll progresses into the streamline phase
-        const billboardOpacity = Math.max(0, 1 - p * 2.6);
-        billboardSprites.forEach(({ sprite, origin }) => {
-          sprite.material.opacity = billboardOpacity;
-          sprite.position.x = THREE.MathUtils.lerp(origin.x, 0, Math.min(1, p * 2));
-          sprite.position.y = THREE.MathUtils.lerp(origin.y, 0, Math.min(1, p * 2));
-        });
-
-        // Smooth camera dolly
-        camera.position.z = THREE.MathUtils.lerp(22, 16, p);
+        // Camera smoothly follows the horizontal flow ($X: -10 -> 0 -> +8)
+        camera.position.x = THREE.MathUtils.lerp(-8, 6, p);
+        camera.position.z = THREE.MathUtils.lerp(24, 18, p);
       }
     });
 
-    // --- 6. ANIMATION LOOP ---
+    // --- 5. ANIMATION LOOP & RAYCASTING ---
     let frameId;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       frameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Mouse dampening
-      mouse.x += (mouse.targetX - mouse.x) * 0.05;
-      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+      // Gentle ambient drift
+      if (particleSystem) {
+        particleSystem.rotation.y = Math.sin(elapsedTime * 0.2) * 0.04;
+      }
 
-      // Mouse Parallax across particles
-      if (animState.progress < 0.6) {
-        camera.position.x = mouse.x * 2.0;
-        camera.position.y = mouse.y * 1.2;
-        particleSystem.rotation.y = elapsedTime * 0.025 + mouse.x * 0.15;
-
-        billboardSprites.forEach(({ sprite, origin, driftSpeed }, idx) => {
-          sprite.position.y = origin.y + Math.sin(elapsedTime * driftSpeed + idx) * 0.3;
-        });
-      } else {
-        // Subtle ambient breathing on structured matrix grid
-        particleSystem.rotation.y = Math.sin(elapsedTime * 0.5) * 0.03;
+      // Raycaster for hover inspection in Chaos zone
+      if (threeRef.current.camera && particleSystem) {
+        threeRef.current.raycaster.setFromCamera(threeRef.current.mouse, threeRef.current.camera);
+        const intersects = threeRef.current.raycaster.intersectObject(particleSystem);
+        if (intersects.length > 0 && intersects[0].index !== undefined) {
+          const idx = intersects[0].index;
+          const signal = COMPLAINT_SIGNALS[idx % COMPLAINT_SIGNALS.length];
+          setHoveredParticleText(signal);
+        } else {
+          setHoveredParticleText(null);
+        }
       }
 
       renderer.render(scene, camera);
     };
-
     animate();
 
-    // Resize
+    // Window resize
     const handleResize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
+      width = container.clientWidth || window.innerWidth;
+      height = container.clientHeight || window.innerHeight;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
     };
-
     window.addEventListener('resize', handleResize);
 
     return () => {
       cancelAnimationFrame(frameId);
-      window.removeEventListener('mousemove', onPointerMove);
+      window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
-      st.kill();
+      pinPin.kill();
       renderer.dispose();
-      particleGeometry.dispose();
-      particleMaterial.dispose();
+      geometry.dispose();
+      material.dispose();
       container.innerHTML = '';
     };
   }, []);
 
+  // 1-Click Role Login Handler for Split Auth Modal
+  const handleRoleAuth = (roleKey, title, name) => {
+    const userSession = {
+      role: roleKey,
+      name,
+      title,
+      email: `${roleKey}@noesis.internal`,
+      authenticated: true,
+      timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
+    if (onLaunchWorkspace) onLaunchWorkspace(roleKey);
+    setShowSplitAuth(false);
+  };
+
+  const handleEmailSignIn = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: authEmail,
+        password: authPassword
+      });
+      if (error) throw error;
+      const userSession = {
+        role: 'executive',
+        name: data.user?.email?.split('@')[0] || 'Executive User',
+        title: 'Executive Operator',
+        email: data.user?.email,
+        authenticated: true
+      };
+      localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
+      if (onLaunchWorkspace) onLaunchWorkspace('executive');
+      setShowSplitAuth(false);
+    } catch (err) {
+      setAuthError(err.message || 'Authentication error. Use 1-Click Demo Roles below.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   return (
-    <div className="landing-hero-root">
-      {/* Luminous Executive Navigation Header */}
-      <header className="landing-hero-nav">
-        <div className="landing-brand" onClick={onLaunchWorkspace} style={{ cursor: 'pointer' }}>
-          <NoesisLogo height={42} showTagline={true} />
+    <div className="landing-hybrid-root" ref={pinContainerRef}>
+      {/* 1. Luminous Executive Navigation Header */}
+      <header className="landing-hybrid-nav">
+        <div className="landing-brand-slot" onClick={() => onLaunchWorkspace('executive')}>
+          <NoesisLogo height={38} showTagline={true} />
         </div>
 
-        <div className="nav-actions">
+        <div className="nav-controls-slot">
           <LanguageSelector />
 
-          <div className="nav-pill-badge">
-            <span className="pulse-dot" />
-            <span>Adaption Engine v0.14 Active</span>
+          <div className="nav-engine-pill">
+            <span className="live-dot" />
+            <span>Adaption Engine v0.14</span>
           </div>
 
-          <button className="btn-launch-nav" onClick={onLaunchWorkspace}>
-            {t('nav.launch', 'Launch Workspace')}
-            <ArrowRight size={15} />
+          <button
+            className="btn-launch-engine"
+            onClick={() => setShowSplitAuth(true)}
+          >
+            <span>Launch Workspace</span>
+            <ArrowRight size={14} />
           </button>
         </div>
       </header>
 
-      {/* Fixed WebGL Canvas Behind Content */}
-      <div className="canvas-container" ref={mountRef} />
+      {/* 2. Interactive Three.js WebGL Canvas (Pinned Background) */}
+      <div className="webgl-canvas-mount" ref={mountRef} />
 
-      {/* 300vh Scroll Narrative Track */}
-      <div className="scroll-track" ref={scrollTrackRef}>
-        {/* SCENE 1 (Scroll 0% - 33%): The Chaos of "Severity Blindness" */}
-        <section className="stage-section">
-          <div
-            className="stage-badge badge-crimson"
-            style={{
-              background: '#fff1f2',
-              border: '1px solid #fecdd3',
-              color: '#be123c',
-              boxShadow: '0 1px 2px rgba(190, 18, 60, 0.04)'
-            }}
-          >
-            <ShieldAlert size={15} color="#be123c" />
-            Scene 01 • The Chaos of Severity Blindness
+      {/* 3. Floating Raycaster Tooltip for Particle Inspection */}
+      {hoveredParticleText && (
+        <div
+          className="particle-raycast-tooltip"
+          style={{
+            left: `${tooltipPos.x + 15}px`,
+            top: `${tooltipPos.y + 15}px`
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                color: hoveredParticleText.color,
+                background: `${hoveredParticleText.color}15`,
+                padding: '2px 6px',
+                borderRadius: '4px'
+              }}
+            >
+              {hoveredParticleText.severity}
+            </span>
+            <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{hoveredParticleText.category}</span>
           </div>
-
-          <h1
-            className="stage-title"
-            style={{
-              color: '#0f172a',
-              letterSpacing: '-0.045em',
-              fontWeight: 900
-            }}
-          >
-            Your business is noise.
-          </h1>
-
-          <p className="stage-subtitle">
-            You have 10,000 raw customer feedback tickets floating chaotically, but you don't know which one will cost you your company today. Legacy sentiment engines treat a 1-star packaging tear identically to a $45,000 escrow wire fraud attack.
+          <p style={{ fontSize: '0.78rem', color: '#0f172a', margin: 0, lineHeight: 1.4, fontWeight: 500 }}>
+            {hoveredParticleText.text}
           </p>
+        </div>
+      )}
 
-          <div className="stage-hud">
-            <div className="hud-chip">
-              <div className="hud-chip-label">Unstructured Feedback</div>
-              <div className="hud-chip-val">10,000+</div>
-              <div className="hud-chip-sub">Raw, noisy customer tickets</div>
-            </div>
-            <div className="hud-chip">
-              <div className="hud-chip-label">Severe Churn Risk</div>
-              <div className="hud-chip-val" style={{ color: '#e11d48' }}>$305,000</div>
-              <div className="hud-chip-sub">Hidden inside 3 friction clusters</div>
-            </div>
-            <div className="hud-chip">
-              <div className="hud-chip-label">Severity Blindness</div>
-              <div className="hud-chip-val" style={{ color: '#d97706' }}>100% Blind</div>
-              <div className="hud-chip-sub">Catastrophic threats go undetected</div>
-            </div>
-          </div>
-        </section>
-
-        {/* SCENE 2 (Scroll 33% - 66%): The Adaption Living Data Engine */}
-        <section className="stage-section">
-          <div className="stage-badge badge-indigo">
-            <Cpu size={15} />
-            Scene 02 • The Adaption Intelligence Engine
-          </div>
-
-          <h2
-            className="stage-title"
-            style={{
-              color: '#0f172a',
-              letterSpacing: '-0.045em',
-              fontWeight: 900
-            }}
-          >
-            NOESIS intercepts the chaos.
-          </h2>
-
-          <p className="stage-subtitle">
-            Powered by Adaption Labs, the raw feedback dots streamline into real-time conditioning. Active recipes sanitize emotional hyperbole, eliminate 14.2% duplicate noise, redact PII, and attach verified causal reasoning traces.
-          </p>
-
-          <div className="stage-hud">
-            <div className="hud-chip">
-              <div className="hud-chip-label">Living Data Stream</div>
-              <div className="hud-chip-val" style={{ color: '#4f46e5' }}>Active Funnel</div>
-              <div className="hud-chip-sub">Real-time prompt conditioning</div>
-            </div>
-            <div className="hud-chip">
-              <div className="hud-chip-label">Prompt Deduplication</div>
-              <div className="hud-chip-val" style={{ color: '#0284c7' }}>94.1%</div>
-              <div className="hud-chip-sub">Noise compressed into root causes</div>
-            </div>
-            <div className="hud-chip">
-              <div className="hud-chip-label">Quality Score Uplift</div>
-              <div className="hud-chip-val" style={{ color: '#059669' }}>6.8 → 9.4</div>
-              <div className="hud-chip-sub">Grade A+ (96th percentile)</div>
-            </div>
-          </div>
-        </section>
-
-        {/* SCENE 3 (Scroll 66% - 100%): Clean Structured Clarity */}
-        <section className="stage-section">
-          <div className="scene3-container">
-            <div className="stage-badge badge-emerald">
-              <CheckCircle2 size={15} />
-              Scene 03 • Structured Clarity & Decision Velocity
-            </div>
-
-            <h2 className="stage-title">
-              Cure Severity Blindness. Turn raw feedback into intelligent action.
-            </h2>
-
-            <p className="stage-subtitle">
-              Notice how the feedback dots have locked into a pristine, structured matrix in the background. Chaotic complaints have emerged as verified, role-conditioned Kanban tickets synchronized with Supabase Cloud.
-            </p>
-
-            {/* Pristine 3-Card Color-Coded Kanban Emergence Grid */}
-            <div className="scene3-cards-grid">
-              {/* Card 1: Critical Rose (Sarah Jenkins) */}
-              <div className="action-kanban-card">
-                <div className="card-top-stripe stripe-rose" />
-                <span className="card-badge badge-rose">
-                  <ShieldAlert size={13} />
-                  Rose • Critical Threat
-                </span>
-                <div className="card-title">Off-Platform Seller Escrow Scam</div>
-                <div className="card-desc">
-                  1,286 reports of fraudulent sellers bypassing platform escrow. P0 seller payout freeze directive auto-generated.
-                </div>
-                <div className="card-footer">
-                  <span className="card-owner">Sarah Jenkins (Trust & Safety)</span>
-                  <span className="card-impact" style={{ color: '#e11d48' }}>$305,000 At-Risk</span>
-                </div>
-              </div>
-
-              {/* Card 2: Warning Amber (Marcus Chen) */}
-              <div className="action-kanban-card">
-                <div className="card-top-stripe stripe-amber" />
-                <span className="card-badge badge-amber">
-                  <AlertTriangle size={13} />
-                  Amber • SLA Warning
-                </span>
-                <div className="card-title">Customer Support Delay &gt; 48h</div>
-                <div className="card-desc">
-                  1,227 complaints regarding support queue backlog during promotional spikes. Auto-routed to Senior Tier escalation.
-                </div>
-                <div className="card-footer">
-                  <span className="card-owner">Marcus Chen (Support CX)</span>
-                  <span className="card-impact" style={{ color: '#d97706' }}>420 Churn Risk</span>
-                </div>
-              </div>
-
-              {/* Card 3: Safe Emerald (Elena Vance) */}
-              <div className="action-kanban-card">
-                <div className="card-top-stripe stripe-emerald" />
-                <span className="card-badge badge-emerald-card">
-                  <CheckCircle2 size={13} />
-                  Emerald • Resolved
-                </span>
-                <div className="card-title">Proactive Carrier SMS Updates</div>
-                <div className="card-desc">
-                  Automated delivery tracking SMS deployed. Logistics delay friction mitigated with +18.4% NPS retention boost.
-                </div>
-                <div className="card-footer">
-                  <span className="card-owner">Elena Vance (CEO Briefing)</span>
-                  <span className="card-impact" style={{ color: '#059669' }}>+18.4% NPS</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Final Launch Actions */}
-            <div className="cta-group">
-              <button className="btn-launch-hero" onClick={onLaunchWorkspace}>
-                Launch Enterprise Workspace
-                <ArrowRight size={18} />
-              </button>
-              <button
-                className="btn-secondary-hero"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              >
-                Replay Story
-              </button>
-            </div>
-          </div>
-        </section>
+      {/* 4. Dynamic Zone HUD Indicator */}
+      <div className="stage-hud-tracker">
+        <div className={`hud-stage-step ${activeZone === 'zone1' ? 'active' : ''}`}>
+          <span className="step-num">01</span>
+          <span className="step-text">Severity Blindness</span>
+        </div>
+        <div className="hud-stage-divider" />
+        <div className={`hud-stage-step ${activeZone === 'zone2' ? 'active' : ''}`}>
+          <span className="step-num">02</span>
+          <span className="step-text">Adaption Conditioning</span>
+        </div>
+        <div className="hud-stage-divider" />
+        <div className={`hud-stage-step ${activeZone === 'zone3' ? 'active' : ''}`}>
+          <span className="step-num">03</span>
+          <span className="step-text">Structured Decision Grid</span>
+        </div>
       </div>
 
-      {/* Floating Scroll Indicator */}
-      {scrollProgress < 0.85 && (
-        <div className="scroll-indicator">
-          <span>Scroll to Structure Data</span>
-          <div style={{ width: 1, height: 26, background: 'linear-gradient(to bottom, #4f46e5, transparent)' }} />
+      {/* 5. Dynamic Story Content Overlays */}
+      <div className="story-content-layer">
+        {/* STAGE 1: 2D Storytelling Narrative Layer (Scroll 0% - 35%) */}
+        {scrollProgress < 0.35 && (
+          <div className="narrative-stage stage-1-container animate-fade-in" ref={stage1Ref}>
+            <div className="stage-warning-pill">
+              <ShieldAlert size={14} color="#be123c" />
+              <span>Scene 01 • The Chaos of Severity Blindness</span>
+            </div>
+
+            <h1 className="hero-executive-title">
+              Your business is noise.
+            </h1>
+
+            <p className="hero-executive-subtitle">
+              You receive 10,000 raw customer feedback tickets, but legacy tools treat a 1-star packaging tear identically to a catastrophic $45,000 wire fraud attack.
+            </p>
+
+            {/* 2D Avatar Speech Bubble Cascade */}
+            <div className="avatar-bubble-stream">
+              <div className="avatar-bubble bubble-critical">
+                <div className="avatar-icon-circle avatar-red">🚨</div>
+                <div>
+                  <div className="bubble-author">Marcus S. • FinTech Wire</div>
+                  <div className="bubble-body">"Account hacked! $45,000 escrow payment diverted by unverified seller!"</div>
+                </div>
+              </div>
+
+              <div className="avatar-bubble bubble-noise">
+                <div className="avatar-icon-circle avatar-gray">📦</div>
+                <div>
+                  <div className="bubble-author">Claire D. • E-Commerce</div>
+                  <div className="bubble-body">"Delivery was delayed by 3 hours, box corner slightly crumpled."</div>
+                </div>
+              </div>
+
+              <div className="avatar-bubble bubble-noise">
+                <div className="avatar-icon-circle avatar-gray">💬</div>
+                <div>
+                  <div className="bubble-author">Jordan T. • Mobile Shopper</div>
+                  <div className="bubble-body">"Can you make the checkout button light violet instead of purple?"</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STAGE 2: Center Funnel Acceleration (Scroll 35% - 70%) */}
+        {scrollProgress >= 0.35 && scrollProgress < 0.70 && (
+          <div className="narrative-stage stage-2-container animate-fade-in">
+            <div className="stage-indigo-pill">
+              <Cpu size={14} color="#4f46e5" />
+              <span>Scene 02 • Adaption Living Data Engine</span>
+            </div>
+
+            <h2 className="hero-executive-title">
+              Streamlining the chaos.
+            </h2>
+
+            <p className="hero-executive-subtitle">
+              Notice the particles accelerating through the central beam. Adaption Labs recipes strip emotional toxicity, redact PII, eliminate 14.2% duplicate noise, and attach 3-hop causal reasoning traces in real-time.
+            </p>
+
+            <div className="streamline-metrics-grid">
+              <div className="metric-card">
+                <div className="m-label">Quality Score Uplift</div>
+                <div className="m-val" style={{ color: '#059669' }}>6.8 → 9.4</div>
+                <div className="m-sub">Grade A+ (96th percentile)</div>
+              </div>
+              <div className="metric-card">
+                <div className="m-label">Noise Reduction</div>
+                <div className="m-val" style={{ color: '#4f46e5' }}>14.2%</div>
+                <div className="m-sub">1,024 duplicates pruned</div>
+              </div>
+              <div className="metric-card">
+                <div className="m-label">P0 Threat Isolation</div>
+                <div className="m-val" style={{ color: '#f43f5e' }}>89 Threats</div>
+                <div className="m-sub">Quarantined for immediate triage</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STAGE 3: Right Structured Grid & Final CTA (Scroll 70%+) */}
+        {scrollProgress >= 0.70 && (
+          <div className="narrative-stage stage-3-container animate-fade-in">
+            <div className="stage-emerald-pill">
+              <CheckCircle2 size={14} color="#059669" />
+              <span>Scene 03 • Structured Decision Equilibrium</span>
+            </div>
+
+            <h2 className="hero-executive-title">
+              Cure Severity Blindness.
+            </h2>
+
+            <p className="hero-executive-subtitle">
+              Unstructured noise has crystallized into a rigid, role-conditioned Decision Matrix. High-risk fraud issues auto-dispatch to Trust & Safety, while SLA queues sync to Support Operations.
+            </p>
+
+            <div className="final-cta-cluster">
+              <button
+                className="btn-enter-noesis"
+                onClick={() => setShowSplitAuth(true)}
+              >
+                <span>Enter NOESIS Decision Engine</span>
+                <ArrowRight size={18} />
+              </button>
+
+              <button
+                className="btn-replay-story"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                Replay Narrative
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 6. SPLIT-SCREEN AUTH MODAL (STAGE 3 INTEGRATION) */}
+      {showSplitAuth && (
+        <div className="split-auth-overlay animate-fade-in">
+          <div className="split-auth-wrapper">
+            {/* Left 50%: Structured Cognitive Engine Visualizer */}
+            <div className="split-auth-left">
+              <div className="auth-brand-pill">
+                <NoesisLogo height={32} showTagline={false} />
+              </div>
+
+              <div className="auth-left-content">
+                <div className="orbital-accent-badge">
+                  <Sparkles size={14} color="#4f46e5" />
+                  <span>Cognitive Intelligence Engine</span>
+                </div>
+                <h3 className="auth-left-title">
+                  Unified Decision Velocity for Enterprise Teams
+                </h3>
+                <p className="auth-left-desc">
+                  Transform 10,000 chaotic customer complaints into role-conditioned, multi-tenant action workflows with Adaption Labs recipes and Supabase Cloud sync.
+                </p>
+
+                <div className="auth-feature-list">
+                  <div className="feature-item">
+                    <CheckCircle2 size={16} color="#10b981" />
+                    <span>Real-Time Living Data Conditioning (Pillar 1)</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle2 size={16} color="#10b981" />
+                    <span>Automated P0 Threat Quarantine (Pillar 2)</span>
+                  </div>
+                  <div className="feature-item">
+                    <CheckCircle2 size={16} color="#10b981" />
+                    <span>Multilingual Gemini Voice Resolution (Pillar 3)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right 50%: Supabase Authentication & 1-Click Role Workspace */}
+            <div className="split-auth-right">
+              <button
+                className="close-split-auth-btn"
+                onClick={() => setShowSplitAuth(false)}
+                aria-label="Close authentication"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="auth-form-card">
+                <h2 className="auth-form-title">Enter NOESIS Platform</h2>
+                <p className="auth-form-subtitle">
+                  Choose a verified enterprise role for instant access or sign in with your Supabase credentials.
+                </p>
+
+                {authError && (
+                  <div className="auth-error-banner">
+                    <AlertTriangle size={15} />
+                    <span>{authError}</span>
+                  </div>
+                )}
+
+                {/* 1-Click Demo Roles (Hackathon Evaluation Showcase) */}
+                <div className="demo-roles-section">
+                  <span className="demo-label">1-Click Role Workspace (Judges / Evaluation):</span>
+                  <div className="role-buttons-row">
+                    <button
+                      type="button"
+                      className="btn-role-chip role-executive"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRoleAuth('executive', 'Chief Executive / VP Product', 'Sarah Vance');
+                      }}
+                    >
+                      <UserCheck size={14} />
+                      <div>
+                        <strong>Executive C-Suite</strong>
+                        <span>Portfolio Risk & Briefings</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn-role-chip role-support"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRoleAuth('support', 'Support Operations Lead', 'Marcus Chen');
+                      }}
+                    >
+                      <UserCheck size={14} />
+                      <div>
+                        <strong>Support Ops Lead</strong>
+                        <span>SLA Backlog & Escalations</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn-role-chip role-trust"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRoleAuth('trust_safety', 'Trust & Safety Director', 'Elena Rostova');
+                      }}
+                    >
+                      <UserCheck size={14} />
+                      <div>
+                        <strong>Trust & Safety</strong>
+                        <span>Fraud & Escrow Quarantines</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="auth-separator">
+                  <span>or enter email credentials</span>
+                </div>
+
+                {/* Standard Supabase Email/Password Form */}
+                <form onSubmit={handleEmailSignIn} className="auth-standard-form">
+                  <div className="input-group">
+                    <label>Enterprise Email</label>
+                    <div className="input-with-icon">
+                      <Mail size={16} color="#94a3b8" />
+                      <input
+                        type="email"
+                        placeholder="operator@company.com"
+                        value={authEmail}
+                        onChange={(e) => setAuthEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="input-group">
+                    <label>Password</label>
+                    <div className="input-with-icon">
+                      <Lock size={16} color="#94a3b8" />
+                      <input
+                        type="password"
+                        placeholder="••••••••••••"
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="btn-auth-submit"
+                    disabled={authLoading}
+                  >
+                    {authLoading ? 'Authenticating...' : 'Sign In to Workspace'}
+                    <ArrowRight size={15} />
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
