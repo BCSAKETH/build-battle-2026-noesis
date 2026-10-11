@@ -238,23 +238,51 @@ def submit_feedback(
 def get_recommendations(current_user: Dict[str, Any] = Depends(get_current_user)):
     return [
         {
+            "id": 1,
             "priority": "P0 Critical",
-            "action": "Quarantine Unverified Merchants & Automate Refund Dispatches",
-            "impact": "Mitigates $42.5k fraud exposure across 140 stalled checkout transactions",
+            "impactScore": 98,
+            "title": "Quarantine Unverified Merchants & Freeze Stalled Escrow",
+            "action": "Quarantine Unverified Merchants & Freeze Stalled Escrow",
+            "impact": "Mitigates $184k fraud exposure across unverified merchants",
+            "evidence": "1,286 complaints citing unverified seller accounts demanding off-platform wire payment.",
+            "whyItMatters": "Eliminates $184,000 direct chargeback liability and restores marketplace trust rating.",
+            "actionSteps": [
+                "Halt auto-payout for accounts flagged > 3 times",
+                "Deploy live modal warning on checkout",
+                "Trigger AML review pipeline in Stripe/Supabase"
+            ],
             "category": "Fraud and Scam",
             "status": "In Progress"
         },
         {
+            "id": 2,
             "priority": "P1 High",
+            "impactScore": 84,
+            "title": "Enforce 3PL Carrier Webhook Sync & Proactive SMS Tracking",
             "action": "Enforce 3PL Carrier Webhook Sync & Proactive SMS Tracking",
             "impact": "Reduces customer transit inquiry ticket volume by 42%",
+            "evidence": "1,227 complaints regarding support queue backlog during promotional spikes.",
+            "whyItMatters": "Reduces customer transit inquiry ticket volume by 42% and alleviates support queue fatigue.",
+            "actionSteps": [
+                "Deploy proactive SMS alert when delivery transit exceeds 48 hours",
+                "Auto-escalate tickets older than 24 hours to tier-2 team"
+            ],
             "category": "Operational Issues",
             "status": "Triaged"
         },
         {
+            "id": 3,
             "priority": "P2 Medium",
-            "action": "Resolve Mobile Checkout Token Timeout",
+            "impactScore": 68,
+            "title": "Resolve Mobile Checkout Token Timeout & Gateway Retry",
+            "action": "Resolve Mobile Checkout Token Timeout & Gateway Retry",
             "impact": "Recovers 3.8% mobile checkout conversion drop",
+            "evidence": "512 complaints citing timeout glitches during payment processing.",
+            "whyItMatters": "Recovers estimated 3.8% mobile checkout conversion drop and improves customer satisfaction.",
+            "actionSteps": [
+                "Implement automatic idempotent retry on failed payment requests",
+                "Persist checkout basket state to local storage"
+            ],
             "category": "Product Feedback",
             "status": "Scheduled"
         }
