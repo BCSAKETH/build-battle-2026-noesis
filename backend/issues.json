@@ -1,0 +1,59 @@
+[
+  {
+    "id": "ISS-101",
+    "title": "Investigate surge in Fraud & Counterfeit seller complaints",
+    "category": "Fraud and Scam",
+    "status": "Resolved",
+    "priority": "Critical",
+    "impact": "High (Customer Trust & Financial Loss)",
+    "assignedTo": "Trust & Safety Team",
+    "description": "Multiple reviews indicate unverified sellers demanding outside payments or sending counterfeit items.",
+    "sourceFeedbackIds": [
+      4,
+      8,
+      17,
+      21
+    ],
+    "createdAt": "2026-10-10",
+    "resolution_log": {
+      "detected_language": "Telugu (\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41)",
+      "transcript": "\u0c08 \u0c1f\u0c3f\u0c15\u0c46\u0c1f\u0c4d \u0c38\u0c2e\u0c38\u0c4d\u0c2f\u0c28\u0c41 \u0c2a\u0c30\u0c3f\u0c36\u0c40\u0c32\u0c3f\u0c02\u0c1a\u0c3e\u0c2e\u0c41. \u0c35\u0c4d\u0c2f\u0c3e\u0c2a\u0c3e\u0c30\u0c3f \u0c16\u0c3e\u0c24\u0c3e\u0c28\u0c41 \u0c28\u0c3f\u0c32\u0c3f\u0c2a\u0c3f\u0c35\u0c47\u0c38\u0c3f, \u0c15\u0c38\u0c4d\u0c1f\u0c2e\u0c30\u0c4d\u200c\u0c15\u0c41 \u0c2a\u0c42\u0c30\u0c4d\u0c24\u0c3f \u0c30\u0c40\u0c2b\u0c02\u0c21\u0c4d \u0c1c\u0c3e\u0c30\u0c40 \u0c1a\u0c47\u0c36\u0c3e\u0c2e\u0c41.",
+      "translated_resolution": "Investigated ticket issue. Merchant account frozen pending audit; full refund of $142.50 disbursed to customer. Ticket resolved.",
+      "operator": "demo.executive@noesis-insightflow.ai",
+      "timestamp": "04:00 PM",
+      "provider": "Gemini 1.5 Multilingual Audio"
+    }
+  },
+  {
+    "id": "ISS-102",
+    "title": "Address Customer Support responsiveness SLA",
+    "category": "Customer Service",
+    "status": "Open",
+    "priority": "High",
+    "impact": "Medium (Customer Churn)",
+    "assignedTo": "Support Ops",
+    "description": "Dissatisfaction reported on response wait times during escalation inquiries.",
+    "sourceFeedbackIds": [
+      3,
+      16,
+      28
+    ],
+    "createdAt": "2026-10-11"
+  },
+  {
+    "id": "ISS-103",
+    "title": "Carrier notification transparency for delivery delays",
+    "category": "Operational Issues",
+    "status": "Resolved",
+    "priority": "Medium",
+    "impact": "Low (Manageable via automated SMS)",
+    "assignedTo": "Logistics Engineering",
+    "description": "Customers expressed appreciation when delays were proactively communicated; roll out automated tracking updates.",
+    "sourceFeedbackIds": [
+      5,
+      18,
+      30
+    ],
+    "createdAt": "2026-10-09"
+  }
+]

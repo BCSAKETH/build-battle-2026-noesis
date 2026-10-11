@@ -51,6 +51,7 @@ import AuthModal from './components/AuthModal';
 import AdaptionCopilot from './components/AdaptionCopilot';
 import LanguageSelector from './components/LanguageSelector';
 import DatasetUploadModal from './components/DatasetUploadModal';
+import TicketDeliveryTracker from './components/TicketDeliveryTracker';
 import { UploadCloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -130,6 +131,7 @@ export default function App() {
   // Modal State
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showRevenueModelModal, setShowRevenueModelModal] = useState(false);
+  const [activeTrackerTicket, setActiveTrackerTicket] = useState(null);
   const [modelArpu, setModelArpu] = useState(180);
   const [newFeedbackText, setNewFeedbackText] = useState('');
   const [newFeedbackCategory, setNewFeedbackCategory] = useState('Product Feedback');
@@ -1845,6 +1847,33 @@ export default function App() {
                                   )}
                                 </div>
                               </div>
+
+                              {/* Delivery Tracker & Voice Memo Trigger */}
+                              <button
+                                onClick={() => setActiveTrackerTicket(item)}
+                                className="btn btn-outline"
+                                style={{
+                                  width: '100%',
+                                  fontSize: '0.74rem',
+                                  padding: '0.35rem 0.6rem',
+                                  marginTop: '0.2rem',
+                                  borderColor: '#c7d2fe',
+                                  color: '#4f46e5',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '0.35rem'
+                                }}
+                              >
+                                <Activity size={13} />
+                                <span>Delivery Tracker & Voice Memo</span>
+                              </button>
+
+                              {item.resolution_log && (
+                                <div style={{ fontSize: '0.68rem', color: '#059669', background: '#ecfdf5', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                  <span>🎙️ {item.resolution_log.detected_language || 'Gemini 1.5 Note'} Attached</span>
+                                </div>
+                              )}
                             </div>
                           ))
                         )}
@@ -1853,6 +1882,43 @@ export default function App() {
                   );
                 })}
               </div>
+
+              {/* Delivery Tracker Modal */}
+              {activeTrackerTicket && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(15, 23, 42, 0.45)',
+                    backdropFilter: 'blur(4px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    padding: '1.5rem'
+                  }}
+                >
+                  <div style={{ maxWidth: '680px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+                      <button
+                        onClick={() => setActiveTrackerTicket(null)}
+                        className="btn btn-outline"
+                        style={{ background: '#ffffff', padding: '0.3rem 0.65rem', fontSize: '0.75rem' }}
+                      >
+                        ✕ Close Tracker
+                      </button>
+                    </div>
+                    <TicketDeliveryTracker
+                      ticket={activeTrackerTicket}
+                      apiBase={API_BASE}
+                      onUpdateStatus={(id, newStatus) => {
+                        handleStatusChange(id, newStatus);
+                        setActiveTrackerTicket((prev) => (prev ? { ...prev, status: newStatus } : null));
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
