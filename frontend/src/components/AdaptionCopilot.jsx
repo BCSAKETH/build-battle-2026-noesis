@@ -67,12 +67,21 @@ export default function AdaptionCopilot({ apiBase = '' }) {
 
       if (res.ok) {
         const data = await res.json();
+        const rawChartData = data.chart?.data;
+        const normalizedData = Array.isArray(rawChartData)
+          ? rawChartData.map((d) => ({
+              ...d,
+              category: d.category || d.name || d.metric || d.day || 'Category',
+              count: Number(d.count ?? d.value ?? d.critical_count ?? 0)
+            }))
+          : [];
+
         const aiMsg = {
           id: Date.now() + 1,
           sender: 'adaption',
-          text: data.answer,
-          chart: data.chart,
-          suggestions: data.suggestions || []
+          text: data.reply || data.answer || 'Dataset analysis generated.',
+          chart: data.chart ? { ...data.chart, data: normalizedData } : null,
+          suggestions: data.suggested_actions || data.suggestions || []
         };
         setMessages((prev) => [...prev, aiMsg]);
       } else {
@@ -84,6 +93,15 @@ export default function AdaptionCopilot({ apiBase = '' }) {
         id: Date.now() + 1,
         sender: 'adaption',
         text: `Analysis of "${q}": Across 7,002 customer touchpoints, sentiment clusters into 4 distinct operational vectors. In Adaption Labs, conditioning these entries with recipes increases classification precision by +38.2%.`,
+        chart: {
+          title: `Telemetry for "${q}"`,
+          chartType: 'bar',
+          data: [
+            { category: 'Signal Matches', count: 480 },
+            { category: 'Conditioned', count: 412 },
+            { category: 'PII Scrubbed', count: 68 }
+          ]
+        },
         suggestions: [
           'How are reviews distributed across categories?',
           "Which review texts contribute most to Fraud and Scam's lead?"
@@ -220,7 +238,7 @@ export default function AdaptionCopilot({ apiBase = '' }) {
                   </p>
 
                   {/* Dynamic Recharts Visualization Card */}
-                  {m.chart && (
+                  {m.chart && Array.isArray(m.chart.data) && m.chart.data.length > 0 && (
                     <div
                       style={{
                         background: '#ffffff',
@@ -233,7 +251,7 @@ export default function AdaptionCopilot({ apiBase = '' }) {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                         <div>
                           <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
-                            {m.chart.title}
+                            {m.chart.title || 'Data Telemetry'}
                           </span>
                           <span style={{ marginLeft: '0.5rem', fontSize: '0.68rem', fontWeight: 600, color: '#6366f1', background: '#eef2ff', padding: '2px 6px', borderRadius: '4px' }}>
                             {(m.chart.chartType || 'bar').toUpperCase()}
@@ -291,9 +309,11 @@ export default function AdaptionCopilot({ apiBase = '' }) {
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.4rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.65rem' }}>
                         {m.chart.data.map((bar, idx) => (
                           <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.35rem 0.6rem', background: '#f8fafc', borderRadius: '6px', fontSize: '0.74rem' }}>
-                            <span style={{ fontWeight: 600, color: '#334155', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{bar.category}</span>
+                            <span style={{ fontWeight: 600, color: '#334155', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                              {bar.category || bar.name || bar.day || bar.metric || 'Item'}
+                            </span>
                             <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#4f46e5', marginLeft: '0.3rem' }}>
-                              {bar.count.toLocaleString()}
+                              {(Number(bar.count ?? bar.value ?? bar.critical_count) || 0).toLocaleString()}
                             </span>
                           </div>
                         ))}

@@ -249,11 +249,11 @@ def adaption_copilot_chat(
             "xKey": "category",
             "yKey": "count",
             "data": [
-                {"category": "Product Feedback", "count": 2240, "fill": "#4F46E5"},
-                {"category": "Customer Service", "count": 1960, "fill": "#6366F1"},
-                {"category": "Operational Issues", "count": 1420, "fill": "#06B6D4"},
-                {"category": "Fraud & Scam", "count": 1070, "fill": "#F43F5E"},
-                {"category": "Pricing & Billing", "count": 533, "fill": "#F59E0B"}
+                {"category": "Product Feedback", "name": "Product Feedback", "count": 2240, "value": 2240, "fill": "#4F46E5"},
+                {"category": "Customer Service", "name": "Customer Service", "count": 1960, "value": 1960, "fill": "#6366F1"},
+                {"category": "Operational Issues", "name": "Operational Issues", "count": 1420, "value": 1420, "fill": "#06B6D4"},
+                {"category": "Fraud & Scam", "name": "Fraud & Scam", "count": 1070, "value": 1070, "fill": "#F43F5E"},
+                {"category": "Pricing & Billing", "name": "Pricing & Billing", "count": 533, "value": 533, "fill": "#F59E0B"}
             ]
         }
         suggestions = ["Show severity breakdown", "Explain root cause of Fraud spikes", "What are the top PII issues?"]
@@ -268,12 +268,12 @@ def adaption_copilot_chat(
         chart = {
             "chartType": "pie",
             "title": "Customer Sentiment Distribution",
-            "xKey": "name",
-            "yKey": "value",
+            "xKey": "category",
+            "yKey": "count",
             "data": [
-                {"name": "Negative", "value": 3322, "fill": "#F43F5E"},
-                {"name": "Positive", "value": 2745, "fill": "#10B981"},
-                {"name": "Neutral", "value": 1156, "fill": "#94A3B8"}
+                {"category": "Negative", "name": "Negative", "count": 3322, "value": 3322, "fill": "#F43F5E"},
+                {"category": "Positive", "name": "Positive", "count": 2745, "value": 2745, "fill": "#10B981"},
+                {"category": "Neutral", "name": "Neutral", "count": 1156, "value": 1156, "fill": "#94A3B8"}
             ]
         }
         suggestions = ["Filter only Critical severity items", "Show MTTR resolution timeline", "Run causal trace on delivery"]
@@ -288,16 +288,16 @@ def adaption_copilot_chat(
         chart = {
             "chartType": "area",
             "title": "P0 & P1 Critical Severity Trend (Last 7 Days)",
-            "xKey": "day",
-            "yKey": "critical_count",
+            "xKey": "category",
+            "yKey": "count",
             "data": [
-                {"day": "Mon", "critical_count": 28, "medium_count": 85},
-                {"day": "Tue", "critical_count": 34, "medium_count": 92},
-                {"day": "Wed", "critical_count": 42, "medium_count": 78},
-                {"day": "Thu", "critical_count": 39, "medium_count": 104},
-                {"day": "Fri", "critical_count": 25, "medium_count": 88},
-                {"day": "Sat", "critical_count": 19, "medium_count": 64},
-                {"day": "Sun", "critical_count": 14, "medium_count": 52}
+                {"category": "Mon", "day": "Mon", "count": 28, "critical_count": 28, "value": 28, "medium_count": 85},
+                {"category": "Tue", "day": "Tue", "count": 34, "critical_count": 34, "value": 34, "medium_count": 92},
+                {"category": "Wed", "day": "Wed", "count": 42, "critical_count": 42, "value": 42, "medium_count": 78},
+                {"category": "Thu", "day": "Thu", "count": 39, "critical_count": 39, "value": 39, "medium_count": 104},
+                {"category": "Fri", "day": "Fri", "count": 25, "critical_count": 25, "value": 25, "medium_count": 88},
+                {"category": "Sat", "day": "Sat", "count": 19, "critical_count": 19, "value": 19, "medium_count": 64},
+                {"category": "Sun", "day": "Sun", "count": 14, "critical_count": 14, "value": 14, "medium_count": 52}
             ]
         }
         suggestions = ["Review open P0 tickets", "Trigger automated rollback on checkout", "Generate executive briefing"]
@@ -312,21 +312,24 @@ def adaption_copilot_chat(
         chart = {
             "chartType": "bar",
             "title": "Key Signal Telemetry",
-            "xKey": "metric",
-            "yKey": "value",
+            "xKey": "category",
+            "yKey": "count",
             "data": [
-                {"metric": "Raw Rows", "value": 7223, "fill": "#94A3B8"},
-                {"metric": "Clean Signals", "value": 6199, "fill": "#4F46E5"},
-                {"metric": "Deduplicated", "value": 1024, "fill": "#10B981"},
-                {"metric": "Critical P0", "value": 89, "fill": "#F43F5E"}
+                {"category": "Raw Rows", "metric": "Raw Rows", "name": "Raw Rows", "count": 7223, "value": 7223, "fill": "#94A3B8"},
+                {"category": "Clean Signals", "metric": "Clean Signals", "name": "Clean Signals", "count": 6199, "value": 6199, "fill": "#4F46E5"},
+                {"category": "Deduplicated", "metric": "Deduplicated", "name": "Deduplicated", "count": 1024, "value": 1024, "fill": "#10B981"},
+                {"category": "Critical P0", "metric": "Critical P0", "name": "Critical P0", "count": 89, "value": 89, "fill": "#F43F5E"}
             ]
         }
         suggestions = ["Show category breakdown", "Explain Severity Blindness", "View Kanban issue tracker"]
 
     return {
         "reply": reply,
+        "answer": reply,
         "chart": chart,
         "suggested_actions": suggestions,
+        "suggestions": suggestions,
         "tenant_id": current_user.get("id"),
-        "timestamp": "Just now"
+        "timestamp": "Just now",
+        "status": "success"
     }

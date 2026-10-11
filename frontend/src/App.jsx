@@ -53,6 +53,7 @@ import LanguageSelector from './components/LanguageSelector';
 import DatasetUploadModal from './components/DatasetUploadModal';
 import TicketDeliveryTracker from './components/TicketDeliveryTracker';
 import Dashboard from './components/Dashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 import { UploadCloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -292,10 +293,10 @@ export default function App() {
     }
 
     // Client-side fallback filter
-    let filtered = FALLBACK_REVIEWS;
+    let filtered = Array.isArray(FALLBACK_REVIEWS) ? [...FALLBACK_REVIEWS] : [];
     if (search) {
       const s = search.toLowerCase();
-      filtered = filtered.filter((r) => r.review.toLowerCase().includes(s));
+      filtered = filtered.filter((r) => ((r?.review || r?.feedback_text || '') + '').toLowerCase().includes(s));
     }
     if (cat && cat !== 'All') {
       filtered = filtered.filter((r) => r.category === cat);
@@ -795,7 +796,8 @@ export default function App() {
 
         {/* TAB CONTENTS */}
         <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
-          {/* TAB 1: EXECUTIVE DASHBOARD */}
+          <ErrorBoundary onReset={() => setActiveTab('overview')}>
+            {/* TAB 1: EXECUTIVE DASHBOARD */}
           {activeTab === 'overview' && (
             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               <div>
@@ -2126,6 +2128,7 @@ export default function App() {
               </div>
             </div>
           )}
+          </ErrorBoundary>
         </div>
 
         {/* SLIDE-OVER CONTEXTUAL INSPECTION DRAWER (ADAPTIVE INTERFACES PILLAR) */}
