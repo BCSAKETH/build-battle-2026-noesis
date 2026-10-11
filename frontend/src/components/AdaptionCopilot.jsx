@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
-import { Sparkles, Send, BarChart3, Database, MessageSquare, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Sparkles, Send, BarChart3, Database, MessageSquare, ArrowRight, CornerDownLeft, PieChart as PieIcon, LineChart as LineIcon, Activity } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 
 /**
  * AdaptionCopilot — Directly models the official Adaption Labs Web App interface
@@ -206,50 +219,84 @@ export default function AdaptionCopilot({ apiBase = '' }) {
                     {m.text}
                   </p>
 
-                  {/* Chart Card (Matching the user's screenshot exactly!) */}
+                  {/* Dynamic Recharts Visualization Card */}
                   {m.chart && (
                     <div
                       style={{
                         background: '#ffffff',
                         border: '1px solid #e2e8f0',
-                        borderRadius: '10px',
+                        borderRadius: '12px',
                         padding: '1.25rem',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                        boxShadow: '0 2px 10px rgba(15, 23, 42, 0.04)'
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                          {m.chart.title}
-                        </span>
-                        <BarChart3 size={15} color="#64748b" />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <div>
+                          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a' }}>
+                            {m.chart.title}
+                          </span>
+                          <span style={{ marginLeft: '0.5rem', fontSize: '0.68rem', fontWeight: 600, color: '#6366f1', background: '#eef2ff', padding: '2px 6px', borderRadius: '4px' }}>
+                            {(m.chart.chartType || 'bar').toUpperCase()}
+                          </span>
+                        </div>
+                        <BarChart3 size={16} color="#6366f1" />
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                        {m.chart.data.map((bar, idx) => {
-                          const max = Math.max(...m.chart.data.map((b) => b.count));
-                          const widthPct = Math.round((bar.count / max) * 100);
-                          return (
-                            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
-                                <span style={{ fontWeight: 600, color: '#334155' }}>{bar.category}</span>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#4f46e5' }}>
-                                  {bar.count.toLocaleString()}
-                                </span>
-                              </div>
-                              <div style={{ width: '100%', height: 16, background: '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
-                                <div
-                                  style={{
-                                    width: `${widthPct}%`,
-                                    height: '100%',
-                                    background: 'linear-gradient(90deg, #6366f1, #38bdf8)',
-                                    borderRadius: 4,
-                                    transition: 'width 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
+                      {/* Interactive Recharts Component Container */}
+                      <div style={{ width: '100%', height: 210, marginBottom: '0.75rem' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          {m.chart.chartType === 'area' ? (
+                            <AreaChart data={m.chart.data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id="copilotAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+                                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                                </linearGradient>
+                              </defs>
+                              <XAxis dataKey="category" tick={{ fontSize: 11, fill: '#64748b' }} />
+                              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
+                              <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px' }} />
+                              <Area type="monotone" dataKey="count" stroke="#4f46e5" strokeWidth={2} fillOpacity={1} fill="url(#copilotAreaGrad)" />
+                            </AreaChart>
+                          ) : m.chart.chartType === 'pie' ? (
+                            <PieChart>
+                              <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px' }} />
+                              <Pie
+                                data={m.chart.data}
+                                dataKey="count"
+                                nameKey="category"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={75}
+                                fill="#4f46e5"
+                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                              >
+                                {m.chart.data.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={['#4f46e5', '#f43f5e', '#06b6d4', '#10b981', '#f59e0b'][index % 5]} />
+                                ))}
+                              </Pie>
+                            </PieChart>
+                          ) : (
+                            <BarChart data={m.chart.data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                              <XAxis dataKey="category" tick={{ fontSize: 10, fill: '#64748b' }} />
+                              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
+                              <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px' }} />
+                              <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      </div>
+
+                      {/* Summary Data Chips */}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.4rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.65rem' }}>
+                        {m.chart.data.map((bar, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.35rem 0.6rem', background: '#f8fafc', borderRadius: '6px', fontSize: '0.74rem' }}>
+                            <span style={{ fontWeight: 600, color: '#334155', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{bar.category}</span>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: '#4f46e5', marginLeft: '0.3rem' }}>
+                              {bar.count.toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
