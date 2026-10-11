@@ -13,30 +13,36 @@ import {
   Lock,
   ChevronRight,
   TrendingDown,
-  Layers
+  Layers,
+  Zap,
+  Activity,
+  AlertTriangle
 } from 'lucide-react';
 import './LandingHero.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// High-fidelity friction snippets for 3D billboard sprites in Stage 1
+// Raw verbatim customer friction snippets for 3D billboard text in Scene 1
 const RAW_COMPLAINTS = [
-  { text: '⚠️ Scammed by unverified seller ($420 wire)', color: '#e11d48' },
-  { text: '⚠️ Counterfeit luxury item delivered', color: '#e11d48' },
-  { text: '⏳ Support unresponsive for 48+ hours', color: '#d97706' },
-  { text: '📦 Delivery delayed without notification', color: '#475569' },
-  { text: '⚠️ Off-platform wire payment requested', color: '#e11d48' },
-  { text: '⏳ Refund denied with zero explanation', color: '#d97706' },
-  { text: '📦 Broken packaging on arrival', color: '#475569' },
-  { text: '⚠️ Account frozen after disputed charge', color: '#e11d48' }
+  '⚠️ My account was hacked! ($4,500 wire stolen)',
+  '⚠️ Scammed by unverified seller, zero delivery',
+  '⏳ My delivery is 8 days late! Where is it?',
+  '💥 The app crashed at checkout during payment',
+  '⚠️ Counterfeit luxury item delivered by merchant',
+  '⏳ Customer service is unresponsive for 72+ hours',
+  '💥 Refund denied with zero explanation given',
+  '⚠️ Off-platform payment demanded via private chat'
 ];
 
 export default function LandingHero({ onLaunchWorkspace }) {
   const mountRef = useRef(null);
   const scrollTrackRef = useRef(null);
+  const rootRef = useRef(null);
   const { t } = useTranslation();
+
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [activeStage, setActiveStage] = useState(1);
+  const [activeScene, setActiveScene] = useState(1);
+  const [isLightMode, setIsLightMode] = useState(false);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -45,13 +51,15 @@ export default function LandingHero({ onLaunchWorkspace }) {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    // --- 1. THREE.JS SCENE (LIGHT THEME CANVAS) ---
+    // --- 1. THREE.JS SCENE SETUP ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafc); // Crisp Slate-50 light background
-    scene.fog = new THREE.FogExp2(0xf8fafc, 0.022);
+    const darkBgColor = new THREE.Color(0x050811);
+    const lightBgColor = new THREE.Color(0xf8fafc);
+    scene.background = darkBgColor.clone();
+    scene.fog = new THREE.FogExp2(0x050811, 0.022);
 
-    const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 18);
+    const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 24);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -61,66 +69,72 @@ export default function LandingHero({ onLaunchWorkspace }) {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 1.2;
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Balanced Bright Lighting for Light Theme
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+    // Dynamic Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0x4f46e5, 1.2);
-    mainLight.position.set(5, 8, 10);
-    scene.add(mainLight);
+    const funnelPointLight = new THREE.PointLight(0x06b6d4, 3.5, 60);
+    funnelPointLight.position.set(0, 0, 2);
+    scene.add(funnelPointLight);
 
-    // --- 2. PARTICLE ENGINE (CHAOS -> FUNNEL -> STRUCTURED BACKGROUND STREAMS) ---
-    const particleCount = 700;
+    const indigoLight = new THREE.PointLight(0x6366f1, 2.5, 50);
+    indigoLight.position.set(0, 4, 10);
+    scene.add(indigoLight);
+
+    // --- 2. 1,000 CHAOTIC PARTICLES (RAW COMPLAINT FIELD) ---
+    const particleCount = 1000;
     const particleGeometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     const chaoticTargets = new Float32Array(particleCount * 3);
     const funnelTargets = new Float32Array(particleCount * 3);
-    const streamTargets = new Float32Array(particleCount * 3);
+    const clarityTargets = new Float32Array(particleCount * 3);
 
-    // Tuned palette for light background visibility
-    const colCrimson = new THREE.Color(0xe11d48); // Rose-600
-    const colSlate = new THREE.Color(0x64748b);   // Slate-500
-    const colIndigo = new THREE.Color(0x4f46e5);  // Indigo-600
-    const colEmerald = new THREE.Color(0x059669); // Emerald-600
-    const colAmber = new THREE.Color(0xd97706);   // Amber-600
+    // Color definitions
+    const colDullGray = new THREE.Color(0x64748b);     // Noisy gray (Scene 1)
+    const colDimRed = new THREE.Color(0xef4444);       // Dim danger red (Scene 1)
+    const colNeonCyan = new THREE.Color(0x06b6d4);     // Groq/Adaption Pipeline (Scene 2)
+    const colNeonIndigo = new THREE.Color(0x6366f1);   // Pipeline glow (Scene 2)
+    const colEmerald = new THREE.Color(0x10b981);      // Scene 3 Safe
+    const colAmber = new THREE.Color(0xf59e0b);        // Scene 3 Warning
+    const colRose = new THREE.Color(0xe11d48);         // Scene 3 Critical
 
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
 
-      // Stage 1 (0-100vh): Chaotic 3D field
-      const x = (Math.random() - 0.5) * 30;
-      const y = (Math.random() - 0.5) * 20;
-      const z = (Math.random() - 0.5) * 20;
-      positions[i3] = x;
-      positions[i3 + 1] = y;
-      positions[i3 + 2] = z;
-      chaoticTargets[i3] = x;
-      chaoticTargets[i3 + 1] = y;
-      chaoticTargets[i3 + 2] = z;
+      // Scene 1 (0-33%): Wide chaotic cloud
+      const cx = (Math.random() - 0.5) * 36;
+      const cy = (Math.random() - 0.5) * 24;
+      const cz = (Math.random() - 0.5) * 28;
+      positions[i3] = cx;
+      positions[i3 + 1] = cy;
+      positions[i3 + 2] = cz;
+      chaoticTargets[i3] = cx;
+      chaoticTargets[i3 + 1] = cy;
+      chaoticTargets[i3 + 2] = cz;
 
-      // Stage 2 (100-200vh): Funnel vortex cylinder
-      const angle = Math.random() * Math.PI * 2;
-      const radius = 1.2 + Math.random() * 2.8;
-      const zFunnel = (Math.random() - 0.5) * 16;
-      funnelTargets[i3] = Math.cos(angle) * radius;
-      funnelTargets[i3 + 1] = Math.sin(angle) * radius;
-      funnelTargets[i3 + 2] = zFunnel;
+      // Scene 2 (33-66%): Hyper-funnel logarithmic vortex
+      const theta = Math.random() * Math.PI * 2;
+      const r = 0.8 + Math.pow(Math.random(), 2) * 3.5;
+      const zF = (Math.random() - 0.5) * 22;
+      funnelTargets[i3] = Math.cos(theta) * r;
+      funnelTargets[i3 + 1] = Math.sin(theta) * r;
+      funnelTargets[i3 + 2] = zF;
 
-      // Stage 3 (200-300vh): Ambient vertical streams safely in background (z = -4 to avoid DOM collision)
-      const streamIdx = i % 3;
-      const streamX = (streamIdx - 1) * 9.5;
-      const streamY = ((i % 25) - 12.5) * 0.9;
-      streamTargets[i3] = streamX + (Math.random() - 0.5) * 1.5;
-      streamTargets[i3 + 1] = streamY;
-      streamTargets[i3 + 2] = -3.5; // Pushed behind DOM card
+      // Scene 3 (66-100%): Clean ambient streams in background
+      const streamCol = i % 3;
+      const streamX = (streamCol - 1) * 11;
+      const streamY = ((i % 30) - 15) * 0.9;
+      clarityTargets[i3] = streamX + (Math.random() - 0.5) * 2;
+      clarityTargets[i3 + 1] = streamY;
+      clarityTargets[i3 + 2] = -4; // Safely behind cards
 
-      // Initial color assignment
-      const baseCol = Math.random() > 0.45 ? colCrimson : colSlate;
+      // Initial Scene 1 Colors (70% noisy gray, 30% dim red)
+      const baseCol = Math.random() > 0.3 ? colDullGray : colDimRed;
       colors[i3] = baseCol.r;
       colors[i3 + 1] = baseCol.g;
       colors[i3 + 2] = baseCol.b;
@@ -129,15 +143,15 @@ export default function LandingHero({ onLaunchWorkspace }) {
     particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-    // Crisp circular particle texture
+    // Radial glowing particle texture
     const pCanvas = document.createElement('canvas');
     pCanvas.width = 64;
     pCanvas.height = 64;
     const pCtx = pCanvas.getContext('2d');
     const pGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 30);
-    pGrad.addColorStop(0, 'rgba(15, 23, 42, 1)');
-    pGrad.addColorStop(0.4, 'rgba(79, 70, 229, 0.8)');
-    pGrad.addColorStop(1, 'rgba(79, 70, 229, 0)');
+    pGrad.addColorStop(0, 'rgba(255,255,255,1)');
+    pGrad.addColorStop(0.3, 'rgba(6, 182, 212, 0.8)');
+    pGrad.addColorStop(1, 'rgba(6, 182, 212, 0)');
     pCtx.fillStyle = pGrad;
     pCtx.beginPath();
     pCtx.arc(32, 32, 30, 0, Math.PI * 2);
@@ -146,141 +160,174 @@ export default function LandingHero({ onLaunchWorkspace }) {
     const particleTexture = new THREE.CanvasTexture(pCanvas);
 
     const particleMaterial = new THREE.PointsMaterial({
-      size: 0.42,
+      size: 0.45,
       vertexColors: true,
       map: particleTexture,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
       depthWrite: false
     });
 
     const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particleSystem);
 
-    // --- 3. SUBTLE HOLOGRAPHIC PIPELINE (STAGE 2) ---
-    const funnelGroup = new THREE.Group();
-    const cylinderGeo = new THREE.CylinderGeometry(1.6, 5.2, 24, 24, 12, true);
-    const cylinderMat = new THREE.MeshBasicMaterial({
-      color: 0x4f46e5,
+    // --- 3. HIGH-TECH GLOWING CENTRAL FUNNEL (ADAPTION & GROQ PIPELINE) ---
+    const pipelineGroup = new THREE.Group();
+
+    // Cylindrical cyber-vortex mesh
+    const tunnelGeo = new THREE.CylinderGeometry(1.4, 6.0, 26, 32, 16, true);
+    const tunnelMat = new THREE.MeshBasicMaterial({
+      color: 0x06b6d4,
       wireframe: true,
       transparent: true,
-      opacity: 0.05
+      opacity: 0.08
     });
-    const funnelMesh = new THREE.Mesh(cylinderGeo, cylinderMat);
-    funnelMesh.rotation.x = Math.PI / 2;
-    funnelGroup.add(funnelMesh);
+    const tunnelMesh = new THREE.Mesh(tunnelGeo, tunnelMat);
+    tunnelMesh.rotation.x = Math.PI / 2;
+    pipelineGroup.add(tunnelMesh);
 
-    // Elegant ring accents
-    const ringGroup = new THREE.Group();
-    for (let r = 0; r < 5; r++) {
-      const ringGeo = new THREE.TorusGeometry(1.8 + r * 0.6, 0.03, 16, 48);
+    // Pulsing Neon Accelerator Rings
+    const rings = [];
+    for (let r = 0; r < 8; r++) {
+      const ringGeo = new THREE.TorusGeometry(1.6 + r * 0.5, 0.04, 16, 64);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x4f46e5,
+        color: r % 2 === 0 ? 0x06b6d4 : 0x6366f1,
         transparent: true,
-        opacity: 0.15
+        opacity: 0.35
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.z = (r - 2) * 4.0;
-      ringGroup.add(ring);
+      ring.position.z = (r - 4) * 3.2;
+      pipelineGroup.add(ring);
+      rings.push(ring);
     }
-    funnelGroup.add(ringGroup);
-    scene.add(funnelGroup);
+    scene.add(pipelineGroup);
 
-    // --- 4. FLOATING 3D COMPLAINT BILLBOARDS (STAGE 1 ONLY) ---
-    const spritesGroup = new THREE.Group();
-    const spriteItems = [];
+    // --- 4. FLOATING 3D COMPLAINT BILLBOARDS (SCENE 1 CHAOS) ---
+    const billboardsGroup = new THREE.Group();
+    const billboardSprites = [];
 
-    RAW_COMPLAINTS.forEach((item, idx) => {
-      const sCanvas = document.createElement('canvas');
-      sCanvas.width = 512;
-      sCanvas.height = 120;
-      const sCtx = sCanvas.getContext('2d');
+    RAW_COMPLAINTS.forEach((txt, idx) => {
+      const bCanvas = document.createElement('canvas');
+      bCanvas.width = 512;
+      bCanvas.height = 110;
+      const bCtx = bCanvas.getContext('2d');
 
-      // Light Card Pill with subtle drop shadow
-      sCtx.fillStyle = '#ffffff';
-      sCtx.strokeStyle = item.color;
-      sCtx.lineWidth = 3;
-      sCtx.beginPath();
-      sCtx.roundRect(8, 8, 496, 104, 20);
-      sCtx.fill();
-      sCtx.stroke();
+      // Dark glass pill with subtle border
+      bCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      bCtx.strokeStyle = txt.includes('hacked') || txt.includes('Scammed') ? '#ef4444' : '#64748b';
+      bCtx.lineWidth = 3;
+      bCtx.beginPath();
+      bCtx.roundRect(8, 8, 496, 94, 20);
+      bCtx.fill();
+      bCtx.stroke();
 
-      // Text label in dark slate
-      sCtx.font = 'bold 22px -apple-system, sans-serif';
-      sCtx.fillStyle = '#0f172a';
-      sCtx.fillText(item.text, 24, 62);
+      bCtx.font = 'bold 22px -apple-system, sans-serif';
+      bCtx.fillStyle = '#f8fafc';
+      bCtx.fillText(txt, 24, 58);
 
-      const sTex = new THREE.CanvasTexture(sCanvas);
-      const sMat = new THREE.SpriteMaterial({
-        map: sTex,
+      const bTex = new THREE.CanvasTexture(bCanvas);
+      const bMat = new THREE.SpriteMaterial({
+        map: bTex,
         transparent: true,
         opacity: 0.95
       });
-      const sprite = new THREE.Sprite(sMat);
+      const sprite = new THREE.Sprite(bMat);
 
-      const sx = (Math.random() - 0.5) * 18;
-      const sy = (Math.random() - 0.5) * 12;
-      const sz = (Math.random() - 0.5) * 12;
+      const sx = (Math.random() - 0.5) * 22;
+      const sy = (Math.random() - 0.5) * 16;
+      const sz = 2 + (Math.random() - 0.5) * 16;
       sprite.position.set(sx, sy, sz);
-      sprite.scale.set(4.4, 1.05, 1);
+      sprite.scale.set(4.8, 1.1, 1);
 
-      spritesGroup.add(sprite);
-      spriteItems.push({
+      billboardsGroup.add(sprite);
+      billboardSprites.push({
         sprite,
-        origin: new THREE.Vector3(sx, sy, sz)
+        origin: new THREE.Vector3(sx, sy, sz),
+        driftSpeed: 0.2 + Math.random() * 0.3
       });
     });
-    scene.add(spritesGroup);
+    scene.add(billboardsGroup);
 
-    // --- 5. GSAP SCROLLTRIGGER ENGINE ---
+    // --- 5. INTERACTIVE MOUSE REACTION (SCENE 1 TURBULENCE) ---
+    const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    const onPointerMove = (e) => {
+      mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+    };
+    window.addEventListener('mousemove', onPointerMove);
+
+    // --- 6. GSAP SCROLLTRIGGER ORCHESTRATION ---
     const animState = { progress: 0 };
 
     const st = ScrollTrigger.create({
       trigger: scrollTrackRef.current,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.2,
+      scrub: 1.4,
       onUpdate: (self) => {
-        const p = self.progress;
+        const p = self.progress; // 0.0 to 1.0
         animState.progress = p;
         setScrollProgress(p);
 
+        // Scene tracking
         if (p < 0.33) {
-          setActiveStage(1);
+          setActiveScene(1);
+          setIsLightMode(false);
         } else if (p < 0.66) {
-          setActiveStage(2);
+          setActiveScene(2);
+          setIsLightMode(false);
         } else {
-          setActiveStage(3);
+          setActiveScene(3);
+          setIsLightMode(true);
         }
 
-        // Particle interpolation
+        // --- BACKGROUND COLOR TRANSITION ---
+        if (p < 0.66) {
+          scene.background.copy(darkBgColor);
+          scene.fog.color.copy(darkBgColor);
+          scene.fog.density = 0.022;
+        } else {
+          // Smooth blend into crisp light theme canvas (#f8fafc)
+          const lightT = (p - 0.66) / 0.34;
+          scene.background.lerpColors(darkBgColor, lightBgColor, lightT);
+          scene.fog.color.lerpColors(darkBgColor, lightBgColor, lightT);
+          scene.fog.density = 0.022 * (1 - lightT * 0.5);
+        }
+
+        // --- PARTICLE WARP & RESTRUCTURING ---
         const posAttr = particleGeometry.attributes.position;
-        const colorAttr = particleGeometry.attributes.color;
+        const colAttr = particleGeometry.attributes.color;
 
         for (let i = 0; i < particleCount; i++) {
           const i3 = i * 3;
           let tx, ty, tz;
 
           if (p < 0.5) {
+            // Scene 1 -> Scene 2 (Chaos sucked into Funnel)
             const t = p * 2.0;
             tx = THREE.MathUtils.lerp(chaoticTargets[i3], funnelTargets[i3], t);
             ty = THREE.MathUtils.lerp(chaoticTargets[i3 + 1], funnelTargets[i3 + 1], t);
             tz = THREE.MathUtils.lerp(chaoticTargets[i3 + 2], funnelTargets[i3 + 2], t);
 
-            colorAttr.array[i3] = THREE.MathUtils.lerp(colors[i3], colIndigo.r, t * 0.8);
-            colorAttr.array[i3 + 1] = THREE.MathUtils.lerp(colors[i3 + 1], colIndigo.g, t * 0.8);
-            colorAttr.array[i3 + 2] = THREE.MathUtils.lerp(colors[i3 + 2], colIndigo.b, t * 0.8);
+            // Morph colors into Glowing Cyan & Indigo
+            const targetColor = i % 2 === 0 ? colNeonCyan : colNeonIndigo;
+            colAttr.array[i3] = THREE.MathUtils.lerp(colors[i3], targetColor.r, t);
+            colAttr.array[i3 + 1] = THREE.MathUtils.lerp(colors[i3 + 1], targetColor.g, t);
+            colAttr.array[i3 + 2] = THREE.MathUtils.lerp(colors[i3 + 2], targetColor.b, t);
           } else {
+            // Scene 2 -> Scene 3 (Funnel -> Emergence in Clarity)
             const t = (p - 0.5) * 2.0;
-            tx = THREE.MathUtils.lerp(funnelTargets[i3], streamTargets[i3], t);
-            ty = THREE.MathUtils.lerp(funnelTargets[i3 + 1], streamTargets[i3 + 1], t);
-            tz = THREE.MathUtils.lerp(funnelTargets[i3 + 2], streamTargets[i3 + 2], t);
+            tx = THREE.MathUtils.lerp(funnelTargets[i3], clarityTargets[i3], t);
+            ty = THREE.MathUtils.lerp(funnelTargets[i3 + 1], clarityTargets[i3 + 1], t);
+            tz = THREE.MathUtils.lerp(funnelTargets[i3 + 2], clarityTargets[i3 + 2], t);
 
-            const streamIdx = i % 3;
-            const targetCol = streamIdx === 0 ? colCrimson : streamIdx === 1 ? colAmber : colEmerald;
-            colorAttr.array[i3] = THREE.MathUtils.lerp(colIndigo.r, targetCol.r, t);
-            colorAttr.array[i3 + 1] = THREE.MathUtils.lerp(colIndigo.g, targetCol.g, t);
-            colorAttr.array[i3 + 2] = THREE.MathUtils.lerp(colIndigo.b, targetCol.b, t);
+            // Transform into Kanban Column Palettes (Rose, Amber, Emerald)
+            const colIdx = i % 3;
+            const targetColor = colIdx === 0 ? colRose : colIdx === 1 ? colAmber : colEmerald;
+            colAttr.array[i3] = THREE.MathUtils.lerp(colNeonCyan.r, targetColor.r, t);
+            colAttr.array[i3 + 1] = THREE.MathUtils.lerp(colNeonCyan.g, targetColor.g, t);
+            colAttr.array[i3 + 2] = THREE.MathUtils.lerp(colNeonCyan.b, targetColor.b, t);
           }
 
           posAttr.array[i3] = tx;
@@ -288,29 +335,36 @@ export default function LandingHero({ onLaunchWorkspace }) {
           posAttr.array[i3 + 2] = tz;
         }
         posAttr.needsUpdate = true;
-        colorAttr.needsUpdate = true;
+        colAttr.needsUpdate = true;
 
-        // Billboards fade out as entering funnel
-        const spriteOpacity = Math.max(0, 1 - p * 2.4);
-        spriteItems.forEach(({ sprite, origin }) => {
-          sprite.material.opacity = spriteOpacity;
-          sprite.position.x = THREE.MathUtils.lerp(origin.x, 0, p);
-          sprite.position.y = THREE.MathUtils.lerp(origin.y, 0, p);
+        // Billboards fade out as they are pulled into the funnel
+        const billboardOpacity = Math.max(0, 1 - p * 2.5);
+        billboardSprites.forEach(({ sprite, origin }) => {
+          sprite.material.opacity = billboardOpacity;
+          // Pull inward toward funnel
+          sprite.position.x = THREE.MathUtils.lerp(origin.x, 0, Math.min(1, p * 2));
+          sprite.position.y = THREE.MathUtils.lerp(origin.y, 0, Math.min(1, p * 2));
         });
 
-        // Pipeline visibility
-        const pipelineOpacity = p < 0.5 ? p * 1.6 : Math.max(0, (1 - p) * 1.6);
-        cylinderMat.opacity = Math.min(0.12, pipelineOpacity * 0.12);
-        ringGroup.children.forEach((rg) => {
-          rg.material.opacity = Math.min(0.3, pipelineOpacity * 0.3);
+        // Pipeline visibility (peaks at p=0.5)
+        const pipelineOpacity = p < 0.5 ? p * 2.0 : Math.max(0, (1 - p) * 2.2);
+        tunnelMat.opacity = Math.min(0.22, pipelineOpacity * 0.22);
+        rings.forEach((ring) => {
+          ring.material.opacity = Math.min(0.7, pipelineOpacity * 0.7);
         });
 
-        // Camera dolly
-        camera.position.z = THREE.MathUtils.lerp(18, 14, p);
+        // --- CAMERA ZOOMING WARP EFFECT ---
+        if (p < 0.5) {
+          // Zoom in toward the funnel entrance (24 down to 5.5)
+          camera.position.z = THREE.MathUtils.lerp(24, 5.5, p * 2.0);
+        } else {
+          // Fly through the end of the funnel and dolly back out into the bright workspace (5.5 out to 15)
+          camera.position.z = THREE.MathUtils.lerp(5.5, 15, (p - 0.5) * 2.0);
+        }
       }
     });
 
-    // Animation Loop
+    // --- 7. ANIMATION LOOP ---
     let frameId;
     let clock = new THREE.Clock();
 
@@ -318,13 +372,27 @@ export default function LandingHero({ onLaunchWorkspace }) {
       frameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      if (animState.progress < 0.6) {
-        particleSystem.rotation.y = elapsedTime * 0.04;
+      // Smooth mouse dampening
+      mouse.x += (mouse.targetX - mouse.x) * 0.05;
+      mouse.y += (mouse.targetY - mouse.y) * 0.05;
+
+      // Mouse Parallax in Scene 1
+      if (animState.progress < 0.4) {
+        camera.position.x = mouse.x * 2.5;
+        camera.position.y = mouse.y * 1.5;
+        particleSystem.rotation.y = elapsedTime * 0.03 + mouse.x * 0.2;
+        particleSystem.rotation.x = mouse.y * 0.1;
+
+        // Subtle organic float for billboards
+        billboardSprites.forEach(({ sprite, origin, driftSpeed }, idx) => {
+          sprite.position.y = origin.y + Math.sin(elapsedTime * driftSpeed + idx) * 0.35;
+        });
       }
 
-      funnelMesh.rotation.z = elapsedTime * 0.25;
-      ringGroup.children.forEach((ring, idx) => {
-        ring.rotation.z = -elapsedTime * (0.15 + idx * 0.04);
+      // High-speed vortex spinning in Scene 2
+      tunnelMesh.rotation.z = elapsedTime * 0.6;
+      rings.forEach((ring, idx) => {
+        ring.rotation.z = -elapsedTime * (0.3 + idx * 0.08);
       });
 
       renderer.render(scene, camera);
@@ -332,7 +400,7 @@ export default function LandingHero({ onLaunchWorkspace }) {
 
     animate();
 
-    // Resize
+    // Resize Handler
     const handleResize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
@@ -345,6 +413,7 @@ export default function LandingHero({ onLaunchWorkspace }) {
 
     return () => {
       cancelAnimationFrame(frameId);
+      window.removeEventListener('mousemove', onPointerMove);
       window.removeEventListener('resize', handleResize);
       st.kill();
       renderer.dispose();
@@ -355,8 +424,11 @@ export default function LandingHero({ onLaunchWorkspace }) {
   }, []);
 
   return (
-    <div className="landing-hero-root">
-      {/* Light Theme Navigation Header */}
+    <div
+      ref={rootRef}
+      className={`landing-hero-root ${isLightMode ? 'light-mode-active' : ''}`}
+    >
+      {/* Sticky Navigation Bar */}
       <header className="landing-hero-nav">
         <div className="landing-brand" onClick={onLaunchWorkspace}>
           <div className="brand-icon-gem">
@@ -364,7 +436,9 @@ export default function LandingHero({ onLaunchWorkspace }) {
           </div>
           <div>
             <div className="brand-title">InsightFlow</div>
-            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>Powered by Adaption Labs</div>
+            <div style={{ fontSize: '0.68rem', color: isLightMode ? '#64748b' : '#94a3b8' }}>
+              Powered by Adaption Labs
+            </div>
           </div>
           <span className="brand-tag">Build Battle 2026</span>
         </div>
@@ -377,149 +451,168 @@ export default function LandingHero({ onLaunchWorkspace }) {
             <span>Adaption Engine v0.14 Active</span>
           </div>
 
-          <button
-            className="btn-launch-nav"
-            onClick={onLaunchWorkspace}
-          >
+          <button className="btn-launch-nav" onClick={onLaunchWorkspace}>
             {t('nav.launch', 'Launch Workspace')}
             <ArrowRight size={15} />
           </button>
         </div>
       </header>
 
-      {/* Fixed WebGL Canvas Layer */}
+      {/* Fixed WebGL Canvas Behind Content */}
       <div className="canvas-container" ref={mountRef} />
 
       {/* 300vh Scroll Narrative Track */}
       <div className="scroll-track" ref={scrollTrackRef}>
-        {/* STAGE 1 (0 - 100vh): Severity Blindness */}
+        {/* SCENE 1 (Scroll 0% - 33%): The Chaos of "Severity Blindness" */}
         <section className="stage-section">
-          <div className="stage-badge badge-crimson">
-            <ShieldAlert size={14} />
-            {t('stages.stage1_badge', 'Stage 01 • The Critical Failure Mode')}
+          <div className="stage-badge badge-dark-abyss">
+            <ShieldAlert size={15} />
+            Scene 01 • The Chaos of Severity Blindness
           </div>
-          <h1 className="stage-title title-gradient-crimson">
-            {t('stages.stage1_title', 'Traditional AI is Blind to Catastrophic Severity.')}
+
+          <h1 className="stage-title title-glow-dark">
+            Your business is drowning in noise.
           </h1>
+
           <p className="stage-subtitle">
-            {t('stages.stage1_desc', 'Legacy sentiment engines treat a 1-star packaging tear identically to a $45,000 off-platform wire fraud exploit. When 7,002 customer complaints flood in, catastrophic churn signals vanish inside noisy semantic fog.')}
+            You have 10,000 customer feedback tickets, but you don't know which one will cost you your company today. Legacy sentiment engines treat a 1-star packaging tear identically to a $45,000 escrow wire fraud attack.
           </p>
 
           <div className="stage-hud">
             <div className="hud-chip">
-              <div className="hud-chip-label">{t('metrics.unstructured_volume', 'Unstructured Volume')}</div>
-              <div className="hud-chip-val">7,002</div>
-              <div className="hud-chip-sub">Raw unconditioned prompts</div>
+              <div className="hud-chip-label">Unstructured Tickets</div>
+              <div className="hud-chip-val">10,000+</div>
+              <div className="hud-chip-sub">Raw, noisy customer complaints</div>
             </div>
             <div className="hud-chip">
-              <div className="hud-chip-label">{t('metrics.churn_risk', 'Severe Churn Risk')}</div>
-              <div className="hud-chip-val" style={{ color: '#e11d48' }}>$305,000</div>
+              <div className="hud-chip-label">Severe Churn Risk</div>
+              <div className="hud-chip-val" style={{ color: '#ef4444' }}>$305,000</div>
               <div className="hud-chip-sub">Hidden inside 3 friction clusters</div>
             </div>
             <div className="hud-chip">
-              <div className="hud-chip-label">{t('metrics.data_quality', 'Baseline Data Quality')}</div>
-              <div className="hud-chip-val" style={{ color: '#d97706' }}>6.8 / 10</div>
-              <div className="hud-chip-sub">Grade B- (High noise redundancy)</div>
+              <div className="hud-chip-label">Severity Blindness</div>
+              <div className="hud-chip-val" style={{ color: '#f59e0b' }}>100% Blind</div>
+              <div className="hud-chip-sub">Catastrophic threats go undetected</div>
             </div>
           </div>
         </section>
 
-        {/* STAGE 2 (100 - 200vh): Adaption Living Funnel */}
+        {/* SCENE 2 (Scroll 33% - 66%): The Adaption Intelligence Engine */}
         <section className="stage-section">
-          <div className="stage-badge badge-indigo">
-            <Cpu size={14} />
-            {t('stages.stage2_badge', 'Stage 02 • Living Data Conditioning')}
+          <div className="stage-badge badge-neon-warp">
+            <Cpu size={15} />
+            Scene 02 • The Adaption Intelligence Engine
           </div>
-          <h2 className="stage-title title-gradient-indigo">
-            {t('stages.stage2_title', 'The Adaption Living Data Funnel.')}
+
+          <h2 className="stage-title title-glow-neon">
+            InsightFlow intercepts the chaos.
           </h2>
+
           <p className="stage-subtitle">
-            {t('stages.stage2_desc', "As raw reviews funnel into Adaption's conditioning engine, active recipes sanitize hyperbole, compress 14.2% duplicate noise, redact PII, and attach verified causal reasoning traces.")}
+            Powered by Adaption Labs, we map, categorize, and score your data in milliseconds. Active recipes sanitize emotional hyperbole, eliminate 14.2% duplicate noise, redact PII, and attach verified causal reasoning traces.
           </p>
 
           <div className="stage-hud">
             <div className="hud-chip">
-              <div className="hud-chip-label">{t('metrics.noise_reduction', 'Prompt Deduplication')}</div>
-              <div className="hud-chip-val" style={{ color: '#4f46e5' }}>94.1%</div>
-              <div className="hud-chip-sub">Noise reduction across clusters</div>
+              <div className="hud-chip-label">Living Data Pipeline</div>
+              <div className="hud-chip-val" style={{ color: '#06b6d4' }}>Active Vortex</div>
+              <div className="hud-chip-sub">Real-time prompt conditioning</div>
             </div>
             <div className="hud-chip">
-              <div className="hud-chip-label">{t('metrics.adapted_uplift', 'Adapted Quality Uplift')}</div>
-              <div className="hud-chip-val" style={{ color: '#0284c7' }}>9.4 / 10</div>
+              <div className="hud-chip-label">Prompt Deduplication</div>
+              <div className="hud-chip-val" style={{ color: '#818cf8' }}>94.1%</div>
+              <div className="hud-chip-sub">Noise compressed into root causes</div>
+            </div>
+            <div className="hud-chip">
+              <div className="hud-chip-label">Quality Score Uplift</div>
+              <div className="hud-chip-val" style={{ color: '#10b981' }}>6.8 → 9.4</div>
               <div className="hud-chip-sub">Grade A+ (96th percentile)</div>
-            </div>
-            <div className="hud-chip">
-              <div className="hud-chip-label">{t('metrics.causality', 'Causality Attached')}</div>
-              <div className="hud-chip-val" style={{ color: '#059669' }}>100%</div>
-              <div className="hud-chip-sub">Root Cause → Action traces</div>
             </div>
           </div>
         </section>
 
-        {/* STAGE 3 (200 - 300vh): Single Spotlight Decision Card (Zero Overlap) */}
+        {/* SCENE 3 (Scroll 66% - 100%): Total Actionable Clarity (Pristine Light Theme) */}
         <section className="stage-section">
-          <div className="stage-3-container">
-            <div className="stage-badge badge-emerald">
-              <CheckCircle2 size={14} />
-              {t('stages.stage3_badge', 'Stage 03 • Actionable Decision Velocity')}
+          <div className="scene3-container">
+            <div className="stage-badge badge-light-clarity">
+              <CheckCircle2 size={15} />
+              Scene 03 • Total Actionable Clarity
             </div>
-            <h2 className="stage-title title-gradient-emerald">
-              {t('stages.stage3_title', 'From Chaotic Text to Prioritized Decisions.')}
+
+            <h2 className="stage-title title-light-clarity">
+              Cure Severity Blindness. Turn raw feedback into intelligent action.
             </h2>
+
             <p className="stage-subtitle">
-              {t('stages.stage3_desc', 'Customer friction is filtered into verified, role-conditioned actions with instant Supabase cloud synchronization.')}
+              The camera breaks through the pipeline into crisp clarity. Chaotic complaints emerge as color-coded, role-conditioned Kanban tickets synchronized with Supabase Cloud.
             </p>
 
-            {/* Pristine Single Spotlight Card (No Overlapping Background Cards) */}
-            <div className="spotlight-card">
-              <div className="spotlight-card-stripe" />
-              <div className="spotlight-header">
-                <span className="spotlight-badge">
-                  <ShieldAlert size={14} />
-                  P0 Critical • Escrow Scam Cluster
+            {/* Pristine 3-Card Color-Coded Kanban Emergence Grid */}
+            <div className="scene3-cards-grid">
+              {/* Card 1: Critical Rose (Sarah Jenkins) */}
+              <div className="action-kanban-card">
+                <div className="card-top-stripe stripe-rose" />
+                <span className="card-badge badge-rose">
+                  <ShieldAlert size={13} />
+                  Rose • Critical Threat
                 </span>
-                <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>
-                  Synced to Supabase
+                <div className="card-title">Off-Platform Seller Escrow Scam</div>
+                <div className="card-desc">
+                  1,286 reports of fraudulent sellers bypassing platform escrow. P0 seller payout freeze directive auto-generated.
+                </div>
+                <div className="card-footer">
+                  <span className="card-owner">Sarah Jenkins (Trust & Safety)</span>
+                  <span className="card-impact" style={{ color: '#e11d48' }}>$305,000 At-Risk</span>
+                </div>
+              </div>
+
+              {/* Card 2: Warning Amber (Marcus Chen) */}
+              <div className="action-kanban-card">
+                <div className="card-top-stripe stripe-amber" />
+                <span className="card-badge badge-amber">
+                  <AlertTriangle size={13} />
+                  Amber • SLA Warning
                 </span>
-              </div>
-
-              <div className="spotlight-title">
-                Surge in Unverified Sellers Demanding Off-Platform Wire Transfers
-              </div>
-
-              <div className="spotlight-desc">
-                Adaption's causality engine extracted 1,286 victim reports identifying rogue sellers bypassing platform escrow. Automated seller payout freeze directive prepared.
-              </div>
-
-              <div className="spotlight-meta-grid">
-                <div className="spotlight-meta-item">
-                  <span className="spotlight-meta-label">Financial Churn Risk</span>
-                  <span className="spotlight-meta-value" style={{ color: '#e11d48' }}>$305,000</span>
+                <div className="card-title">Customer Support Delay &gt; 48h</div>
+                <div className="card-desc">
+                  1,227 complaints regarding support queue backlog during promotional spikes. Auto-routed to Senior Tier escalation.
                 </div>
-                <div className="spotlight-meta-item">
-                  <span className="spotlight-meta-label">Assigned Owner</span>
-                  <span className="spotlight-meta-value">Sarah Jenkins (Trust & Safety)</span>
-                </div>
-                <div className="spotlight-meta-item">
-                  <span className="spotlight-meta-label">Prescribed Action</span>
-                  <span className="spotlight-meta-value" style={{ color: '#4f46e5' }}>P0 Escrow Lock</span>
+                <div className="card-footer">
+                  <span className="card-owner">Marcus Chen (Support CX)</span>
+                  <span className="card-impact" style={{ color: '#d97706' }}>420 Churn Risk</span>
                 </div>
               </div>
 
-              <div className="cta-group">
-                <button className="btn-launch-hero" onClick={onLaunchWorkspace}>
-                  Launch Enterprise Workspace
-                  <ArrowRight size={18} />
-                </button>
-                <button
-                  className="btn-secondary-hero"
-                  onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                >
-                  Replay Sequence
-                </button>
+              {/* Card 3: Safe Emerald (Elena Vance) */}
+              <div className="action-kanban-card">
+                <div className="card-top-stripe stripe-emerald" />
+                <span className="card-badge badge-emerald-card">
+                  <CheckCircle2 size={13} />
+                  Emerald • Resolved
+                </span>
+                <div className="card-title">Proactive Carrier SMS Updates</div>
+                <div className="card-desc">
+                  Automated delivery tracking SMS deployed. Logistics delay friction mitigated with +18.4% NPS retention boost.
+                </div>
+                <div className="card-footer">
+                  <span className="card-owner">Elena Vance (CEO Briefing)</span>
+                  <span className="card-impact" style={{ color: '#059669' }}>+18.4% NPS</span>
+                </div>
               </div>
+            </div>
+
+            {/* Final Launch Actions */}
+            <div className="cta-group">
+              <button className="btn-launch-hero" onClick={onLaunchWorkspace}>
+                Launch Enterprise Workspace
+                <ArrowRight size={18} />
+              </button>
+              <button
+                className="btn-secondary-hero"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                Replay Cinematic Story
+              </button>
             </div>
           </div>
         </section>
@@ -528,8 +621,8 @@ export default function LandingHero({ onLaunchWorkspace }) {
       {/* Floating Scroll Indicator */}
       {scrollProgress < 0.85 && (
         <div className="scroll-indicator">
-          <span>Scroll to Funnel Data</span>
-          <div style={{ width: 1, height: 24, background: 'linear-gradient(to bottom, #94a3b8, transparent)' }} />
+          <span>Scroll to Enter the Funnel</span>
+          <div style={{ width: 1, height: 26, background: isLightMode ? 'linear-gradient(to bottom, #4f46e5, transparent)' : 'linear-gradient(to bottom, #06b6d4, transparent)' }} />
         </div>
       )}
     </div>
