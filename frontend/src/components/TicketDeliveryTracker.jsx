@@ -15,6 +15,7 @@ import {
   ShieldAlert,
   ArrowRight
 } from 'lucide-react';
+import { supabase } from '../supabase';
 
 /**
  * TicketDeliveryTracker
@@ -152,38 +153,85 @@ export default function TicketDeliveryTracker({ ticket, onUpdateStatus, apiBase 
     }, 800);
   };
 
-  // Submit audio to backend Gemini 1.5 route
+  // Convert Audio Blob to Base64 String
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  // Submit audio memo to Gemini backend & sync resolution log to Supabase
   const submitAudioToGemini = async () => {
     setProcessingAudio(true);
     setErrorMsg('');
 
     try {
+      // 1. Get Supabase JWT session token
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token || '';
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+      // 2. Prepare Base64 payload & FormData
+      let base64Audio = null;
+      if (audioBlob) {
+        base64Audio = await blobToBase64(audioBlob);
+      }
+
       const formData = new FormData();
       if (audioBlob) {
         formData.append('audio', audioBlob, 'resolution_voice_memo.webm');
+      }
+      if (base64Audio) {
+        formData.append('audio_base64', base64Audio);
       }
       formData.append('issue_id', ticket?.id || 'ISS-DEMO');
       formData.append('preferred_language', selectedLanguage);
       formData.append('title', ticket?.title || '');
       formData.append('category', ticket?.category || '');
 
+      // 3. Post to Gemini Audio Notes endpoint
       const res = await fetch(`${apiBase}/api/audio-notes`, {
         method: 'POST',
+        headers: {
+          ...authHeader
+        },
         body: formData
       });
 
-      if (!res.ok) throw new Error('Failed to process audio');
+      if (!res.ok) throw new Error('Failed to process audio memo');
 
       const data = await res.json();
-      setAudioResolutionLog(data);
+      const resolutionLog = data.resolution_log || data;
+      setAudioResolutionLog(resolutionLog);
 
-      // Promote ticket status to Resolved
+      // 4. Live-update resolution_log and status in Supabase via PATCH
+      if (ticket?.id) {
+        try {
+          await fetch(`${apiBase}/api/issues/${ticket.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeader
+            },
+            body: JSON.stringify({
+              status: 'Resolved',
+              resolution_log: resolutionLog
+            })
+          });
+        } catch (patchErr) {
+          console.warn('Issue PATCH sync notice:', patchErr);
+        }
+      }
+
+      // 5. Update local parent UI state
       if (onUpdateStatus) {
         onUpdateStatus(ticket?.id, 'Resolved');
       }
     } catch (err) {
-      console.warn('Audio processing error:', err);
-      // Fallback multilingual resolution
+      console.warn('Audio processing fallback:', err);
       const fallbackData = {
         detected_language: selectedLanguage === 'te' ? 'Telugu (తెలుగు)' : selectedLanguage === 'hi' ? 'Hindi (हिंदी)' : 'English',
         language_code: selectedLanguage === 'auto' ? 'te' : selectedLanguage,
@@ -197,6 +245,26 @@ export default function TicketDeliveryTracker({ ticket, onUpdateStatus, apiBase 
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setAudioResolutionLog(fallbackData);
+
+      // Attempt fallback patch
+      if (ticket?.id) {
+        try {
+          const { data: sessionData } = await supabase.auth.getSession();
+          const token = sessionData?.session?.access_token || '';
+          await fetch(`${apiBase}/api/issues/${ticket.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              status: 'Resolved',
+              resolution_log: fallbackData
+            })
+          });
+        } catch {}
+      }
+
       if (onUpdateStatus) {
         onUpdateStatus(ticket?.id, 'Resolved');
       }

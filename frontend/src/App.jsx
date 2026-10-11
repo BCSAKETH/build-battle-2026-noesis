@@ -52,6 +52,7 @@ import AdaptionCopilot from './components/AdaptionCopilot';
 import LanguageSelector from './components/LanguageSelector';
 import DatasetUploadModal from './components/DatasetUploadModal';
 import TicketDeliveryTracker from './components/TicketDeliveryTracker';
+import Dashboard from './components/Dashboard';
 import { UploadCloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
