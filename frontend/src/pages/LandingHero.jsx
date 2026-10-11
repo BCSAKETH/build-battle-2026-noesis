@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from '../components/LanguageSelector';
+import NoesisLogo from '../components/NoesisLogo';
 import {
   ShieldAlert,
   ArrowRight,
@@ -341,19 +342,10 @@ export default function LandingHero({ onLaunchWorkspace }) {
 
   return (
     <div className="landing-hero-root">
-      {/* Luminous Navigation Header */}
+      {/* Luminous Executive Navigation Header */}
       <header className="landing-hero-nav">
-        <div className="landing-brand" onClick={onLaunchWorkspace}>
-          <div className="brand-icon-gem">
-            <Sparkles size={20} color="#ffffff" />
-          </div>
-          <div>
-            <div className="brand-title">InsightFlow</div>
-            <div style={{ fontSize: '0.68rem', color: '#64748b' }}>
-              Powered by Adaption Labs
-            </div>
-          </div>
-          <span className="brand-tag">Build Battle 2026</span>
+        <div className="landing-brand" onClick={onLaunchWorkspace} style={{ cursor: 'pointer' }}>
+          <NoesisLogo height={42} showTagline={true} />
         </div>
 
         <div className="nav-actions">
@@ -378,13 +370,28 @@ export default function LandingHero({ onLaunchWorkspace }) {
       <div className="scroll-track" ref={scrollTrackRef}>
         {/* SCENE 1 (Scroll 0% - 33%): The Chaos of "Severity Blindness" */}
         <section className="stage-section">
-          <div className="stage-badge badge-crimson">
-            <ShieldAlert size={15} />
+          <div
+            className="stage-badge badge-crimson"
+            style={{
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              color: '#be123c',
+              boxShadow: '0 1px 2px rgba(190, 18, 60, 0.04)'
+            }}
+          >
+            <ShieldAlert size={15} color="#be123c" />
             Scene 01 • The Chaos of Severity Blindness
           </div>
 
-          <h1 className="stage-title">
-            Your business is drowning in noise.
+          <h1
+            className="stage-title"
+            style={{
+              color: '#0f172a',
+              letterSpacing: '-0.045em',
+              fontWeight: 900
+            }}
+          >
+            Your business is noise.
           </h1>
 
           <p className="stage-subtitle">
@@ -417,8 +424,15 @@ export default function LandingHero({ onLaunchWorkspace }) {
             Scene 02 • The Adaption Intelligence Engine
           </div>
 
-          <h2 className="stage-title">
-            InsightFlow intercepts the chaos.
+          <h2
+            className="stage-title"
+            style={{
+              color: '#0f172a',
+              letterSpacing: '-0.045em',
+              fontWeight: 900
+            }}
+          >
+            NOESIS intercepts the chaos.
           </h2>
 
           <p className="stage-subtitle">
