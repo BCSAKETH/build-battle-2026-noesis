@@ -46,8 +46,11 @@ import {
 } from './supabase';
 import { FALLBACK_REVIEWS } from './data/fallbackFeedback';
 import LandingPage from './components/LandingPage';
+import LandingHero from './pages/LandingHero';
 import AuthModal from './components/AuthModal';
 import AdaptionCopilot from './components/AdaptionCopilot';
+import LanguageSelector from './components/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 // Dynamic API_BASE for local development and Vercel serverless / remote deployment
 const API_BASE = import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
@@ -55,6 +58,7 @@ const API_BASE = import.meta.env.VITE_API_URL !== undefined && import.meta.env.V
   : (import.meta.env.DEV ? 'http://127.0.0.1:8000' : '');
 
 export default function App() {
+  const { t } = useTranslation();
   // Navigation & View Mode: 'landing' (story) vs 'dashboard' (workspace)
   const [viewMode, setViewMode] = useState('landing');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -417,10 +421,8 @@ export default function App() {
   if (viewMode === 'landing') {
     return (
       <>
-        <LandingPage
-          onLaunchApp={handleLaunchApp}
-          onOpenAuth={() => setShowAuthModal(true)}
-          apiBase={API_BASE}
+        <LandingHero
+          onLaunchWorkspace={handleLaunchApp}
         />
         <AuthModal
           isOpen={showAuthModal}
@@ -597,6 +599,9 @@ export default function App() {
 
           {/* Quick Actions & Command Bar Trigger */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            {/* Language Selector (EN / తె / हि) */}
+            <LanguageSelector />
+
             {/* Back to Landing Page & Story Button */}
             <button
               onClick={() => setViewMode('landing')}
