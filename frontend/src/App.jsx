@@ -53,6 +53,19 @@ import LanguageSelector from './components/LanguageSelector';
 import DatasetUploadModal from './components/DatasetUploadModal';
 import { UploadCloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 
 // Dynamic API_BASE for local development and Vercel serverless / remote deployment
 const API_BASE = import.meta.env.VITE_API_URL !== undefined && import.meta.env.VITE_API_URL !== ''
@@ -871,75 +884,126 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Analytics Distribution: 2 Columns */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                {/* Sentiment Distribution */}
-                <div className="card" style={{ padding: '1.5rem' }}>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.25rem' }}>Sentiment Breakdown</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1.25rem' }}>
-                    Automated NLP classification across full dataset
-                  </p>
+              {/* Analytics Distribution: 2 Columns with Dynamic Recharts */}
+              {(() => {
+                const sentDist = overview?.sentimentDistribution || { Positive: 4210, Neutral: 1240, Negative: 1552 };
+                const sentTotal = (sentDist.Positive || 0) + (sentDist.Neutral || 0) + (sentDist.Negative || 0) || 1;
+                const sentChartData = [
+                  { name: 'Positive', count: sentDist.Positive || 0, pct: Math.round(((sentDist.Positive || 0) / sentTotal) * 100), fill: '#10b981' },
+                  { name: 'Neutral', count: sentDist.Neutral || 0, pct: Math.round(((sentDist.Neutral || 0) / sentTotal) * 100), fill: '#f59e0b' },
+                  { name: 'Negative', count: sentDist.Negative || 0, pct: Math.round(((sentDist.Negative || 0) / sentTotal) * 100), fill: '#ef4444' }
+                ];
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
-                        <span style={{ fontWeight: 600, color: '#059669' }}>● Positive Sentiment</span>
-                        <span style={{ fontWeight: 700 }}>4,210 (60.1%)</span>
+                const catDist = overview?.categoryDistribution || {
+                  'Product Feedback': 3150,
+                  'Customer Service': 1890,
+                  'Fraud and Scam': 1120,
+                  'Operational Issues': 842
+                };
+                const catTotal = Object.values(catDist).reduce((a, b) => a + b, 0) || 1;
+                const colorPalette = ['#4f46e5', '#0284c7', '#dc2626', '#d97706', '#8b5cf6', '#06b6d4', '#10b981'];
+                const catChartData = Object.entries(catDist).map(([name, count], idx) => ({
+                  category: name,
+                  count,
+                  pct: Math.round((count / catTotal) * 100),
+                  color: colorPalette[idx % colorPalette.length]
+                }));
+
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                    {/* Sentiment Distribution Card with Recharts Pie */}
+                    <div className="card" style={{ padding: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>Sentiment Breakdown</h3>
+                        <span style={{ fontSize: '0.72rem', background: '#ecfdf5', color: '#059669', padding: '2px 8px', borderRadius: '9999px', fontWeight: 600 }}>
+                          {sentTotal.toLocaleString()} rated
+                        </span>
                       </div>
-                      <div style={{ height: 8, background: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }}>
-                        <div style={{ width: '60.1%', height: '100%', background: '#10b981', borderRadius: 9999 }} />
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1rem' }}>
+                        Automated NLP cognitive classification across full dataset
+                      </p>
+
+                      <div style={{ width: '100%', height: 160, marginBottom: '1rem' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px' }} />
+                            <Pie
+                              data={sentChartData}
+                              dataKey="count"
+                              nameKey="name"
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={45}
+                              outerRadius={70}
+                              paddingAngle={3}
+                            >
+                              {sentChartData.map((entry, index) => (
+                                <Cell key={`sent-cell-${index}`} fill={entry.fill} />
+                              ))}
+                            </Pie>
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {sentChartData.map((item) => (
+                          <div key={item.name}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.25rem' }}>
+                              <span style={{ fontWeight: 600, color: item.fill }}>● {item.name}</span>
+                              <span style={{ fontWeight: 700, color: '#334155' }}>
+                                {item.count.toLocaleString()} ({item.pct}%)
+                              </span>
+                            </div>
+                            <div style={{ height: 6, background: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }}>
+                              <div style={{ width: `${item.pct}%`, height: '100%', background: item.fill, borderRadius: 9999, transition: 'width 0.5s ease' }} />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
-                        <span style={{ fontWeight: 600, color: '#d97706' }}>● Neutral Feedback</span>
-                        <span style={{ fontWeight: 700 }}>1,240 (17.7%)</span>
+                    {/* Category Volume Breakdown with Recharts Bar */}
+                    <div className="card" style={{ padding: '1.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <h3 style={{ fontSize: '1.05rem', fontWeight: 700 }}>Category Distribution</h3>
+                        <span style={{ fontSize: '0.72rem', background: '#eff6ff', color: '#1d4ed8', padding: '2px 8px', borderRadius: '9999px', fontWeight: 600 }}>
+                          {catChartData.length} Domains
+                        </span>
                       </div>
-                      <div style={{ height: 8, background: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }}>
-                        <div style={{ width: '17.7%', height: '100%', background: '#f59e0b', borderRadius: 9999 }} />
-                      </div>
-                    </div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1rem' }}>
+                        Volume breakdown dynamically aggregated from mapped categories
+                      </p>
 
-                    <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.35rem' }}>
-                        <span style={{ fontWeight: 600, color: '#dc2626' }}>● Negative & High Severity</span>
-                        <span style={{ fontWeight: 700 }}>1,552 (22.2%)</span>
+                      <div style={{ width: '100%', height: 160, marginBottom: '1rem' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={catChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                            <XAxis dataKey="category" tick={{ fontSize: 9, fill: '#64748b' }} interval={0} />
+                            <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
+                            <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px' }} />
+                            <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
                       </div>
-                      <div style={{ height: 8, background: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }}>
-                        <div style={{ width: '22.2%', height: '100%', background: '#ef4444', borderRadius: 9999 }} />
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
+                        {catChartData.map((cat) => (
+                          <div key={cat.category}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: '0.25rem' }}>
+                              <span style={{ fontWeight: 600, color: '#1e293b' }}>{cat.category}</span>
+                              <span style={{ color: 'var(--text-muted)' }}>
+                                {cat.count.toLocaleString()} ({cat.pct}%)
+                              </span>
+                            </div>
+                            <div style={{ height: 6, background: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }}>
+                              <div style={{ width: `${cat.pct}%`, height: '100%', background: cat.color, borderRadius: 9999, transition: 'width 0.5s ease' }} />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Category Volume Breakdown */}
-                <div className="card" style={{ padding: '1.5rem' }}>
-                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.25rem' }}>Category Distribution</h3>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '1.25rem' }}>
-                    Volume breakdown by business domain
-                  </p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    {[
-                      { name: 'Product Feedback', count: 3150, pct: 45, color: '#4f46e5' },
-                      { name: 'Customer Service', count: 1890, pct: 27, color: '#0284c7' },
-                      { name: 'Fraud and Scam', count: 1120, pct: 16, color: '#dc2626' },
-                      { name: 'Operational Issues', count: 842, pct: 12, color: '#d97706' }
-                    ].map((cat) => (
-                      <div key={cat.name}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '0.3rem' }}>
-                          <span style={{ fontWeight: 600 }}>{cat.name}</span>
-                          <span style={{ color: 'var(--text-muted)' }}>{cat.count} ({cat.pct}%)</span>
-                        </div>
-                        <div style={{ height: 6, background: '#f1f5f9', borderRadius: 9999, overflow: 'hidden' }}>
-                          <div style={{ width: `${cat.pct}%`, height: '100%', background: cat.color, borderRadius: 9999 }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           )}
 
