@@ -50,6 +50,8 @@ import LandingHero from './pages/LandingHero';
 import AuthModal from './components/AuthModal';
 import AdaptionCopilot from './components/AdaptionCopilot';
 import LanguageSelector from './components/LanguageSelector';
+import DatasetUploadModal from './components/DatasetUploadModal';
+import { UploadCloud } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 // Dynamic API_BASE for local development and Vercel serverless / remote deployment
@@ -62,6 +64,7 @@ export default function App() {
   // Navigation & View Mode: 'landing' (story) vs 'dashboard' (workspace)
   const [viewMode, setViewMode] = useState('landing');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [authUser, setAuthUser] = useState(() => {
     try {
       const stored = localStorage.getItem('noesis_auth_user');
@@ -655,6 +658,26 @@ export default function App() {
               <kbd style={{ background: '#f1f5f9', padding: '0.1rem 0.35rem', borderRadius: 4, fontSize: '0.68rem', fontWeight: 700, marginLeft: '0.4rem' }}>
                 ⌘K
               </kbd>
+            </button>
+
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="btn btn-secondary"
+              style={{
+                fontSize: '0.82rem',
+                padding: '0.45rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                border: '1px solid #c7d2fe',
+                color: '#4f46e5',
+                fontWeight: 600,
+                background: '#eef2ff'
+              }}
+              title="Upload custom CSV dataset with Groq Llama-3 Auto-Mapping"
+            >
+              <UploadCloud size={15} color="#4f46e5" />
+              Upload Dataset (Groq)
             </button>
 
             <button
@@ -2181,6 +2204,16 @@ export default function App() {
             </div>
           </div>
         )}
+        {/* DATASET UPLOAD MODAL (GROQ LLAMA-3 AUTO-MAPPING) */}
+        <DatasetUploadModal
+          isOpen={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          apiBase={API_BASE}
+          onUploadSuccess={(res) => {
+            initData();
+            showToast(`Ingested ${res.total_records.toLocaleString()} records via ${res.groq_provider}!`);
+          }}
+        />
         {/* AUTH MODAL */}
         <AuthModal
           isOpen={showAuthModal}
