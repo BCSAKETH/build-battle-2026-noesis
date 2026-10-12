@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
-import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe } from 'lucide-react';
+import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import { useSettings } from '../context/SettingsContext';
+import CreditsModal from './CreditsModal';
 
 export default function TopBar({ onOpenUpload, onReturnToLanding }) {
   const { appearance, setAppearance, workspaceScale, setWorkspaceScale, theme } = useSettings();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showCreditsModal, setShowCreditsModal] = useState(false);
+  const [currentCredits, setCurrentCredits] = useState(() => {
+    try {
+      const stored = localStorage.getItem('noesis_ai_credits');
+      return stored ? parseInt(stored, 10) : 850;
+    } catch {
+      return 850;
+    }
+  });
 
   return (
     <>
@@ -66,8 +76,37 @@ export default function TopBar({ onOpenUpload, onReturnToLanding }) {
           </div>
         </div>
 
-        {/* Right: Global Actions (Upload Dataset, Language Selector, Settings Cog) */}
+        {/* Right: Global Actions (Credits Quota, Upload Dataset, Language Selector, Settings Cog) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          {/* Interactive Credits Pill: "Learn how to get more credits" */}
+          <button
+            onClick={() => setShowCreditsModal(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.45rem 0.85rem',
+              borderRadius: '999px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+              color: '#059669',
+              border: '1px solid #a7f3d0',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(16, 185, 129, 0.1)',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+            title="Click to view AI credit telemetry & get more credits"
+          >
+            <Zap size={14} color="#10b981" />
+            <span>{currentCredits} / 1,000 Credits</span>
+            <span style={{ color: '#047857', textDecoration: 'underline', fontWeight: 600, fontSize: '0.72rem', marginLeft: '3px' }}>
+              Learn how to get more credits
+            </span>
+          </button>
+
           {/* Global Upload Dataset CTA */}
           <button
             onClick={onOpenUpload}
@@ -125,6 +164,13 @@ export default function TopBar({ onOpenUpload, onReturnToLanding }) {
           </button>
         </div>
       </header>
+
+      {/* Global Credits Modal */}
+      <CreditsModal
+        isOpen={showCreditsModal}
+        onClose={() => setShowCreditsModal(false)}
+        onCreditsClaimed={(newAmt) => setCurrentCredits(newAmt)}
+      />
 
       {/* Global Settings Modal */}
       {showSettingsModal && (

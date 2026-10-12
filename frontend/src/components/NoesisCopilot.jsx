@@ -29,6 +29,8 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
+import Floating3DParticles from './ui/Floating3DParticles';
+import DiaTextReveal from './ui/DiaTextReveal';
 
 export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToIssue }) {
   const [messages, setMessages] = useState([
@@ -165,18 +167,35 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
         borderRadius: '16px',
         border: '1px solid #e2e8f0',
         boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.04)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}
     >
+      {/* Ambient 3D Particles Background Layer */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          opacity: 0.22,
+          zIndex: 0
+        }}
+      >
+        <Floating3DParticles color="#4f46e5" count={28} speed={0.3} />
+      </div>
+
       {/* Top Copilot Bar */}
       <div
         style={{
           padding: '1rem 1.5rem',
-          background: '#f8fafc',
+          background: 'rgba(248, 250, 252, 0.92)',
+          backdropFilter: 'blur(8px)',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 2
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
@@ -195,10 +214,12 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
             <Sparkles size={16} />
           </div>
           <div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-              Noesis Enterprise Copilot
-            </div>
-            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+            <DiaTextReveal
+              text="NOESIS Cognitive Copilot"
+              colors={["#4F46E5", "#06B6D4", "#6366F1", "#10B981"]}
+              className="text-sm font-bold"
+            />
+            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
               Conversational dataset telemetry & live issue tracking intelligence
             </div>
           </div>
@@ -229,7 +250,9 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
           padding: '1.75rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.5rem'
+          gap: '1.5rem',
+          position: 'relative',
+          zIndex: 1
         }}
       >
         {messages.map((m) => (
@@ -461,7 +484,9 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
         style={{
           padding: '1rem 1.5rem',
           background: '#ffffff',
-          borderTop: '1px solid #e2e8f0'
+          borderTop: '1px solid #e2e8f0',
+          position: 'relative',
+          zIndex: 2
         }}
       >
         <form

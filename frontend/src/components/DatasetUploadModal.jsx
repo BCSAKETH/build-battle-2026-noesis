@@ -12,6 +12,7 @@ import {
   Database
 } from 'lucide-react';
 import { supabase } from '../supabase';
+import CloudSyncLoader from './ui/CloudSyncLoader';
 
 export default function DatasetUploadModal({ isOpen, onClose, onUploadSuccess, apiBase }) {
   const [dragActive, setDragActive] = useState(false);
@@ -173,54 +174,79 @@ export default function DatasetUploadModal({ isOpen, onClose, onUploadSuccess, a
         <div style={{ padding: '1.75rem' }}>
           {!uploadResult ? (
             <>
-              {/* Dropzone */}
-              <div
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  border: `2px dashed ${dragActive ? '#4f46e5' : '#cbd5e1'}`,
-                  borderRadius: '12px',
-                  padding: '2.5rem 1.5rem',
-                  textAlign: 'center',
-                  background: dragActive ? '#f5f3ff' : '#f8fafc',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv"
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                />
-
-                <div style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: '50%',
-                  background: '#ffffff',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1rem'
-                }}>
-                  <UploadCloud size={24} color="#4f46e5" />
+              {/* Dropzone or CloudSyncLoader */}
+              {isUploading ? (
+                <div
+                  style={{
+                    border: '2px dashed #4f46e5',
+                    borderRadius: '12px',
+                    padding: '2.5rem 1.5rem',
+                    textAlign: 'center',
+                    background: '#f8fafc',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'fadeIn 0.2s ease-out'
+                  }}
+                >
+                  <CloudSyncLoader />
+                  <div style={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a', marginTop: '1.25rem' }}>
+                    Groq Llama-3 Active Conditioning Pipeline
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0.35rem 0 0 0' }}>
+                    Streaming headers, resolving PII, calculating quality uplift and syncing to Supabase Cloud...
+                  </p>
                 </div>
+              ) : (
+                <div
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: `2px dashed ${dragActive ? '#4f46e5' : '#cbd5e1'}`,
+                    borderRadius: '12px',
+                    padding: '2.5rem 1.5rem',
+                    textAlign: 'center',
+                    background: dragActive ? '#f5f3ff' : '#f8fafc',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
 
-                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', marginBottom: '0.35rem' }}>
-                  {selectedFile ? selectedFile.name : 'Click to upload or drag & drop CSV'}
+                  <div style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 1rem'
+                  }}>
+                    <UploadCloud size={24} color="#4f46e5" />
+                  </div>
+
+                  <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', marginBottom: '0.35rem' }}>
+                    {selectedFile ? selectedFile.name : 'Click to upload or drag & drop CSV'}
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>
+                    {selectedFile
+                      ? `${(selectedFile.size / 1024).toFixed(1)} KB • Ready for Groq Auto-Mapping`
+                      : 'Upload any raw customer feedback CSV (e.g. Zendesk, Intercom, App Store)'}
+                  </p>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>
-                  {selectedFile
-                    ? `${(selectedFile.size / 1024).toFixed(1)} KB • Ready for Groq Auto-Mapping`
-                    : 'Upload any raw customer feedback CSV (e.g. Zendesk, Intercom, App Store)'}
-                </p>
-              </div>
+              )}
 
               {/* Error Message */}
               {errorMessage && (

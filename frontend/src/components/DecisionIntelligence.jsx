@@ -22,6 +22,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { createIssueInCloud } from '../supabase';
+import IsometricCubes from './ui/IsometricCubes';
+import NumberTicker from './ui/NumberTicker';
+import Highlighter from './ui/Highlighter';
+import DiaTextReveal from './ui/DiaTextReveal';
 
 // Default edge cases & inspected feedbacks for Decision Intelligence triage
 const DEFAULT_TRIAGE_ITEMS = [
@@ -205,9 +209,11 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
             >
               <Target size={18} />
             </div>
-            <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              Decision Intelligence
-            </h1>
+            <DiaTextReveal
+              text="Autonomous Decision Intelligence"
+              colors={["#4F46E5", "#06B6D4", "#6366F1", "#10B981"]}
+              className="text-xl font-extrabold tracking-tight"
+            />
             <span
               style={{
                 fontSize: '0.72rem',
@@ -226,7 +232,13 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
             </span>
           </div>
           <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-            Adaption Conditioning Engine continuously routes high-severity P0 items to the Issue Tracker. Ambiguous edge cases arrive here for 3-hop causal triage.
+            <Highlighter action="underline" color="#4F46E5">
+              Adaption Conditioning Engine
+            </Highlighter>{' '}
+            continuously routes high-severity P0 items to the Issue Tracker. Ambiguous edge cases arrive here for{' '}
+            <Highlighter action="highlight" color="#c7d2fe">
+              3-hop causal triage
+            </Highlighter>.
           </p>
         </div>
 
@@ -246,7 +258,9 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
             <Zap size={15} color="#4f46e5" />
             <div>
               <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>P0 Auto-Routed</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>{autoTriageCount} Tickets</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                <NumberTicker value={autoTriageCount} suffix=" Tickets" />
+              </div>
             </div>
           </div>
 
@@ -264,7 +278,9 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
             <ShieldAlert size={15} color="#f59e0b" />
             <div>
               <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>In Review Queue</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>{triageItems.length} Edge Cases</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                <NumberTicker value={triageItems.length} suffix=" Edge Cases" />
+              </div>
             </div>
           </div>
 
@@ -282,7 +298,9 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
             <TrendingDown size={15} color="#10b981" />
             <div>
               <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Risk Mitigated</div>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>$305,000</div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#059669' }}>
+                <NumberTicker value={305} prefix="$" suffix=",000" />
+              </div>
             </div>
           </div>
         </div>
@@ -537,14 +555,21 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Layers size={18} color="#4f46e5" />
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                    3-Hop Causal Trace (Root Cause → Impact → Action)
-                  </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  <div style={{ width: 44, height: 44, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <IsometricCubes scale={0.36} />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                      3-Hop Causal Trace (Root Cause → Impact → Action)
+                    </h3>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                      Autonomous causal chain deduction across multi-source operational telemetry
+                    </div>
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
-                  Adaption Cognitive Synthesis v0.14
+                <div style={{ fontSize: '0.75rem', color: '#4f46e5', fontWeight: 700, background: '#eef2ff', padding: '4px 10px', borderRadius: '6px' }}>
+                  Adaption Cognitive Synthesis
                 </div>
               </div>
 

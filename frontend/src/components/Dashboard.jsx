@@ -31,6 +31,10 @@ import {
 } from 'lucide-react';
 import { supabase } from '../supabase';
 import { FALLBACK_REVIEWS } from '../data/fallbackFeedback';
+import NumberTicker from './ui/NumberTicker';
+import DiaTextReveal from './ui/DiaTextReveal';
+import Highlighter from './ui/Highlighter';
+import TypewriterLoader from './ui/TypewriterLoader';
 
 const COLORS = {
   primary: '#4F46E5',
@@ -65,6 +69,15 @@ export default function Dashboard({ apiBase = '' }) {
 
   // Sub-view: Executive Briefing Modal
   const [showBriefingModal, setShowBriefingModal] = useState(false);
+  const [isGeneratingBriefing, setIsGeneratingBriefing] = useState(false);
+
+  const handleOpenBriefing = () => {
+    setShowBriefingModal(true);
+    setIsGeneratingBriefing(true);
+    setTimeout(() => {
+      setIsGeneratingBriefing(false);
+    }, 2200);
+  };
 
   const getAuthHeader = async () => {
     try {
@@ -196,11 +209,19 @@ export default function Dashboard({ apiBase = '' }) {
       {/* Top Header & Executive Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.65rem', fontWeight: 800, color: COLORS.slateDark, margin: '0 0 0.25rem 0' }}>
-            Executive Telemetry & Perception Matrix
-          </h2>
-          <p style={{ fontSize: '0.88rem', color: COLORS.slateMuted, margin: 0 }}>
-            Unified cognitive intelligence synthesized across 7,223 verified customer feedback touchpoints.
+          <DiaTextReveal
+            text="Executive Telemetry & Perception Matrix"
+            colors={["#4F46E5", "#06B6D4", "#6366F1", "#10B981"]}
+            className="text-2xl font-extrabold tracking-tight"
+          />
+          <p style={{ fontSize: '0.88rem', color: COLORS.slateMuted, margin: '0.35rem 0 0 0' }}>
+            <Highlighter action="underline" color="#4F46E5">
+              Unified cognitive intelligence
+            </Highlighter>{' '}
+            synthesized across{' '}
+            <Highlighter action="highlight" color="#e0e7ff">
+              7,223 verified customer touchpoints
+            </Highlighter>.
           </p>
         </div>
 
@@ -228,7 +249,7 @@ export default function Dashboard({ apiBase = '' }) {
 
           {/* Export Executive Briefing PDF */}
           <button
-            onClick={() => setShowBriefingModal(true)}
+            onClick={handleOpenBriefing}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -258,7 +279,7 @@ export default function Dashboard({ apiBase = '' }) {
             <Activity size={16} color="#4f46e5" />
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: COLORS.slateDark }}>
-            {(overviewData?.totalFeedback || 7223).toLocaleString()}
+            <NumberTicker value={overviewData?.totalFeedback || 7223} />
           </div>
           <div style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 600, marginTop: '0.25rem' }}>
             &bull; Multi-channel Ingestion Active
@@ -271,7 +292,7 @@ export default function Dashboard({ apiBase = '' }) {
             <ShieldAlert size={16} color="#f43f5e" />
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#f43f5e' }}>
-            {overviewData?.highRiskAlerts || 89}
+            <NumberTicker value={overviewData?.highRiskAlerts || 89} />
           </div>
           <div style={{ fontSize: '0.72rem', color: '#f43f5e', fontWeight: 600, marginTop: '0.25rem' }}>
             Immediate Escrow/Fraud Risk
@@ -284,7 +305,11 @@ export default function Dashboard({ apiBase = '' }) {
             <Cpu size={16} color="#10b981" />
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#10b981' }}>
-            {pipelineData?.pipeline_metrics?.conditioned_score || 9.4} / 10
+            <NumberTicker
+              value={Number(pipelineData?.pipeline_metrics?.conditioned_score || 9.4)}
+              decimals={1}
+              suffix=" / 10"
+            />
           </div>
           <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, marginTop: '0.25rem' }}>
             Grade A+ (Top 4% Quality)
@@ -297,7 +322,11 @@ export default function Dashboard({ apiBase = '' }) {
             <TrendingUp size={16} color="#06b6d4" />
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: 800, color: COLORS.slateDark }}>
-            {overviewData?.csatScore || 74.2}%
+            <NumberTicker
+              value={Number(overviewData?.csatScore || 74.2)}
+              decimals={1}
+              suffix="%"
+            />
           </div>
           <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '0.25rem' }}>
             +4.8% post-conditioning
@@ -591,45 +620,54 @@ export default function Dashboard({ apiBase = '' }) {
               </button>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
-              <div style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1rem' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#4f46e5' }}>
-                  Enterprise Telemetry & Risk Intelligence Briefing
-                </div>
-                <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.2rem' }}>
-                  Scope: 7,223 Multi-channel Customer Records &bull; Date: {new Date().toLocaleDateString()}
+            {isGeneratingBriefing ? (
+              <div style={{ flex: 1, padding: '3.5rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 320 }}>
+                <TypewriterLoader statusText="Synthesizing Executive Cognitive Briefing..." />
+                <div style={{ marginTop: '1.25rem', fontSize: '0.82rem', color: '#64748b', fontWeight: 600 }}>
+                  Cross-referencing 7,223 customer records with Adaption Living Data recipes...
                 </div>
               </div>
+            ) : (
+              <div style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', fontSize: '0.88rem', color: '#334155', lineHeight: 1.6 }}>
+                <div style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1rem' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#4f46e5' }}>
+                    Enterprise Telemetry & Risk Intelligence Briefing
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.2rem' }}>
+                    Scope: 7,223 Multi-channel Customer Records &bull; Date: {new Date().toLocaleDateString()}
+                  </div>
+                </div>
 
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                  1. Executive Summary & Severity Blindness Remediation
-                </h4>
-                <p>
-                  Across 7,223 customer touchpoints, Net CSAT is measured at 74.2%. Prior to Adaption conditioning, unweighted volume created critical severity blindness, hiding 89 high-impact escrow fraud attacks under packaging and transit queries.
-                </p>
-              </div>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    1. Executive Summary & Severity Blindness Remediation
+                  </h4>
+                  <p>
+                    Across 7,223 customer touchpoints, Net CSAT is measured at 74.2%. Prior to Adaption conditioning, unweighted volume created critical severity blindness, hiding 89 high-impact escrow fraud attacks under packaging and transit queries.
+                  </p>
+                </div>
 
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                  2. Living Data Quality Uplift (Adaption Labs)
-                </h4>
-                <p>
-                  Active recipe conditioning lifted raw quality scores from 6.8 (Grade B-) to 9.4 (Grade A+), pruning 1,024 duplicate reviews (14.2% noise reduction) and saving 3.2M downstream prompt tokens monthly ($4,800/mo savings).
-                </p>
-              </div>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    2. Living Data Quality Uplift (Adaption Labs)
+                  </h4>
+                  <p>
+                    Active recipe conditioning lifted raw quality scores from 6.8 (Grade B-) to 9.4 (Grade A+), pruning 1,024 duplicate reviews (14.2% noise reduction) and saving 3.2M downstream prompt tokens monthly ($4,800/mo savings).
+                  </p>
+                </div>
 
-              <div>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
-                  3. Autonomous Prioritization Directives
-                </h4>
-                <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
-                  <li><strong>P0 Critical</strong>: Quarantine unverified merchant payouts ($184,000 fraud exposure).</li>
-                  <li><strong>P1 High</strong>: Enforce 3PL webhook synchronization to eliminate 42% of late transit queue inquiries.</li>
-                  <li><strong>P2 Medium</strong>: Deploy mobile checkout token retry idempotency to recover 3.8% cart conversion.</li>
-                </ul>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.35rem' }}>
+                    3. Autonomous Prioritization Directives
+                  </h4>
+                  <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
+                    <li><strong>P0 Critical</strong>: Quarantine unverified merchant payouts ($184,000 fraud exposure).</li>
+                    <li><strong>P1 High</strong>: Enforce 3PL webhook synchronization to eliminate 42% of late transit queue inquiries.</li>
+                    <li><strong>P2 Medium</strong>: Deploy mobile checkout token retry idempotency to recover 3.8% cart conversion.</li>
+                  </ul>
+                </div>
               </div>
-            </div>
+            )}
 
             <div style={{ padding: '1rem 1.5rem', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
               <button

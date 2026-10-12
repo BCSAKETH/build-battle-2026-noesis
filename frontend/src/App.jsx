@@ -13,6 +13,7 @@ import DecisionIntelligence from './components/DecisionIntelligence';
 import TicketDeliveryTracker from './components/TicketDeliveryTracker';
 import DatasetUploadModal from './components/DatasetUploadModal';
 import ErrorBoundary from './components/ErrorBoundary';
+import { FloatingDock } from './components/ui/FloatingDock';
 
 // Dynamic API_BASE for local development and Vercel serverless monorepo deployment
 const API_BASE =
@@ -285,6 +286,16 @@ export default function App() {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onLoginSuccess={handleLoginSuccess}
+      />
+
+      {/* Floating Liquid Glass Dock (Uiverse by mymiamo) */}
+      <FloatingDock
+        activeRoute={activeRoute}
+        onNavigate={(route) => {
+          setActiveRoute(route);
+          setSelectedIssueId(null);
+        }}
+        onOpenUpload={() => setShowUploadModal(true)}
       />
 
       {/* Global Floating Toast Alert */}
