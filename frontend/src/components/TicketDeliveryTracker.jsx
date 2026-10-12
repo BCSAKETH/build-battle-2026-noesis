@@ -25,6 +25,10 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { supabase, updateIssueInCloud } from '../supabase';
+import DiaTextReveal from './ui/DiaTextReveal';
+import Highlighter from './ui/Highlighter';
+import CoolMode from './ui/CoolMode';
+import NumberTicker from './ui/NumberTicker';
 
 /**
  * TicketDeliveryTracker (Phase 5: Grid-Based Issue Tracker)
@@ -326,6 +330,9 @@ export default function TicketDeliveryTracker({
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+              OPERATIONS / TRACKED ISSUES
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <div
                 style={{
@@ -341,12 +348,30 @@ export default function TicketDeliveryTracker({
               >
                 <Layers size={18} />
               </div>
-              <h1 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-                Operational Issue Tracker
-              </h1>
+              <DiaTextReveal
+                text="Issue Tracker"
+                colors={["#0f172a", "#4F46E5", "#06B6D4"]}
+                className="text-xl font-extrabold tracking-tight"
+              />
+              <span
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  background: '#eef2ff',
+                  color: '#4f46e5',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: '999px',
+                  border: '1px solid #c7d2fe'
+                }}
+              >
+                <NumberTicker value={issues.length || 24} /> tickets
+              </span>
             </div>
-            <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Operational ticket dispatch grid. Click any card to review progress timeline and execute Multilingual Voice Resolution.
+            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+              Severity tells you the impact. Status tells you the progress. Click any card to execute{' '}
+              <Highlighter action="underline" color="#4F46E5">
+                Gemini Multilingual Voice Resolution
+              </Highlighter>.
             </p>
           </div>
 
@@ -961,35 +986,37 @@ export default function TicketDeliveryTracker({
                     </div>
                   </div>
 
-                  {/* Submit / Process Button */}
-                  <button
-                    onClick={submitAudioToGemini}
-                    disabled={(!audioBlob && !isRecording) || processingAudio}
-                    style={{
-                      padding: '0.65rem 1.25rem',
-                      borderRadius: '8px',
-                      border: 'none',
-                      background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
-                      color: '#ffffff',
-                      fontSize: '0.82rem',
-                      fontWeight: 700,
-                      cursor: (!audioBlob && !isRecording) || processingAudio ? 'not-allowed' : 'pointer',
-                      opacity: (!audioBlob && !isRecording) || processingAudio ? 0.6 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
-                    }}
-                  >
-                    {processingAudio ? (
-                      <>Transcribing via Gemini...</>
-                    ) : (
-                      <>
-                        <Sparkles size={15} />
-                        Transcribe & Resolve
-                      </>
-                    )}
-                  </button>
+                  {/* Submit / Process Button with CoolMode */}
+                  <CoolMode>
+                    <button
+                      onClick={submitAudioToGemini}
+                      disabled={(!audioBlob && !isRecording) || processingAudio}
+                      style={{
+                        padding: '0.65rem 1.25rem',
+                        borderRadius: '8px',
+                        border: 'none',
+                        background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                        color: '#ffffff',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        cursor: (!audioBlob && !isRecording) || processingAudio ? 'not-allowed' : 'pointer',
+                        opacity: (!audioBlob && !isRecording) || processingAudio ? 0.6 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
+                      }}
+                    >
+                      {processingAudio ? (
+                        <>Transcribing via Gemini...</>
+                      ) : (
+                        <>
+                          <Sparkles size={15} />
+                          Transcribe & Resolve
+                        </>
+                      )}
+                    </button>
+                  </CoolMode>
                 </div>
 
                 {errorMsg && (

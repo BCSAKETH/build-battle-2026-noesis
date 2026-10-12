@@ -26,6 +26,7 @@ import IsometricCubes from './ui/IsometricCubes';
 import NumberTicker from './ui/NumberTicker';
 import Highlighter from './ui/Highlighter';
 import DiaTextReveal from './ui/DiaTextReveal';
+import CoolMode from './ui/CoolMode';
 
 // Default edge cases & inspected feedbacks for Decision Intelligence triage
 const DEFAULT_TRIAGE_ITEMS = [
@@ -209,11 +210,16 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
             >
               <Target size={18} />
             </div>
-            <DiaTextReveal
-              text="Autonomous Decision Intelligence"
-              colors={["#4F46E5", "#06B6D4", "#6366F1", "#10B981"]}
-              className="text-xl font-extrabold tracking-tight"
-            />
+            <div>
+              <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+                AUTONOMOUS TRIAGE / HUMAN REVIEW
+              </div>
+              <DiaTextReveal
+                text="Decision Intelligence"
+                colors={["#0f172a", "#4F46E5", "#06B6D4"]}
+                className="text-xl font-extrabold tracking-tight"
+              />
+            </div>
             <span
               style={{
                 fontSize: '0.72rem',
@@ -228,16 +234,13 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
               }}
             >
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-              Autonomous Engine Active
+              P0 (Critical) auto-routes to Tracker
             </span>
           </div>
-          <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+          <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+            Review only edge cases and manually inspected feedback. Every decision keeps its{' '}
             <Highlighter action="underline" color="#4F46E5">
-              Adaption Conditioning Engine
-            </Highlighter>{' '}
-            continuously routes high-severity P0 items to the Issue Tracker. Ambiguous edge cases arrive here for{' '}
-            <Highlighter action="highlight" color="#c7d2fe">
-              3-hop causal triage
+              3-hop causal trace
             </Highlighter>.
           </p>
         </div>
@@ -778,43 +781,45 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
                 </div>
 
                 {/* Primary Mandatory CTA: Dispatch to Issue Tracker */}
-                <button
-                  onClick={handleDispatch}
-                  disabled={isDispatching || selectedItem.status === 'Dispatched to Tracker'}
-                  style={{
-                    padding: '0.75rem 1.6rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: selectedItem.status === 'Dispatched to Tracker' ? '#10b981' : 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
-                    color: '#ffffff',
-                    fontSize: '0.9rem',
-                    fontWeight: 700,
-                    cursor: selectedItem.status === 'Dispatched to Tracker' ? 'default' : 'pointer',
-                    boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.6rem',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {isDispatching ? (
-                    <>
-                      <RefreshCw size={16} className="animate-spin" />
-                      Dispatching to Cloud...
-                    </>
-                  ) : selectedItem.status === 'Dispatched to Tracker' ? (
-                    <>
-                      <Check size={16} />
-                      Dispatched to Tracker
-                    </>
-                  ) : (
-                    <>
-                      <Zap size={16} fill="#ffffff" />
-                      Dispatch to Issue Tracker
-                      <ArrowRight size={16} />
-                    </>
-                  )}
-                </button>
+                <CoolMode>
+                  <button
+                    onClick={handleDispatch}
+                    disabled={isDispatching || selectedItem.status === 'Dispatched to Tracker'}
+                    style={{
+                      padding: '0.75rem 1.6rem',
+                      borderRadius: '8px',
+                      border: 'none',
+                      background: selectedItem.status === 'Dispatched to Tracker' ? '#10b981' : 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                      color: '#ffffff',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      cursor: selectedItem.status === 'Dispatched to Tracker' ? 'default' : 'pointer',
+                      boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.6rem',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {isDispatching ? (
+                      <>
+                        <RefreshCw size={16} className="animate-spin" />
+                        Dispatching to Cloud...
+                      </>
+                    ) : selectedItem.status === 'Dispatched to Tracker' ? (
+                      <>
+                        <Check size={16} />
+                        Dispatched to Tracker
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={16} fill="#ffffff" />
+                        Dispatch to Issue Tracker
+                        <ArrowRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </CoolMode>
               </div>
             </div>
           </div>

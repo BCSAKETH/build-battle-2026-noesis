@@ -6,7 +6,6 @@ import { useSettings } from './context/SettingsContext';
 import LandingHero from './pages/LandingHero';
 import AuthModal from './components/AuthModal';
 import TopBar from './components/TopBar';
-import Sidebar from './components/Sidebar';
 import NoesisCopilot from './components/NoesisCopilot';
 import Dashboard from './components/Dashboard';
 import DecisionIntelligence from './components/DecisionIntelligence';
@@ -14,6 +13,7 @@ import TicketDeliveryTracker from './components/TicketDeliveryTracker';
 import DatasetUploadModal from './components/DatasetUploadModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FloatingDock } from './components/ui/FloatingDock';
+import ScrollProgress from './components/ui/ScrollProgress';
 
 // Dynamic API_BASE for local development and Vercel serverless monorepo deployment
 const API_BASE =
@@ -179,41 +179,36 @@ export default function App() {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
       }}
     >
-      {/* Phase 1 TopBar: Orbital Iris Logo (no v4.8), Upload Dataset, LanguageSelector, Settings Cog */}
+      {/* TopBar with Active Dataset, Credits Quota, Upload, Languages, Settings & Logout */}
       <TopBar
         onOpenUpload={() => setShowUploadModal(true)}
         onReturnToLanding={() => setViewMode('landing')}
+        onLogout={handleLogout}
       />
 
-      {/* Main Workspace Body */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 68px)' }}>
-        {/* Phase 1 Sidebar: Exactly 4 routes + Logout anchored at bottom */}
-        <Sidebar
-          activeRoute={activeRoute}
-          onNavigate={(route) => {
-            setActiveRoute(route);
-            setSelectedIssueId(null);
-          }}
-          onLogout={handleLogout}
-          issuesCount={issues.length}
-        />
+      {/* Reactive ScrollProgress Line */}
+      <ScrollProgress />
 
-        {/* Viewport Canvas (Configured by SettingsContext Workspace Scale & Appearance) */}
+      {/* Main Workspace Body - Full Width (Sidebar completely removed per redesign) */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 68px)', width: '100%' }}>
+        {/* Full-width Viewport Canvas */}
         <main
           style={{
             flex: 1,
+            width: '100%',
             minWidth: 0,
             background: '#f8fafc',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            paddingBottom: '100px' // Clearance for FloatingDock
           }}
         >
           <div
             style={{
               width: getScaleWidth(),
-              maxWidth: '100%',
+              maxWidth: '1440px',
               padding: density.padding || '1.75rem',
               boxSizing: 'border-box',
               minHeight: '100%'

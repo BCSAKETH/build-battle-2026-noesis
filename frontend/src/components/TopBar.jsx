@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap } from 'lucide-react';
+import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap, LogOut, Database } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import { useSettings } from '../context/SettingsContext';
 import CreditsModal from './CreditsModal';
 
-export default function TopBar({ onOpenUpload, onReturnToLanding }) {
+export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
   const { appearance, setAppearance, workspaceScale, setWorkspaceScale, theme } = useSettings();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showCreditsModal, setShowCreditsModal] = useState(false);
@@ -134,6 +134,25 @@ export default function TopBar({ onOpenUpload, onReturnToLanding }) {
           {/* Language Selector (EN, TE, HI) */}
           <LanguageSelector />
 
+          {/* Active Dataset Pill (from Figma design) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.4rem 0.75rem',
+              borderRadius: '8px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              fontSize: '0.75rem',
+              color: '#475569'
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>feedback_oct_2026</span>
+            <span style={{ color: '#94a3b8' }}>&bull; 1,500 records &bull; Oct 1–7</span>
+          </div>
+
           {/* Settings Cog */}
           <button
             onClick={() => setShowSettingsModal(true)}
@@ -162,6 +181,39 @@ export default function TopBar({ onOpenUpload, onReturnToLanding }) {
           >
             <Settings size={18} />
           </button>
+
+          {/* Logout Button */}
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                background: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#64748b',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#fecdd3';
+                e.currentTarget.style.background = '#fff1f2';
+                e.currentTarget.style.color = '#ef4444';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.color = '#64748b';
+              }}
+              title="Sign Out of Workspace"
+            >
+              <LogOut size={16} />
+            </button>
+          )}
         </div>
       </header>
 

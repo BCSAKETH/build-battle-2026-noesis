@@ -35,6 +35,8 @@ import NumberTicker from './ui/NumberTicker';
 import DiaTextReveal from './ui/DiaTextReveal';
 import Highlighter from './ui/Highlighter';
 import TypewriterLoader from './ui/TypewriterLoader';
+import AnimatedCircularProgressBar from './ui/AnimatedCircularProgressBar';
+import CoolMode from './ui/CoolMode';
 
 const COLORS = {
   primary: '#4F46E5',
@@ -206,21 +208,23 @@ export default function Dashboard({ apiBase = '' }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', width: '100%' }}>
-      {/* Top Header & Executive Controls */}
+      {/* Top Header & Executive Controls (Figma: Noesis — Dashboard) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <DiaTextReveal
-            text="Executive Telemetry & Perception Matrix"
-            colors={["#4F46E5", "#06B6D4", "#6366F1", "#10B981"]}
-            className="text-2xl font-extrabold tracking-tight"
-          />
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+            OVERVIEW / OCTOBER 1–7, 2026
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <DiaTextReveal
+              text="Dashboard"
+              colors={["#0f172a", "#4F46E5", "#06B6D4"]}
+              className="text-2xl font-extrabold tracking-tight"
+            />
+          </div>
           <p style={{ fontSize: '0.88rem', color: COLORS.slateMuted, margin: '0.35rem 0 0 0' }}>
-            <Highlighter action="underline" color="#4F46E5">
-              Unified cognitive intelligence
-            </Highlighter>{' '}
-            synthesized across{' '}
+            The customer signal, organized by severity and operational impact. Synthesized across{' '}
             <Highlighter action="highlight" color="#e0e7ff">
-              7,223 verified customer touchpoints
+              7,223 verified touchpoints
             </Highlighter>.
           </p>
         </div>
@@ -247,32 +251,34 @@ export default function Dashboard({ apiBase = '' }) {
             <span>Feedback Explorer</span>
           </button>
 
-          {/* Export Executive Briefing PDF */}
-          <button
-            onClick={handleOpenBriefing}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.55rem 1.15rem',
-              borderRadius: '8px',
-              border: '1px solid #4338ca',
-              background: '#4f46e5',
-              color: '#ffffff',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)'
-            }}
-          >
-            <FileText size={15} />
-            <span>Generate Executive Briefing</span>
-          </button>
+          {/* Export Executive Briefing PDF with CoolMode */}
+          <CoolMode>
+            <button
+              onClick={handleOpenBriefing}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.55rem 1.15rem',
+                borderRadius: '8px',
+                border: '1px solid #4338ca',
+                background: '#4f46e5',
+                color: '#ffffff',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)'
+              }}
+            >
+              <FileText size={15} />
+              <span>Generate Executive Briefing</span>
+            </button>
+          </CoolMode>
         </div>
       </div>
 
       {/* 4 Metric KPI Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
         <div style={{ background: '#ffffff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: COLORS.slateMuted, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
             <span>Total Ingested</span>
@@ -300,36 +306,56 @@ export default function Dashboard({ apiBase = '' }) {
         </div>
 
         <div style={{ background: '#ffffff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: COLORS.slateMuted, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            <span>Quality Uplift</span>
-            <Cpu size={16} color="#10b981" />
-          </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#10b981' }}>
-            <NumberTicker
-              value={Number(pipelineData?.pipeline_metrics?.conditioned_score || 9.4)}
-              decimals={1}
-              suffix=" / 10"
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ color: COLORS.slateMuted, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                Quality Uplift
+              </div>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, color: '#10b981' }}>
+                <NumberTicker
+                  value={Number(pipelineData?.pipeline_metrics?.conditioned_score || 9.4)}
+                  decimals={1}
+                  suffix=" / 10"
+                />
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, marginTop: '0.25rem' }}>
+                Top 4% Quality
+              </div>
+            </div>
+            <AnimatedCircularProgressBar
+              value={94}
+              gaugePrimaryColor="#10b981"
+              size={52}
+              strokeWidth={5}
+              suffix="%"
             />
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 600, marginTop: '0.25rem' }}>
-            Grade A+ (Top 4% Quality)
           </div>
         </div>
 
         <div style={{ background: '#ffffff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: COLORS.slateMuted, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            <span>Net CSAT Pulse</span>
-            <TrendingUp size={16} color="#06b6d4" />
-          </div>
-          <div style={{ fontSize: '1.85rem', fontWeight: 800, color: COLORS.slateDark }}>
-            <NumberTicker
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ color: COLORS.slateMuted, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                Net CSAT Pulse
+              </div>
+              <div style={{ fontSize: '1.85rem', fontWeight: 800, color: COLORS.slateDark }}>
+                <NumberTicker
+                  value={Number(overviewData?.csatScore || 74.2)}
+                  decimals={1}
+                  suffix="%"
+                />
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '0.25rem' }}>
+                +4.8% post-conditioning
+              </div>
+            </div>
+            <AnimatedCircularProgressBar
               value={Number(overviewData?.csatScore || 74.2)}
-              decimals={1}
+              gaugePrimaryColor="#06b6d4"
+              size={52}
+              strokeWidth={5}
               suffix="%"
             />
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '0.25rem' }}>
-            +4.8% post-conditioning
           </div>
         </div>
       </div>

@@ -14,7 +14,9 @@ import {
   Terminal,
   Activity,
   Bot,
-  User
+  User,
+  Plus,
+  RotateCcw
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -31,6 +33,40 @@ import {
 } from 'recharts';
 import Floating3DParticles from './ui/Floating3DParticles';
 import DiaTextReveal from './ui/DiaTextReveal';
+import AnimatedList from './ui/AnimatedList';
+import InteractiveGridPattern from './ui/InteractiveGridPattern';
+import CoolMode from './ui/CoolMode';
+
+const OPERATIONAL_NOTIFICATIONS = [
+  {
+    name: 'P0 Escrow Threat',
+    description: 'Unverified merchant batch payout frozen ($184k)',
+    time: 'Just now',
+    icon: '🚨',
+    color: '#F43F5E'
+  },
+  {
+    name: 'Carrier Webhook Overflow',
+    description: '1,200 tracking payloads auto-routed to Redis buffer',
+    time: '2m ago',
+    icon: '⚠️',
+    color: '#F59E0B'
+  },
+  {
+    name: 'Refund SLA Collision',
+    description: 'Payment gateway callback validated before closure',
+    time: '5m ago',
+    icon: '💬',
+    color: '#4F46E5'
+  },
+  {
+    name: 'Living Data Ingestion',
+    description: '1,500 records conditioned with +2.6 quality delta',
+    time: '12m ago',
+    icon: '📊',
+    color: '#10B981'
+  }
+];
 
 export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToIssue }) {
   const [messages, setMessages] = useState([
@@ -184,12 +220,12 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
         <Floating3DParticles color="#4f46e5" count={28} speed={0.3} />
       </div>
 
-      {/* Top Copilot Bar */}
+      {/* Top Copilot Bar (Figma: Noesis — Copilot home) */}
       <div
         style={{
-          padding: '1rem 1.5rem',
-          background: 'rgba(248, 250, 252, 0.92)',
-          backdropFilter: 'blur(8px)',
+          padding: '1.25rem 1.75rem',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
           borderBottom: '1px solid #e2e8f0',
           display: 'flex',
           justifyContent: 'space-between',
@@ -198,47 +234,72 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
           zIndex: 2
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, #4f46e5, #06b6d4)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff'
-            }}
-          >
-            <Sparkles size={16} />
+        <div>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+            YOUR INTELLIGENCE WORKSPACE
           </div>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <DiaTextReveal
-              text="NOESIS Cognitive Copilot"
-              colors={["#4F46E5", "#06B6D4", "#6366F1", "#10B981"]}
-              className="text-sm font-bold"
+              text="Noesis Copilot"
+              colors={["#0f172a", "#4F46E5", "#06B6D4"]}
+              className="text-xl font-extrabold tracking-tight"
             />
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '2px' }}>
-              Conversational dataset telemetry & live issue tracking intelligence
-            </div>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: '9999px',
+                background: '#ecfdf5',
+                color: '#059669',
+                border: '1px solid #a7f3d0'
+              }}
+            >
+              ● Telemetry & Supabase Active
+            </span>
+          </div>
+          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.25rem' }}>
+            Ask about customer signals, dataset telemetry or a tracking ID. Start with the evidence below.
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <span
-            style={{
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '9999px',
-              background: '#ecfdf5',
-              color: '#059669',
-              border: '1px solid #a7f3d0'
-            }}
-          >
-            ● Telemetry & Supabase Active
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <CoolMode>
+            <button
+              onClick={() => {
+                setMessages([
+                  {
+                    id: 1,
+                    sender: 'ai',
+                    text: 'Welcome to the NOESIS Cognitive Engine. I am synchronized with your active customer feedback dataset (7,223 records) and your Supabase Cloud Issue Tracker. How can I assist your operational decisions today?',
+                    suggestions: [
+                      'What is the status of ticket #1 (Escrow Fraud)?',
+                      'How are reviews distributed across categories?',
+                      'List all open P0 Critical threats',
+                      'What is our current Data Quality Uplift?'
+                    ]
+                  }
+                ]);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.5rem 0.95rem',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#334155',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <RotateCcw size={14} color="#4f46e5" />
+              <span>New conversation</span>
+            </button>
+          </CoolMode>
         </div>
       </div>
 
@@ -445,6 +506,72 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
                       {sug}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Magic UI AnimatedList: Real-time Operational Telemetry Stream */}
+              {m.id === 1 && (
+                <div style={{ marginTop: '0.85rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.15rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <Activity size={15} color="#4f46e5" />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.04em' }}>
+                        Live Operational Signal Stream
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+                      Synced with Supabase Cloud
+                    </span>
+                  </div>
+
+                  <AnimatedList delay={2000}>
+                    {OPERATIONAL_NOTIFICATIONS.map((item, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.85rem',
+                          background: '#ffffff',
+                          borderRadius: '10px',
+                          padding: '0.75rem 1rem',
+                          border: '1px solid #e2e8f0',
+                          boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                          cursor: 'pointer',
+                          transition: 'transform 0.15s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        onClick={() => handleSend(`Tell me more about ${item.name}`)}
+                      >
+                        <div
+                          style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: '10px',
+                            background: item.color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1.1rem',
+                            flexShrink: 0
+                          }}
+                        >
+                          {item.icon}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{item.name}</span>
+                            <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{item.time}</span>
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.description}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </AnimatedList>
                 </div>
               )}
             </div>
