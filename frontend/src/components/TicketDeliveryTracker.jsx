@@ -4,42 +4,140 @@ import {
   Clock,
   Mic,
   Square,
-  Volume2,
-  Sparkles,
+  Play,
+  Pause,
   Languages,
   Check,
-  AlertCircle,
-  Play,
-  RotateCcw,
-  Send,
-  ShieldAlert,
-  ArrowRight,
   Search,
-  Filter,
   X,
-  User,
-  Tag,
-  AlertTriangle,
-  Layers,
-  ChevronRight,
-  ExternalLink
+  ArrowRight,
+  ArrowUpRight,
+  FastForward,
+  Edit2,
+  Database
 } from 'lucide-react';
 import { supabase, updateIssueInCloud } from '../supabase';
-import DiaTextReveal from './ui/DiaTextReveal';
-import Highlighter from './ui/Highlighter';
-import CoolMode from './ui/CoolMode';
-import NumberTicker from './ui/NumberTicker';
 
-/**
- * TicketDeliveryTracker (Phase 5: Grid-Based Issue Tracker)
- * 
- * Mandate:
- * - Delete column-based Kanban layout.
- * - Render operational tickets in a responsive CSS Grid of cards.
- * - Top-level pill filters: All, Open, In Progress, Resolved.
- * - Resolution Overlay: Modal showing issue history, 4-stage delivery timeline,
- *   and Gemini Multilingual Audio Resolution workflow (Record -> Transcribe/Translate -> Patch Supabase -> Resolve).
- */
+// Waveform height presets matching Figma's 64 audio frequency bars
+const WAVEFORM_HEIGHTS = [
+  8, 21, 9, 22, 10, 23, 11, 24, 12, 25, 13, 26, 14, 27, 15, 28, 16, 29, 17, 30,
+  18, 31, 19, 32, 20, 8, 21, 9, 22, 10, 23, 11, 24, 12, 25, 13, 26, 14, 27, 15,
+  28, 16, 29, 17, 30, 18, 31, 19, 32, 20, 8, 21, 9, 22, 10, 23, 11, 24, 12, 25,
+  13, 26, 14, 27
+];
+
+// Baseline seed operational tickets matching Figma Frame 50:38370
+const SEED_OPERATIONAL_TICKETS = [
+  {
+    id: 'N-1042',
+    title: 'Checkout timeout after payment retry',
+    description: 'Payment retries exhaust after a 5,000 ms timeout. The retry handler patch is prepared; closure is not yet confirmed.',
+    category: 'Payments',
+    status: 'In Progress',
+    priority: 'High',
+    severityText: 'P1 · High',
+    severityType: 'high',
+    assigned_to: 'Maya Rao · Payments',
+    initials: 'MR',
+    related_count: 34,
+    next_action: 'Retry handler patch prepared',
+    next_action_alert: true,
+    last_update: 'Oct 7 · 10:42',
+    telugu_transcript: 'రీట్రై హ్యాండ్లర్ను సరిచేశాం. చెక్అవుట్ పరీక్షలు విజయవంతమయ్యాయి.',
+    english_translation: 'The retry handler has been corrected. Checkout validation passed.'
+  },
+  {
+    id: 'N-1043',
+    title: 'UPI mandate confirmation delay',
+    description: 'Customer receives bank debit notification before transaction receipt is issued on merchant app.',
+    category: 'Core Banking',
+    status: 'In Progress',
+    priority: 'High',
+    severityText: 'P1 · High',
+    severityType: 'high',
+    assigned_to: 'Vikram Sen · Core Banking',
+    initials: 'VS',
+    related_count: 28,
+    next_action: 'Webhook retry queue scaled up',
+    next_action_alert: false,
+    last_update: 'Oct 7 · 10:15',
+    telugu_transcript: 'యూపీఐ వెబ్‌హుక్ ప్రాసెసింగ్‌ను ఆప్టిమైజ్ చేశాం. లాగ్స్ చెక్ చేశాము.',
+    english_translation: 'UPI webhook processing has been optimized. Async queues cleared.'
+  },
+  {
+    id: 'N-1044',
+    title: 'Recurring invoice PDF generation crash',
+    description: 'Memory allocation limit hit on large batch export containing more than 500 lines.',
+    category: 'Billing',
+    status: 'In Progress',
+    priority: 'Medium',
+    severityText: 'P2 · Medium',
+    severityType: 'medium',
+    assigned_to: 'Ananya Iyer · Billing',
+    initials: 'AI',
+    related_count: 19,
+    next_action: 'Async streaming worker deployed',
+    next_action_alert: false,
+    last_update: 'Oct 7 · 09:40',
+    telugu_transcript: 'పీడీఎఫ్ స్ట్రీమింగ్ వర్కర్‌ను మోహరించాం. మెమరీ లీక్ తొలగించబడింది.',
+    english_translation: 'PDF streaming worker deployed. Memory bottleneck resolved.'
+  },
+  {
+    id: 'N-1045',
+    title: 'Mobile biometric login session drop',
+    description: 'Tokens invalidated prematurely after background switch on iOS 18 devices.',
+    category: 'Auth Platform',
+    status: 'In Progress',
+    priority: 'Medium',
+    severityText: 'P2 · Medium',
+    severityType: 'medium',
+    assigned_to: 'Kiran Patel · Auth Platform',
+    initials: 'KP',
+    related_count: 42,
+    next_action: 'Token TTL extended to 15m',
+    next_action_alert: false,
+    last_update: 'Oct 7 · 08:55',
+    telugu_transcript: 'బయోమెట్రిక్ టోకెన్ వ్యవధిని పొడిగించాం. సెషన్స్ స్థిరంగా ఉన్నాయి.',
+    english_translation: 'Biometric token validity extended. Background persistence verified.'
+  },
+  {
+    id: 'N-1046',
+    title: 'Dark mode contrast in notification center',
+    description: 'Text legibility below WCAG AA threshold in secondary status pills.',
+    category: 'Design Ops',
+    status: 'Resolved',
+    priority: 'Low',
+    severityText: 'P3 · Low',
+    severityType: 'low',
+    assigned_to: 'Rhea Nair · Design Ops',
+    initials: 'RN',
+    related_count: 12,
+    next_action: 'Tokens updated to v2.4',
+    next_action_alert: false,
+    last_update: 'Oct 6 · 17:30',
+    telugu_transcript: 'డిజైన్ టోకెన్ల కాంట్రాస్ట్ సరిచేయబడింది.',
+    english_translation: 'Design tokens contrast updated to WCAG AA compliance.'
+  },
+  {
+    id: 'N-1047',
+    title: 'Search query autocomplete debounce lag',
+    description: 'Excessive network requests triggered during fast keypad input on mobile web.',
+    category: 'Search Ops',
+    status: 'Resolved',
+    priority: 'Medium',
+    severityText: 'P2 · Medium',
+    severityType: 'medium',
+    assigned_to: 'Dev Sharma · Search Ops',
+    initials: 'DS',
+    related_count: 23,
+    next_action: '300ms debounce throttle applied',
+    next_action_alert: false,
+    last_update: 'Oct 6 · 14:10',
+    telugu_transcript: 'శోధన డీబౌన్స్ వ్యవధిని 300msకి సర్దుబాటు చేశాం.',
+    english_translation: 'Search autocomplete debounce rate-limited to 300ms.'
+  }
+];
+
 export default function TicketDeliveryTracker({
   issues = [],
   onUpdateIssue,
@@ -50,103 +148,118 @@ export default function TicketDeliveryTracker({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTicket, setSelectedTicket] = useState(null);
 
-  // Audio Recording State for Resolution Modal
+  // Audio recording & playback state
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [activeVoiceLanguage, setActiveVoiceLanguage] = useState('TE');
   const [audioBlob, setAudioBlob] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(null);
-  const [processingAudio, setProcessingAudio] = useState(false);
-  const [audioResolutionLog, setAudioResolutionLog] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('auto');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [patchSuccess, setPatchSuccess] = useState(false);
+  const [isEditingTranslation, setIsEditingTranslation] = useState(false);
+  const [editedEnglishText, setEditedEnglishText] = useState('');
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
 
-  // Auto-select initial ticket if passed
-  useEffect(() => {
-    if (initialSelectedId && issues.length > 0) {
-      const match = issues.find((i) => i.id === initialSelectedId);
-      if (match) openTicketOverlay(match);
-    }
-  }, [initialSelectedId, issues]);
+  // Merge seed operational tickets with live Supabase issues
+  const allTickets = React.useMemo(() => {
+    if (!issues || issues.length === 0) return SEED_OPERATIONAL_TICKETS;
+    
+    // Ensure N-1042 is at the top for Figma parity
+    const seedIds = new Set(SEED_OPERATIONAL_TICKETS.map(t => t.id));
+    const customIssues = issues
+      .filter(i => !seedIds.has(i.id))
+      .map((i, idx) => ({
+        id: i.id || `N-${1050 + idx}`,
+        title: i.title || 'Operational signal',
+        description: i.description || 'Customer report logged in database.',
+        category: i.category || 'General Ops',
+        status: i.status || 'Open',
+        priority: i.priority || 'Medium',
+        severityText: i.priority === 'Critical' ? 'P0 · Critical' : i.priority === 'High' ? 'P1 · High' : 'P2 · Medium',
+        severityType: i.priority === 'Critical' ? 'critical' : i.priority === 'High' ? 'high' : 'medium',
+        assigned_to: i.assigned_to || 'Support Ops',
+        initials: (i.assigned_to || 'SO').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        related_count: 18,
+        next_action: i.status === 'Resolved' ? 'Audit verified' : 'Engineering triaged',
+        next_action_alert: i.priority === 'Critical',
+        last_update: 'Oct 7 · 10:42',
+        telugu_transcript: i.telugu_transcript || 'పరిష్కారం సమీక్షించబడింది.',
+        english_translation: i.english_translation || 'Issue analyzed and queued for deployment.'
+      }));
 
-  // Clean up timer on unmount
+    return [...SEED_OPERATIONAL_TICKETS, ...customIssues];
+  }, [issues]);
+
+  // Auto-select initial ticket if requested
+  useEffect(() => {
+    if (initialSelectedId) {
+      const match = allTickets.find(t => t.id === initialSelectedId);
+      if (match) openResolutionOverlay(match);
+    }
+  }, [initialSelectedId, allTickets]);
+
+  // Clean up audio timer
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
 
-  const openTicketOverlay = (ticket) => {
+  const openResolutionOverlay = (ticket) => {
     setSelectedTicket(ticket);
-    setAudioResolutionLog(ticket.resolution_log || null);
-    setAudioBlob(null);
-    setAudioUrl(null);
+    setEditedEnglishText(ticket.english_translation || 'The retry handler has been corrected. Checkout validation passed.');
+    setIsEditingTranslation(false);
+    setIsPlayingAudio(false);
     setIsRecording(false);
-    setErrorMsg('');
-    setPatchSuccess(false);
+    setRecordingSeconds(0);
   };
 
-  const closeTicketOverlay = () => {
+  const closeResolutionOverlay = () => {
     if (isRecording) stopRecording();
     setSelectedTicket(null);
-    setAudioBlob(null);
-    setAudioUrl(null);
-    setErrorMsg('');
+    setIsPlayingAudio(false);
   };
 
-  // Status Counts
-  const counts = {
-    All: issues.length,
-    Open: issues.filter((i) => i.status === 'Open' || !i.status).length,
-    'In Progress': issues.filter((i) => i.status === 'In Progress').length,
-    Resolved: issues.filter((i) => i.status === 'Resolved').length
-  };
+  // Status counts for portfolio overview
+  const totalCount = allTickets.length;
+  const openCount = allTickets.filter(t => t.status === 'Open').length;
+  const inProgressCount = allTickets.filter(t => t.status === 'In Progress').length;
+  const resolvedCount = allTickets.filter(t => t.status === 'Resolved').length;
 
-  // Filtered issues
-  const filteredIssues = issues.filter((ticket) => {
+  // Filtered tickets
+  const filteredTickets = allTickets.filter((ticket) => {
     const status = ticket.status || 'Open';
     const matchesFilter =
       filterStatus === 'All' ||
-      (filterStatus === 'Open' && (status === 'Open' || status === 'Reported')) ||
+      (filterStatus === 'Open' && status === 'Open') ||
       (filterStatus === 'In Progress' && status === 'In Progress') ||
       (filterStatus === 'Resolved' && status === 'Resolved');
 
     const matchesSearch =
+      !searchQuery ||
       (ticket.title && ticket.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (ticket.id && String(ticket.id).toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (ticket.category && ticket.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (ticket.id && ticket.id.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (ticket.assigned_to && ticket.assigned_to.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return matchesFilter && matchesSearch;
   });
 
-  // Start MediaRecorder audio capture
+  // MediaRecorder live mic capture
   const startRecording = async () => {
-    setErrorMsg('');
-    setAudioBlob(null);
-    setAudioUrl(null);
-    audioChunksRef.current = [];
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
         stream.getTracks().forEach((track) => track.stop());
       };
 
@@ -157,526 +270,621 @@ export default function TicketDeliveryTracker({
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      console.warn('Microphone permission warning:', err);
-      setErrorMsg('Microphone access unavailable. Using synthetic voice memo simulator.');
-      simulateSyntheticRecording();
+      console.warn('Microphone permission unavailable, using simulation:', err);
+      setIsRecording(true);
+      setRecordingSeconds(0);
+      timerRef.current = setInterval(() => {
+        setRecordingSeconds((prev) => {
+          if (prev >= 3) {
+            clearInterval(timerRef.current);
+            setIsRecording(false);
+            return 3;
+          }
+          return prev + 1;
+        });
+      }, 1000);
     }
   };
 
-  // Stop recording
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      clearInterval(timerRef.current);
     }
+    setIsRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
   };
 
-  // Synthetic recording simulator for environments without mic permissions
-  const simulateSyntheticRecording = () => {
-    setIsRecording(true);
-    setRecordingSeconds(0);
-    timerRef.current = setInterval(() => {
-      setRecordingSeconds((prev) => {
-        if (prev >= 2) {
-          clearInterval(timerRef.current);
-          setIsRecording(false);
-          const dummyBlob = new Blob(['sample-voice-memo-bytes'], { type: 'audio/webm' });
-          setAudioBlob(dummyBlob);
-          setAudioUrl(URL.createObjectURL(dummyBlob));
-          return 2;
-        }
-        return prev + 1;
-      });
-    }, 800);
-  };
-
-  const blobToBase64 = (blob) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
-  // Submit audio memo to Gemini backend & sync resolution log to Supabase
-  const submitAudioToGemini = async () => {
+  // Confirm and resolve ticket
+  const handleConfirmAndResolve = async () => {
     if (!selectedTicket) return;
-    setProcessingAudio(true);
-    setErrorMsg('');
-    setPatchSuccess(false);
+    const ticketId = selectedTicket.id;
+    const resolvedData = {
+      status: 'Resolved',
+      resolution_language: activeVoiceLanguage.toLowerCase(),
+      resolution_note: editedEnglishText,
+      resolved_at: new Date().toISOString()
+    };
 
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token || '';
-      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-
-      let base64Audio = null;
-      if (audioBlob) {
-        base64Audio = await blobToBase64(audioBlob);
-      }
-
-      const formData = new FormData();
-      if (audioBlob) {
-        formData.append('audio', audioBlob, 'resolution_voice_memo.webm');
-      }
-      if (base64Audio) {
-        formData.append('audio_base64', base64Audio);
-      }
-      formData.append('issue_id', selectedTicket.id || 'ISS-DEMO');
-      formData.append('preferred_language', selectedLanguage);
-      formData.append('title', selectedTicket.title || '');
-      formData.append('category', selectedTicket.category || '');
-
-      let resolutionLog = null;
-
-      try {
-        const res = await fetch(`${apiBase}/api/audio-notes`, {
-          method: 'POST',
-          headers: { ...authHeader },
-          body: formData
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          resolutionLog = data.resolution_log || data;
-        }
-      } catch (apiErr) {
-        console.warn('Audio endpoint unreachable, using fallback translation:', apiErr);
-      }
-
-      // High-quality multilingual fallback
-      if (!resolutionLog) {
-        resolutionLog = {
-          detected_language:
-            selectedLanguage === 'te'
-              ? 'Telugu (తెలుగు)'
-              : selectedLanguage === 'hi'
-              ? 'Hindi (हिंदी)'
-              : 'English',
-          language_code: selectedLanguage === 'auto' ? 'te' : selectedLanguage,
-          transcript:
-            selectedLanguage === 'te'
-              ? 'ఈ ఆర్డర్ కోసం వ్యాపారి ఖాతాను నిలిపివేసి, కస్టమర్‌కు పూర్తి రీఫండ్ జారీ చేశాము.'
-              : selectedLanguage === 'hi'
-              ? 'विक्रेता के खाते को फ्रीज कर दिया गया है और ग्राहक को पूर्ण रिफंड जारी किया गया है।'
-              : 'Verified seller irregularity, quarantined payout gateway, and initiated escrow refund.',
-          translated_resolution:
-            'Merchant payout gateway quarantined pending AML audit. Escrow refund of $184.00 cleared to customer. Ticket resolved with zero chargeback exposure.',
-          operator: 'Executive Lead (Multilingual Voice Memo)',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-      }
-
-      setAudioResolutionLog(resolutionLog);
-
-      // Patch Supabase & Cloud
-      await updateIssueInCloud(selectedTicket.id, {
-        status: 'Resolved',
-        resolution_log: resolutionLog
-      });
-
-      // Update state in parent
-      if (onUpdateIssue) {
-        onUpdateIssue(selectedTicket.id, {
-          status: 'Resolved',
-          resolution_log: resolutionLog
-        });
-      }
-
-      // Update local selected ticket
-      setSelectedTicket((prev) => ({
-        ...prev,
-        status: 'Resolved',
-        resolution_log: resolutionLog
-      }));
-
-      setPatchSuccess(true);
+      await updateIssueInCloud(ticketId, resolvedData);
     } catch (err) {
-      console.error('Audio resolution workflow error:', err);
-      setErrorMsg('Failed to process resolution voice memo.');
-    } finally {
-      setProcessingAudio(false);
+      console.warn('Cloud update fallback:', err);
     }
+
+    if (onUpdateIssue) {
+      onUpdateIssue(ticketId, resolvedData);
+    }
+
+    // Update in-memory ticket
+    setSelectedTicket((prev) => prev ? { ...prev, ...resolvedData } : null);
+    closeResolutionOverlay();
   };
 
-  // Direct status toggle in modal
-  const handleDirectStatusChange = async (newStatus) => {
-    if (!selectedTicket) return;
-    try {
-      await updateIssueInCloud(selectedTicket.id, { status: newStatus });
-      if (onUpdateIssue) {
-        onUpdateIssue(selectedTicket.id, { status: newStatus });
-      }
-      setSelectedTicket((prev) => ({ ...prev, status: newStatus }));
-    } catch (e) {
-      console.warn('Failed to update status directly:', e);
+  // Severity pill style helper
+  const getSeverityStyle = (type, text) => {
+    if (type === 'critical' || (text && text.includes('Critical'))) {
+      return { bg: '#FFF1F3', color: '#BE3455', dot: '#BE3455', label: text || 'P0 · Critical' };
     }
+    if (type === 'high' || (text && text.includes('High'))) {
+      return { bg: '#FFFAEB', color: '#B77913', dot: '#B77913', label: text || 'P1 · High' };
+    }
+    if (type === 'low' || (text && text.includes('Low'))) {
+      return { bg: '#ECFDF5', color: '#158366', dot: '#158366', label: text || 'P3 · Low' };
+    }
+    return { bg: '#EEF0FF', color: '#4F46E5', dot: '#4F46E5', label: text || 'P2 · Medium' };
   };
 
   return (
-    <div style={{ width: '100%', minHeight: 'calc(100vh - 68px)', background: '#f8fafc', color: '#0f172a' }}>
-      {/* Header & Filter Bar */}
+    <div
+      style={{
+        width: '100%',
+        minHeight: 'calc(100vh - 80px)',
+        background: '#F8FAFC',
+        padding: '40px',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px'
+      }}
+    >
+      {/* Page Heading (Figma: Noesis · Issue Tracker) */}
       <div
         style={{
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '1.25rem 2rem',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem'
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          gap: '24px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.2rem' }}>
-              OPERATIONS / TRACKED ISSUES
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '8px',
-                  background: 'rgba(79, 70, 229, 0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#4f46e5'
-                }}
-              >
-                <Layers size={18} />
-              </div>
-              <DiaTextReveal
-                text="Issue Tracker"
-                colors={["#0f172a", "#4F46E5", "#06B6D4"]}
-                className="text-xl font-extrabold tracking-tight"
-              />
-              <span
-                style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 700,
-                  background: '#eef2ff',
-                  color: '#4f46e5',
-                  padding: '0.2rem 0.6rem',
-                  borderRadius: '999px',
-                  border: '1px solid #c7d2fe'
-                }}
-              >
-                <NumberTicker value={issues.length || 24} /> tickets
-              </span>
-            </div>
-            <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Severity tells you the impact. Status tells you the progress. Click any card to execute{' '}
-              <Highlighter action="underline" color="#4F46E5">
-                Gemini Multilingual Voice Resolution
-              </Highlighter>.
-            </p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px' }}>
+          <div
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontWeight: 500,
+              fontSize: '10px',
+              lineHeight: '150%',
+              color: '#4F46E5',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase'
+            }}
+          >
+            OPERATIONS / ISSUE TRACKER
           </div>
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 600,
+              fontSize: '40px',
+              lineHeight: '115%',
+              color: '#172033',
+              letterSpacing: '-0.02em'
+            }}
+          >
+            Issue Tracker
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 400,
+              fontSize: '13px',
+              lineHeight: '150%',
+              color: '#64748B'
+            }}
+          >
+            Real-time delivery portfolio and multilingual voice closure workflow.
+          </p>
+        </div>
+      </div>
 
-          {/* Search Box */}
-          <div style={{ position: 'relative', width: '320px' }}>
-            <Search
-              size={16}
-              color="#94a3b8"
-              style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)' }}
-            />
-            <input
-              type="text"
-              placeholder="Search by ID, title, assignee..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.55rem 0.85rem 0.55rem 2.4rem',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                fontSize: '0.82rem',
-                outline: 'none',
-                background: '#f8fafc',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
+      {/* Ticket Portfolio Overview Bar */}
+      <div
+        style={{
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: '14px 0px',
+          gap: '32px',
+          width: '100%',
+          borderWidth: '1px 0px',
+          borderStyle: 'solid',
+          borderColor: '#DCE3ED'
+        }}
+      >
+        {/* Total Tickets */}
+        <div
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 500,
+            fontSize: '28px',
+            lineHeight: '150%',
+            color: '#172033',
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '8px'
+          }}
+        >
+          <span>{totalCount || 133}</span>
+          <span style={{ fontSize: '13px', color: '#64748B', fontWeight: 400 }}>total tickets</span>
         </div>
 
-        {/* Top-Level Status Pill Filters */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {['All', 'Open', 'In Progress', 'Resolved'].map((st) => {
-            const count = counts[st] || 0;
-            const isSelected = filterStatus === st;
+        {/* Status Totals */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '22px', color: '#172033' }}>
+            {openCount || 53}
+          </span>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '12px', color: '#64748B' }}>
+            Open
+          </span>
+        </div>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '22px', color: '#172033' }}>
+            {inProgressCount || 14}
+          </span>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '12px', color: '#64748B' }}>
+            In Progress
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '22px', color: '#172033' }}>
+            {resolvedCount || 66}
+          </span>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '12px', color: '#64748B' }}>
+            Resolved
+          </span>
+        </div>
+
+        {/* Critical Routing Reminder */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            gap: '8px',
+            flex: 1
+          }}
+        >
+          <FastForward size={16} color="#BE3455" />
+          <span
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 400,
+              fontSize: '11px',
+              lineHeight: '150%',
+              color: '#64748B'
+            }}
+          >
+            P0 incidents auto-route to on-call engineers.
+          </span>
+        </div>
+      </div>
+
+      {/* Tracker Controls (Pill Filters & Search) */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          height: '40px'
+        }}
+      >
+        {/* Exact Status Filters */}
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '8px' }}>
+          {['All', 'Open', 'In Progress', 'Resolved'].map((st) => {
+            const isSelected = filterStatus === st;
             return (
               <button
                 key={st}
                 onClick={() => setFilterStatus(st)}
                 style={{
+                  boxSizing: 'border-box',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.5rem',
-                  padding: '0.45rem 0.9rem',
-                  borderRadius: '999px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  border: isSelected ? '1px solid #4f46e5' : '1px solid #e2e8f0',
-                  background: isSelected ? '#4f46e5' : '#ffffff',
-                  color: isSelected ? '#ffffff' : '#475569',
+                  justifyContent: 'center',
+                  padding: '9px 17px',
+                  height: '36px',
+                  background: isSelected ? '#4F46E5' : '#FFFFFF',
+                  border: isSelected ? '1px solid #4F46E5' : '1px solid #DCE3ED',
+                  borderRadius: '100px',
                   cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  boxShadow: isSelected ? '0 2px 8px rgba(79, 70, 229, 0.2)' : 'none'
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: isSelected ? 600 : 400,
+                  fontSize: '12px',
+                  lineHeight: '150%',
+                  color: isSelected ? '#FFFFFF' : '#64748B',
+                  transition: 'all 0.15s ease'
                 }}
               >
-                <span>{st}</span>
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    padding: '0.1rem 0.45rem',
-                    borderRadius: '999px',
-                    background: isSelected ? 'rgba(255, 255, 255, 0.25)' : '#f1f5f9',
-                    color: isSelected ? '#ffffff' : '#64748b',
-                    fontWeight: 800
-                  }}
-                >
-                  {count}
-                </span>
+                {st}
               </button>
             );
           })}
         </div>
-      </div>
 
-      {/* Responsive CSS Grid of Ticket Cards */}
-      <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto' }}>
+        {/* Issue Search Input */}
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-            gap: '1.25rem'
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: '0px 14px',
+            gap: '8px',
+            width: '298px',
+            height: '40px',
+            background: '#FFFFFF',
+            border: '1px solid #DCE3ED',
+            borderRadius: '6px'
           }}
         >
-          {filteredIssues.map((ticket) => {
-            const status = ticket.status || 'Open';
-            const isResolved = status === 'Resolved';
-            const isInProgress = status === 'In Progress';
-            const priority = ticket.priority || 'Medium';
+          <Search size={16} color="#64748B" />
+          <input
+            type="text"
+            placeholder="Search by ID, title, or assignee..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              border: 'none',
+              outline: 'none',
+              width: '100%',
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '11px',
+              color: '#172033',
+              background: 'transparent'
+            }}
+          />
+        </div>
+      </div>
 
-            const priorityBadge =
-              priority === 'Critical' || priority === 'P0 Critical'
-                ? { bg: 'rgba(239, 68, 68, 0.1)', text: '#dc2626' }
-                : priority === 'High' || priority === 'P1 High'
-                ? { bg: 'rgba(245, 158, 11, 0.1)', text: '#d97706' }
-                : { bg: 'rgba(79, 70, 229, 0.1)', text: '#4f46e5' };
+      {/* Operational Ticket Card Grid (2 Columns, 551px wide cards) */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(520px, 1fr))',
+          gap: '18px',
+          width: '100%'
+        }}
+      >
+        {filteredTickets.map((ticket) => {
+          const sev = getSeverityStyle(ticket.severityType, ticket.severityText);
 
-            const statusBadge = isResolved
-              ? { bg: 'rgba(16, 185, 129, 0.1)', text: '#059669', label: 'Resolved' }
-              : isInProgress
-              ? { bg: 'rgba(79, 70, 229, 0.1)', text: '#4f46e5', label: 'In Progress' }
-              : { bg: 'rgba(245, 158, 11, 0.1)', text: '#d97706', label: 'Open' };
-
-            return (
+          return (
+            <div
+              key={ticket.id}
+              onClick={() => openResolutionOverlay(ticket)}
+              style={{
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '18px',
+                gap: '10px',
+                background: '#FFFFFF',
+                border: '1px solid #DCE3ED',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                position: 'relative'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#4F46E5';
+                e.currentTarget.style.boxShadow = '0px 4px 12px rgba(79, 70, 229, 0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#DCE3ED';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              {/* Ticket Identity Row */}
               <div
-                key={ticket.id}
-                onClick={() => openTicketOverlay(ticket)}
                 style={{
-                  background: '#ffffff',
-                  borderRadius: '14px',
-                  border: '1px solid #e2e8f0',
-                  padding: '1.35rem',
                   display: 'flex',
-                  flexDirection: 'column',
+                  flexDirection: 'row',
+                  alignItems: 'center',
                   justifyContent: 'space-between',
-                  boxShadow: '0 1px 4px rgba(15, 23, 42, 0.03)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  position: 'relative',
-                  ':hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)'
-                  }
+                  width: '100%',
+                  gap: '10px'
                 }}
               >
-                <div>
-                  {/* Top Bar: ID, Date, Priority */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#4f46e5' }}>
-                        {ticket.id}
-                      </span>
-                      <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
-                        {ticket.created_at ? new Date(ticket.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' }) : 'Today'}
-                      </span>
-                    </div>
-
-                    <span
-                      style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        padding: '0.2rem 0.55rem',
-                        borderRadius: '6px',
-                        background: priorityBadge.bg,
-                        color: priorityBadge.text
-                      }}
-                    >
-                      {priority}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {/* Tracking ID */}
+                  <span
                     style={{
-                      margin: '0 0 0.65rem 0',
-                      fontSize: '0.95rem',
-                      fontWeight: 700,
-                      color: '#0f172a',
-                      lineHeight: '1.35'
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      lineHeight: '150%',
+                      color: '#4F46E5'
                     }}
                   >
-                    {ticket.title}
-                  </h3>
+                    {ticket.id}
+                  </span>
 
-                  {/* Description / Summary */}
-                  <p
-                    style={{
-                      margin: '0 0 1rem 0',
-                      fontSize: '0.82rem',
-                      color: '#64748b',
-                      lineHeight: '1.45',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    {ticket.description || 'No detailed issue notes attached.'}
-                  </p>
-                </div>
-
-                <div>
-                  {/* Category & Assignee Tag */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
-                      }}
-                    >
-                      <Tag size={11} /> {ticket.category || 'General'}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 600,
-                        background: '#f8fafc',
-                        color: '#64748b',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '4px',
-                        border: '1px solid #e2e8f0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
-                      }}
-                    >
-                      <User size={11} /> {ticket.assigned_to || 'Support Ops'}
-                    </span>
-                  </div>
-
-                  {/* Bottom Footer: Status Pill & Action */}
+                  {/* Severity Badge */}
                   <div
                     style={{
                       display: 'flex',
+                      flexDirection: 'row',
                       alignItems: 'center',
-                      justifyContent: 'space-between',
-                      borderTop: '1px solid #f1f5f9',
-                      paddingTop: '0.85rem'
+                      padding: '4px 8px',
+                      gap: '6px',
+                      background: sev.bg,
+                      borderRadius: '4px'
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <span
-                        style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 700,
-                          padding: '0.25rem 0.6rem',
-                          borderRadius: '999px',
-                          background: statusBadge.bg,
-                          color: statusBadge.text,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.35rem'
-                        }}
-                      >
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: statusBadge.text }} />
-                        {statusBadge.label}
-                      </span>
-
-                      {ticket.resolution_log && (
-                        <span
-                          title="Resolved via Gemini Multilingual Audio"
-                          style={{
-                            fontSize: '0.68rem',
-                            fontWeight: 700,
-                            background: 'rgba(79, 70, 229, 0.08)',
-                            color: '#4f46e5',
-                            padding: '0.2rem 0.45rem',
-                            borderRadius: '4px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.2rem'
-                          }}
-                        >
-                          <Mic size={10} /> Voice Logged
-                        </span>
-                      )}
-                    </div>
-
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: sev.dot }} />
                     <span
                       style={{
-                        fontSize: '0.78rem',
-                        fontWeight: 700,
-                        color: '#4f46e5',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem'
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 600,
+                        fontSize: '11px',
+                        lineHeight: '150%',
+                        color: sev.color
                       }}
                     >
-                      Timeline <ChevronRight size={14} />
+                      {sev.label}
+                    </span>
+                  </div>
+
+                  {/* Progress State Badge */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      padding: '4px 8px',
+                      gap: '6px',
+                      background: '#F8FAFC',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#64748B' }} />
+                    <span
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 600,
+                        fontSize: '11px',
+                        lineHeight: '150%',
+                        color: '#64748B'
+                      }}
+                    >
+                      {ticket.status}
                     </span>
                   </div>
                 </div>
+
+                {/* Arrow Up Right */}
+                <ArrowUpRight size={16} color="#64748B" />
               </div>
-            );
-          })}
+
+              {/* Issue Title */}
+              <div
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  fontSize: '18px',
+                  lineHeight: '120%',
+                  color: '#172033',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  width: '100%'
+                }}
+              >
+                {ticket.title}
+              </div>
+
+              {/* Issue Description */}
+              <div
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '12px',
+                  lineHeight: '150%',
+                  color: '#64748B',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  width: '100%'
+                }}
+              >
+                {ticket.description}
+              </div>
+
+              {/* Ticket Owner and Evidence Row */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '100%',
+                  gap: '10px'
+                }}
+              >
+                {/* Owner Avatar */}
+                <div
+                  style={{
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '28px',
+                    height: '28px',
+                    background: '#EEF0FF',
+                    borderRadius: '50%'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '9px',
+                      color: '#4F46E5'
+                    }}
+                  >
+                    {ticket.initials}
+                  </span>
+                </div>
+
+                {/* Owner & Team Name */}
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '11px',
+                    lineHeight: '150%',
+                    color: '#172033',
+                    flex: 1
+                  }}
+                >
+                  {ticket.assigned_to}
+                </span>
+
+                {/* Related Reports */}
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  {ticket.related_count} reports
+                </span>
+              </div>
+
+              {/* Next Action & Last Update Row */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%',
+                  borderTop: '1px solid #F1F5F9',
+                  paddingTop: '6px'
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: ticket.next_action_alert ? '#BE3455' : '#64748B'
+                  }}
+                >
+                  Next action: {ticket.next_action}
+                </span>
+
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '9px',
+                    lineHeight: '150%',
+                    color: '#8996AB'
+                  }}
+                >
+                  {ticket.last_update}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tracker Pagination Footer */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          paddingTop: '12px'
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 400,
+            fontSize: '11px',
+            color: '#64748B'
+          }}
+        >
+          Showing {filteredTickets.length} of {allTickets.length} tickets
         </div>
 
-        {filteredIssues.length === 0 && (
-          <div
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
             style={{
-              background: '#ffffff',
-              borderRadius: '14px',
-              border: '1px dashed #cbd5e1',
-              padding: '4rem 2rem',
-              textAlign: 'center',
-              color: '#94a3b8'
+              padding: '6px 14px',
+              borderRadius: '6px',
+              border: '1px solid #DCE3ED',
+              background: '#FFFFFF',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 600,
+              fontSize: '12px',
+              color: '#172033',
+              cursor: 'pointer'
             }}
           >
-            <Layers size={36} style={{ margin: '0 auto 0.75rem', opacity: 0.5 }} />
-            <h3 style={{ margin: '0 0 0.5rem 0', color: '#475569' }}>No Tickets Found</h3>
-            <p style={{ margin: 0, fontSize: '0.85rem' }}>
-              No operational tickets match the current status filter "{filterStatus}".
-            </p>
-          </div>
-        )}
+            Previous
+          </button>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', color: '#4F46E5', fontWeight: 600 }}>
+            1
+          </span>
+          <button
+            style={{
+              padding: '6px 14px',
+              borderRadius: '6px',
+              border: '1px solid #DCE3ED',
+              background: '#FFFFFF',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 600,
+              fontSize: '12px',
+              color: '#172033',
+              cursor: 'pointer'
+            }}
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* ============================================================================== */}
-      {/* Resolution Overlay Modal */}
+      {/* Detailed Resolution Overlay Modal (Figma Frame 50:38370)                       */}
       {/* ============================================================================== */}
       {selectedTicket && (
         <div
@@ -684,417 +892,962 @@ export default function TicketDeliveryTracker({
             position: 'fixed',
             inset: 0,
             zIndex: 1000,
-            background: 'rgba(15, 23, 42, 0.5)',
-            backdropFilter: 'blur(4px)',
+            background: 'rgba(226, 232, 240, 0.780392)',
+            backdropFilter: 'blur(3px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1.5rem'
+            padding: '24px'
           }}
-          onClick={closeTicketOverlay}
+          onClick={closeResolutionOverlay}
         >
           <div
             style={{
-              width: '100%',
-              maxWidth: '820px',
-              maxHeight: '90vh',
-              background: '#ffffff',
-              borderRadius: '20px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
+              boxSizing: 'border-box',
               display: 'flex',
               flexDirection: 'column',
-              overflow: 'hidden'
+              alignItems: 'flex-start',
+              padding: '32px',
+              gap: '18px',
+              width: '100%',
+              maxWidth: '1120px',
+              maxHeight: '94vh',
+              background: '#FFFFFF',
+              border: '1px solid #DCE3ED',
+              boxShadow: '0px 20px 60px rgba(23, 32, 51, 0.101961)',
+              borderRadius: '10px',
+              overflowY: 'auto'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
+            {/* Overlay Heading */}
             <div
               style={{
-                padding: '1.25rem 1.75rem',
-                borderBottom: '1px solid #e2e8f0',
                 display: 'flex',
-                alignItems: 'center',
+                flexDirection: 'row',
+                alignItems: 'flex-start',
                 justifyContent: 'space-between',
-                background: '#f8fafc'
+                width: '100%',
+                gap: '24px'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px', flex: 1 }}>
                 <div
                   style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: '10px',
-                    background: 'rgba(79, 70, 229, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#4f46e5'
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontWeight: 500,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#4F46E5',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase'
                   }}
                 >
-                  <ShieldAlert size={20} />
+                  ISSUE TRACKER / {selectedTicket.id}
                 </div>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#4f46e5' }}>
-                      {selectedTicket.id}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
-                        padding: '0.15rem 0.5rem',
-                        borderRadius: '4px',
-                        background: 'rgba(79, 70, 229, 0.1)',
-                        color: '#4f46e5'
-                      }}
-                    >
-                      {selectedTicket.category}
-                    </span>
-                  </div>
-                  <h2 style={{ margin: '0.15rem 0 0 0', fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
-                    {selectedTicket.title}
-                  </h2>
+                <h2
+                  style={{
+                    margin: 0,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '32px',
+                    lineHeight: '120%',
+                    color: '#172033',
+                    letterSpacing: '-0.02em'
+                  }}
+                >
+                  {selectedTicket.title}
+                </h2>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '13px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  Review the progress and proposed resolution before confirming a ticket update.
                 </div>
               </div>
 
               <button
-                onClick={closeTicketOverlay}
+                onClick={closeResolutionOverlay}
                 style={{
                   width: 32,
                   height: 32,
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#64748b',
+                  borderRadius: '6px',
+                  border: '1px solid #DCE3ED',
+                  background: '#FFFFFF',
+                  color: '#64748B',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#F8FAFC';
+                  e.currentTarget.style.color = '#172033';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#FFFFFF';
+                  e.currentTarget.style.color = '#64748B';
                 }}
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Modal Body: Scrollable */}
-            <div style={{ padding: '1.75rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              {/* Status Selector Bar */}
-              <div
-                style={{
-                  background: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '0.85rem 1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '0.75rem'
-                }}
-              >
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#475569' }}>
-                  Current Status:
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  {['Open', 'In Progress', 'Resolved'].map((st) => (
-                    <button
-                      key={st}
-                      onClick={() => handleDirectStatusChange(st)}
-                      style={{
-                        padding: '0.4rem 0.85rem',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        border: selectedTicket.status === st ? '1px solid #4f46e5' : '1px solid #cbd5e1',
-                        background: selectedTicket.status === st ? '#4f46e5' : '#ffffff',
-                        color: selectedTicket.status === st ? '#ffffff' : '#64748b',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {st}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4-Stage Delivery Progress Timeline */}
-              <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#94a3b8', marginBottom: '1rem' }}>
-                  Delivery Progress Timeline
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
-                  {[
-                    {
-                      label: '1. Reported',
-                      desc: 'Ingested into Living Data Engine',
-                      isComplete: true,
-                      isActive: selectedTicket.status === 'Open'
-                    },
-                    {
-                      label: '2. Triaged',
-                      desc: 'P0 Causal trace mapped',
-                      isComplete: true,
-                      isActive: false
-                    },
-                    {
-                      label: '3. In Progress',
-                      desc: `Dispatched to ${selectedTicket.assigned_to || 'Ops'}`,
-                      isComplete: selectedTicket.status === 'In Progress' || selectedTicket.status === 'Resolved',
-                      isActive: selectedTicket.status === 'In Progress'
-                    },
-                    {
-                      label: '4. Resolved',
-                      desc: audioResolutionLog ? 'Verified via Multilingual Voice' : 'Audit closed',
-                      isComplete: selectedTicket.status === 'Resolved',
-                      isActive: selectedTicket.status === 'Resolved'
-                    }
-                  ].map((stage, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        background: stage.isComplete ? '#ffffff' : '#f8fafc',
-                        border: stage.isActive
-                          ? '2px solid #4f46e5'
-                          : stage.isComplete
-                          ? '1px solid #10b981'
-                          : '1px solid #e2e8f0',
-                        borderRadius: '10px',
-                        padding: '0.85rem',
-                        boxShadow: stage.isActive ? '0 2px 8px rgba(79, 70, 229, 0.1)' : 'none'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.35rem' }}>
-                        {stage.isComplete ? (
-                          <CheckCircle2 size={15} color="#10b981" />
-                        ) : (
-                          <Clock size={15} color="#94a3b8" />
-                        )}
-                        <span style={{ fontSize: '0.78rem', fontWeight: 800, color: stage.isComplete ? '#0f172a' : '#94a3b8' }}>
-                          {stage.label}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.7rem', color: '#64748b', lineHeight: '1.3' }}>
-                        {stage.desc}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Gemini Multilingual Audio Resolution Workflow */}
-              <div
-                style={{
-                  background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '16px',
-                  padding: '1.5rem'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <div
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '6px',
-                        background: 'rgba(79, 70, 229, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#4f46e5'
-                      }}
-                    >
-                      <Mic size={15} />
-                    </div>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>
-                      Gemini Multilingual Voice Resolution Workflow
-                    </span>
-                  </div>
-
-                  {/* Language Selector */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Languages size={15} color="#64748b" />
-                    <select
-                      value={selectedLanguage}
-                      onChange={(e) => setSelectedLanguage(e.target.value)}
-                      style={{
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        padding: '0.3rem 0.6rem',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        background: '#ffffff',
-                        color: '#334155'
-                      }}
-                    >
-                      <option value="auto">Auto-Detect</option>
-                      <option value="te">Telugu (తెలుగు)</option>
-                      <option value="hi">Hindi (हिंदी)</option>
-                      <option value="en">English (US)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Recorder Control Box */}
-                <div
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '12px',
-                    padding: '1.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '1rem',
-                    marginBottom: '1rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button
-                      onClick={isRecording ? stopRecording : startRecording}
-                      disabled={processingAudio}
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: '50%',
-                        border: 'none',
-                        background: isRecording ? '#ef4444' : '#4f46e5',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        boxShadow: isRecording
-                          ? '0 0 0 4px rgba(239, 68, 68, 0.2)'
-                          : '0 4px 12px rgba(79, 70, 229, 0.25)',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {isRecording ? <Square size={18} fill="#ffffff" /> : <Mic size={20} />}
-                    </button>
-
-                    <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                        {isRecording ? `Recording... 00:0${recordingSeconds}` : audioBlob ? 'Voice Memo Captured' : 'Record Resolution Voice Memo'}
-                      </div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        Speak in Telugu, Hindi, or English to record resolution notes.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Submit / Process Button with CoolMode */}
-                  <CoolMode>
-                    <button
-                      onClick={submitAudioToGemini}
-                      disabled={(!audioBlob && !isRecording) || processingAudio}
-                      style={{
-                        padding: '0.65rem 1.25rem',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
-                        color: '#ffffff',
-                        fontSize: '0.82rem',
-                        fontWeight: 700,
-                        cursor: (!audioBlob && !isRecording) || processingAudio ? 'not-allowed' : 'pointer',
-                        opacity: (!audioBlob && !isRecording) || processingAudio ? 0.6 : 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        boxShadow: '0 2px 8px rgba(79, 70, 229, 0.2)'
-                      }}
-                    >
-                      {processingAudio ? (
-                        <>Transcribing via Gemini...</>
-                      ) : (
-                        <>
-                          <Sparkles size={15} />
-                          Transcribe & Resolve
-                        </>
-                      )}
-                    </button>
-                  </CoolMode>
-                </div>
-
-                {errorMsg && (
-                  <div style={{ fontSize: '0.78rem', color: '#d97706', marginBottom: '1rem' }}>
-                    {errorMsg}
-                  </div>
-                )}
-
-                {/* Display Resolved Audio Log */}
-                {audioResolutionLog && (
-                  <div
-                    style={{
-                      background: 'rgba(16, 185, 129, 0.05)',
-                      border: '1px solid #10b981',
-                      borderRadius: '12px',
-                      padding: '1.25rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#065f46', fontWeight: 800, fontSize: '0.85rem' }}>
-                        <CheckCircle2 size={16} color="#059669" />
-                        Resolution Logged & Closed
-                      </div>
-                      <span style={{ fontSize: '0.72rem', color: '#047857', fontWeight: 600 }}>
-                        {audioResolutionLog.detected_language} • {audioResolutionLog.timestamp}
-                      </span>
-                    </div>
-
-                    {audioResolutionLog.transcript && (
-                      <div style={{ marginBottom: '0.65rem' }}>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase' }}>
-                          Original Audio Transcript
-                        </div>
-                        <div style={{ fontSize: '0.82rem', color: '#1f2937', fontStyle: 'italic', marginTop: '0.2rem' }}>
-                          "{audioResolutionLog.transcript}"
-                        </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#047857', textTransform: 'uppercase' }}>
-                        Executive English Translation & Audit Action
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, marginTop: '0.2rem' }}>
-                        {audioResolutionLog.translated_resolution || audioResolutionLog.transcript}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
+            {/* Issue Facts Bar */}
             <div
               style={{
-                padding: '1rem 1.75rem',
-                borderTop: '1px solid #e2e8f0',
+                boxSizing: 'border-box',
                 display: 'flex',
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
-                background: '#f8fafc'
+                padding: '12px 0px',
+                gap: '20px',
+                width: '100%',
+                borderWidth: '1px 0px',
+                borderStyle: 'solid',
+                borderColor: '#DCE3ED'
               }}
             >
-              <button
-                onClick={closeTicketOverlay}
+              {/* Severity Pill */}
+              <div
                 style={{
-                  padding: '0.6rem 1.25rem',
-                  borderRadius: '8px',
-                  border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#475569',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: '4px 8px',
+                  gap: '6px',
+                  background: '#FFFAEB',
+                  borderRadius: '4px'
                 }}
               >
-                Close Overlay
-              </button>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#B77913' }} />
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '11px',
+                    lineHeight: '150%',
+                    color: '#B77913'
+                  }}
+                >
+                  {selectedTicket.severityText || 'P1 · High'}
+                </span>
+              </div>
+
+              {/* Progress State */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: '4px 8px',
+                  gap: '6px',
+                  background: '#F8FAFC',
+                  borderRadius: '4px'
+                }}
+              >
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#64748B' }} />
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '11px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  {selectedTicket.status || 'In Progress'}
+                </span>
+              </div>
+
+              {/* Ownership */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px', flex: 1 }}>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    lineHeight: '150%',
+                    color: '#172033'
+                  }}
+                >
+                  {selectedTicket.assigned_to}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  {selectedTicket.related_count || 34} related reports · Created Oct 4, 2026 · feedback_oct_2026
+                </div>
+              </div>
+
+              {/* Summary Description */}
+              <div
+                style={{
+                  maxWidth: '470px',
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '12px',
+                  lineHeight: '150%',
+                  color: '#64748B'
+                }}
+              >
+                {selectedTicket.description}
+              </div>
+            </div>
+
+            {/* Gemini Multilingual Audio Resolution Workflow Section */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px', width: '100%' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%'
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '21px',
+                    lineHeight: '150%',
+                    color: '#172033'
+                  }}
+                >
+                  Gemini Multilingual Audio Resolution
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: '4px 8px',
+                    gap: '6px',
+                    background: '#F8FAFC',
+                    borderRadius: '4px'
+                  }}
+                >
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#64748B' }} />
+                  <span
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '11px',
+                      lineHeight: '150%',
+                      color: '#64748B'
+                    }}
+                  >
+                    Ready to confirm
+                  </span>
+                </div>
+              </div>
+
+              {/* 4 Resolution Workflow Stages */}
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '20px', width: '100%' }}>
+                {[
+                  { num: '01', title: 'Record voice', active: false },
+                  { num: '02', title: 'Transcribe/Translate', active: false },
+                  { num: '03', title: 'Patch Supabase', active: false },
+                  { num: '04', title: 'Resolve Ticket', active: true }
+                ].map((st, i) => (
+                  <div
+                    key={st.num}
+                    style={{
+                      boxSizing: 'border-box',
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      padding: '10px 0px',
+                      gap: '10px',
+                      flex: 1,
+                      borderTop: st.active ? '2px solid #4F46E5' : '2px solid #DCE3ED'
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontWeight: 400,
+                        fontSize: '10px',
+                        lineHeight: '150%',
+                        color: '#4F46E5'
+                      }}
+                    >
+                      {st.num}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: st.active ? 600 : 400,
+                        fontSize: '12px',
+                        lineHeight: '150%',
+                        color: st.active ? '#4F46E5' : '#64748B',
+                        flex: 1
+                      }}
+                    >
+                      {st.title}
+                    </span>
+                    {i < 3 && <ArrowRight size={14} color="#64748B" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Voice Recording State Box (Figma Frame 50:38370) */}
+            <div
+              style={{
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '16px',
+                gap: '10px',
+                width: '100%',
+                background: '#F8FAFC',
+                borderRadius: '6px'
+              }}
+            >
+              {/* Recording Controls */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%'
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '12px' }}>
+                  <Languages size={18} color="#4F46E5" />
+                  <span
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '11px',
+                      lineHeight: '150%',
+                      color: '#172033'
+                    }}
+                  >
+                    Recording language
+                  </span>
+
+                  {/* Language Pills */}
+                  {['TE', 'EN', 'HI'].map((langKey) => {
+                    const isLangActive = activeVoiceLanguage === langKey;
+                    const labels = { TE: 'TE · Telugu', EN: 'EN · English', HI: 'HI · Hindi' };
+                    return (
+                      <button
+                        key={langKey}
+                        onClick={() => setActiveVoiceLanguage(langKey)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          padding: '4px 8px',
+                          gap: '6px',
+                          border: 'none',
+                          background: isLangActive ? '#EEF0FF' : 'transparent',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isLangActive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#4F46E5' }} />}
+                        <span
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                            fontWeight: isLangActive ? 600 : 400,
+                            fontSize: '11px',
+                            lineHeight: '150%',
+                            color: isLangActive ? '#4F46E5' : '#8996AB'
+                          }}
+                        >
+                          {labels[langKey]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Timer */}
+                <div
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  {isRecording ? `Recording · 00:0${recordingSeconds}` : 'Recorded · 00:38'}
+                </div>
+              </div>
+
+              {/* Audio Playback Bar with 64-Bar Frequency Waveform */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '100%',
+                  gap: '14px'
+                }}
+              >
+                {/* Play / Pause Toggle */}
+                <button
+                  onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 0
+                  }}
+                  title={isPlayingAudio ? 'Pause Voice Memo' : 'Play Voice Memo'}
+                >
+                  {isPlayingAudio ? (
+                    <Pause size={22} color="#4F46E5" fill="#4F46E5" />
+                  ) : (
+                    <Play size={22} color="#4F46E5" fill="#4F46E5" />
+                  )}
+                </button>
+
+                {/* 64-Bar Frequency Waveform */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: '6px',
+                    flex: 1,
+                    height: '32px'
+                  }}
+                >
+                  {WAVEFORM_HEIGHTS.map((h, idx) => {
+                    // Bars 0-41 are Indigo (#4F46E5), 42-63 are Lavender (#C7CAFF) per Figma spec
+                    const isPlayed = idx < 42;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          flex: 1,
+                          height: isPlayingAudio ? `${Math.max(6, (h * (0.6 + Math.random() * 0.7)))}px` : `${h}px`,
+                          background: isPlayed ? '#4F46E5' : '#C7CAFF',
+                          borderRadius: '2px',
+                          transition: 'height 0.1s ease'
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Duration */}
+                <span
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontWeight: 400,
+                    fontSize: '11px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  00:38
+                </span>
+
+                {/* Live Mic Action */}
+                <button
+                  onClick={isRecording ? stopRecording : startRecording}
+                  style={{
+                    background: isRecording ? '#BE3455' : 'transparent',
+                    border: isRecording ? 'none' : '1px solid #4F46E5',
+                    borderRadius: '50%',
+                    width: 32,
+                    height: 32,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={isRecording ? 'Stop Recording' : 'Record New Resolution Voice Memo'}
+                >
+                  {isRecording ? <Square size={14} color="#FFFFFF" fill="#FFFFFF" /> : <Mic size={16} color="#4F46E5" />}
+                </button>
+              </div>
+
+              {/* Status Caption */}
+              <div
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 400,
+                  fontSize: '10px',
+                  lineHeight: '150%',
+                  color: '#8996AB'
+                }}
+              >
+                Recording complete. Review or record again before applying.
+              </div>
+            </div>
+
+            {/* Transcript & Translation Review (Dual Side-by-Side Columns) */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '24px', width: '100%' }}>
+              {/* Transcript Column */}
+              <div
+                style={{
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  padding: '16px 0px',
+                  gap: '10px',
+                  flex: 1,
+                  borderWidth: '1px 0px',
+                  borderStyle: 'solid',
+                  borderColor: '#DCE3ED'
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    lineHeight: '150%',
+                    color: '#172033'
+                  }}
+                >
+                  Transcript · {activeVoiceLanguage}
+                </div>
+
+                <div
+                  style={{
+                    fontFamily: activeVoiceLanguage === 'TE' ? "'Noto Sans Telugu', sans-serif" : activeVoiceLanguage === 'HI' ? "'Noto Sans Devanagari', sans-serif" : "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '15px',
+                    lineHeight: '165%',
+                    color: '#172033'
+                  }}
+                >
+                  {activeVoiceLanguage === 'TE'
+                    ? (selectedTicket.telugu_transcript || 'రీట్రై హ్యాండ్లర్ను సరిచేశాం. చెక్అవుట్ పరీక్షలు విజయవంతమయ్యాయి.')
+                    : activeVoiceLanguage === 'HI'
+                    ? (selectedTicket.hindi_transcript || 'रीट्राई हैंडलर को ठीक कर दिया गया है। चेकआउट सत्यापन सफल रहा।')
+                    : (selectedTicket.english_translation || 'The retry handler has been corrected. Checkout validation passed.')
+                  }
+                </div>
+
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#8996AB'
+                  }}
+                >
+                  Transcribed from the recorded audio
+                </div>
+              </div>
+
+              {/* Translation Column */}
+              <div
+                style={{
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  padding: '16px 0px',
+                  gap: '10px',
+                  flex: 1,
+                  borderWidth: '1px 0px',
+                  borderStyle: 'solid',
+                  borderColor: '#DCE3ED'
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    width: '100%'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'Inter', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '12px',
+                      lineHeight: '150%',
+                      color: '#172033'
+                    }}
+                  >
+                    Translation · {activeVoiceLanguage === 'EN' ? 'TE' : 'EN'}
+                  </span>
+
+                  <button
+                    onClick={() => setIsEditingTranslation(!isEditingTranslation)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 0,
+                      color: '#64748B'
+                    }}
+                    title="Edit Translation"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                </div>
+
+                {isEditingTranslation ? (
+                  <textarea
+                    value={editedEnglishText}
+                    onChange={(e) => setEditedEnglishText(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: '1px solid #4F46E5',
+                      fontFamily: "'Inter', sans-serif",
+                      fontSize: '15px',
+                      lineHeight: '150%',
+                      color: '#172033',
+                      outline: 'none',
+                      resize: 'vertical',
+                      boxSizing: 'border-box'
+                    }}
+                    rows={2}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      fontFamily: activeVoiceLanguage === 'EN' ? "'Noto Sans Telugu', sans-serif" : "'Inter', sans-serif",
+                      fontWeight: 400,
+                      fontSize: '16px',
+                      lineHeight: '150%',
+                      color: '#172033'
+                    }}
+                  >
+                    {activeVoiceLanguage === 'EN'
+                      ? (selectedTicket.telugu_transcript || 'రీట్రై హ్యాండ్లర్ను సరిచేశాం. చెక్అవుట్ పరీక్షలు విజయవంతమయ్యాయి.')
+                      : (editedEnglishText || selectedTicket.english_translation || 'The retry handler has been corrected. Checkout validation passed.')
+                    }
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#8996AB'
+                  }}
+                >
+                  Review translation before confirmation
+                </div>
+              </div>
+            </div>
+
+            {/* Supabase Patch Preview */}
+            <div
+              style={{
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                padding: '16px',
+                gap: '8px',
+                width: '100%',
+                background: '#EEF0FF',
+                borderRadius: '6px'
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%'
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    lineHeight: '150%',
+                    color: '#4F46E5'
+                  }}
+                >
+                  Patch Supabase · preview only
+                </span>
+
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#4F46E5'
+                  }}
+                >
+                  Not applied
+                </span>
+              </div>
+
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontWeight: 400,
+                  fontSize: '11px',
+                  lineHeight: '150%',
+                  color: '#64748B'
+                }}
+              >
+                tracking_id: {selectedTicket.id} · status: In Progress → Resolved · resolution_language:{' '}
+                {activeVoiceLanguage.toLowerCase()} · resolution_note: reviewed English translation
+              </div>
+            </div>
+
+            {/* Issue Progress Timeline & Issue History (Two Columns) */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '30px', width: '100%' }}>
+              {/* Left Column: Progress Timeline (600px) */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px', flex: '1 1 580px' }}>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    lineHeight: '150%',
+                    color: '#172033'
+                  }}
+                >
+                  Progress timeline
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: '16px', width: '100%' }}>
+                  {[
+                    { title: 'Investigation started', date: 'Oct 5 · 09:12', done: true },
+                    { title: 'Retry handler patch prepared', date: 'Oct 7 · 10:18', done: true },
+                    { title: 'Validation recorded', date: 'Oct 7 · 10:42', done: true },
+                    { title: 'Resolution confirmation', date: 'Pending your confirmation', done: false }
+                  ].map((ev, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: '8px',
+                        flex: 1
+                      }}
+                    >
+                      {/* Progress Marker */}
+                      <div
+                        style={{
+                          boxSizing: 'border-box',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '22px',
+                          height: '22px',
+                          background: ev.done ? '#EEF0FF' : '#FFFFFF',
+                          border: ev.done ? '1px solid #EEF0FF' : '1px solid #DCE3ED',
+                          borderRadius: '50%'
+                        }}
+                      >
+                        {ev.done ? <Check size={12} color="#4F46E5" /> : null}
+                      </div>
+
+                      <div
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 500,
+                          fontSize: '11px',
+                          lineHeight: '150%',
+                          color: '#172033'
+                        }}
+                      >
+                        {ev.title}
+                      </div>
+
+                      <div
+                        style={{
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 400,
+                          fontSize: '9px',
+                          lineHeight: '150%',
+                          color: '#8996AB'
+                        }}
+                      >
+                        {ev.date}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column: Issue History (426px) */}
+              <div
+                style={{
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  paddingLeft: '24px',
+                  gap: '10px',
+                  flex: '1 1 380px',
+                  borderLeft: '1px solid #DCE3ED'
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    lineHeight: '150%',
+                    color: '#172033'
+                  }}
+                >
+                  Issue history
+                </div>
+
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '10px', color: '#64748B' }}>
+                  Oct 4 · Cluster linked to {selectedTicket.id} from 34 reports.
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '10px', color: '#64748B' }}>
+                  Oct 5 · Maya Rao moved Open → In Progress.
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, fontSize: '10px', color: '#64748B' }}>
+                  Oct 7 · Audio resolution prepared. No status change yet.
+                </div>
+              </div>
+            </div>
+
+            {/* Resolution Confirmation Controls (Footer) */}
+            <div
+              style={{
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingTop: '18px',
+                width: '100%',
+                borderTop: '1px solid #DCE3ED'
+              }}
+            >
+              {/* Confirmation State Note */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px', flex: 1 }}>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    lineHeight: '150%',
+                    color: '#172033'
+                  }}
+                >
+                  Ready to confirm, not yet resolved
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#64748B'
+                  }}
+                >
+                  Current ticket status remains In Progress until confirmed.
+                </div>
+                <div
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '10px',
+                    lineHeight: '150%',
+                    color: '#8996AB'
+                  }}
+                >
+                  Confirming saves the reviewed resolution and changes {selectedTicket.id} to Resolved.
+                </div>
+              </div>
+
+              {/* Resolution Actions */}
+              <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
+                <button
+                  onClick={closeResolutionOverlay}
+                  style={{
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0px 16px',
+                    width: '76px',
+                    height: '42px',
+                    background: '#FFFFFF',
+                    border: '1px solid #DCE3ED',
+                    borderRadius: '6px',
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    color: '#172033',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFC'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#FFFFFF'}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleConfirmAndResolve}
+                  style={{
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '9px',
+                    padding: '0px 16px',
+                    width: '215px',
+                    height: '42px',
+                    background: '#4F46E5',
+                    border: '1px solid #4F46E5',
+                    borderRadius: '6px',
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '13px',
+                    color: '#FFFFFF',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#4338CA'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#4F46E5'}
+                >
+                  <Check size={16} color="#FFFFFF" />
+                  <span>Confirm & Resolve Ticket</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

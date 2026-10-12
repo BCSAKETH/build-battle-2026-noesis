@@ -238,98 +238,193 @@ def adaption_copilot_chat(
 
     # Default Bar Chart: Category breakdown
     if "category" in q or "breakdown" in q or "topic" in q or "department" in q:
+        summary = "Volume is concentrated in Product Feedback (31%) and Customer Service (27%), while Fraud & Scam (15%) drives 92% of P0 financial risk."
         reply = (
-            "Here is the breakdown of feedback volume by category across all 7,223 ingested records. "
+            "Here is the breakdown of feedback volume by category across all 7,002 verified customer records. "
             "Notice that 'Product Feedback' and 'Customer Service' represent 58% of all feedback volume, "
             "while 'Fraud and Scam' accounts for 14.8% of items but triggers 92% of critical business risk."
         )
+        causal_trace = {
+            "root_cause": "Seller onboarding loophole allowing counterfeit merchants onto marketplace catalog without automated bank payout escrow.",
+            "business_impact": "Direct buyer chargeback claims and customer trust erosion ($42.5k annualized risk).",
+            "prescribed_action": "Freeze seller disbursement gateways, issue buyer credit voucher, enforce mandatory 2FA tier KYC onboarding."
+        }
+        key_findings = [
+            {"label": "Volume Concentration", "value": "58% in Core Product & Support", "severity": "info"},
+            {"label": "Critical Risk Exposure", "value": "92% concentrated in Fraud & Scam", "severity": "critical"},
+            {"label": "Conditioning Gain", "value": "+38.2% Classification Precision via Adaption", "severity": "success"}
+        ]
         chart = {
             "chartType": "bar",
-            "title": "Feedback Volume by Category",
+            "title": "Feedback Volume by Category (7,002 Records)",
             "xKey": "category",
             "yKey": "count",
             "data": [
-                {"category": "Product Feedback", "name": "Product Feedback", "count": 2240, "value": 2240, "fill": "#4F46E5"},
-                {"category": "Customer Service", "name": "Customer Service", "count": 1960, "value": 1960, "fill": "#6366F1"},
-                {"category": "Operational Issues", "name": "Operational Issues", "count": 1420, "value": 1420, "fill": "#06B6D4"},
-                {"category": "Fraud & Scam", "name": "Fraud & Scam", "count": 1070, "value": 1070, "fill": "#F43F5E"},
-                {"category": "Pricing & Billing", "name": "Pricing & Billing", "count": 533, "value": 533, "fill": "#F59E0B"}
+                {"category": "Product Feedback", "name": "Product Feedback", "count": 2240, "value": 2240, "fill": "#4F46E5", "pct": "32.0%"},
+                {"category": "Customer Service", "name": "Customer Service", "count": 1960, "value": 1960, "fill": "#6366F1", "pct": "28.0%"},
+                {"category": "Operational Issues", "name": "Operational Issues", "count": 1420, "value": 1420, "fill": "#06B6D4", "pct": "20.3%"},
+                {"category": "Fraud & Scam", "name": "Fraud & Scam", "count": 1070, "value": 1070, "fill": "#BE3455", "pct": "15.3%"},
+                {"category": "Pricing & Billing", "name": "Pricing & Billing", "count": 312, "value": 312, "fill": "#B77913", "pct": "4.4%"}
             ]
         }
         suggestions = ["Show severity breakdown", "Explain root cause of Fraud spikes", "What are the top PII issues?"]
+        directive = "Dispatch P0 ticket to Trust & Safety engineering to halt automated seller disbursements."
 
     # Pie Chart: Sentiment breakdown
     elif "sentiment" in q or "positive" in q or "negative" in q or "satisfaction" in q:
+        summary = "Conditioned sentiment reveals 46% Negative, 38% Positive, and 16% Neutral across 7,002 records."
         reply = (
             "Across the conditioned feedback dataset, sentiment is distributed as: "
             "46% Negative (elevated due to fraud and delivery complaints), 38% Positive, and 16% Neutral. "
             "Living data conditioning rephrased emotional hostility into objective root causes without losing signal fidelity."
         )
+        causal_trace = {
+            "root_cause": "Delivery delays from regional sorting hubs coupled with lack of automated transit SMS tracking.",
+            "business_impact": "+42% inbound ticket volume spikes and elevated customer agitation index.",
+            "prescribed_action": "Deploy webhook-driven push notifications at carrier handoff; route negative sentiment to priority queue."
+        }
+        key_findings = [
+            {"label": "Negative Cluster", "value": "46% concentrated in Fulfillment & Billing", "severity": "warning"},
+            {"label": "Positive Cluster", "value": "38% praising new v4 layout & speed", "severity": "success"},
+            {"label": "Neutral Cluster", "value": "16% exploratory feature requests", "severity": "info"}
+        ]
         chart = {
             "chartType": "pie",
             "title": "Customer Sentiment Distribution",
             "xKey": "category",
             "yKey": "count",
             "data": [
-                {"category": "Negative", "name": "Negative", "count": 3322, "value": 3322, "fill": "#F43F5E"},
-                {"category": "Positive", "name": "Positive", "count": 2745, "value": 2745, "fill": "#10B981"},
-                {"category": "Neutral", "name": "Neutral", "count": 1156, "value": 1156, "fill": "#94A3B8"}
+                {"category": "Negative", "name": "Negative", "count": 3221, "value": 3221, "fill": "#BE3455", "pct": "46.0%"},
+                {"category": "Positive", "name": "Positive", "count": 2660, "value": 2660, "fill": "#158366", "pct": "38.0%"},
+                {"category": "Neutral", "name": "Neutral", "count": 1121, "value": 1121, "fill": "#64748B", "pct": "16.0%"}
             ]
         }
         suggestions = ["Filter only Critical severity items", "Show MTTR resolution timeline", "Run causal trace on delivery"]
+        directive = "Enable proactive push notification webhook on logistics carrier transit status."
 
     # Area Chart: Severity over time
     elif "severity" in q or "critical" in q or "risk" in q or "trend" in q:
+        summary = "89 Critical P0 incidents actively quarantined. Peak occurred mid-week due to checkout gateway latency."
         reply = (
             "Severity analysis indicates 89 Critical (P0) incidents actively quarantined. "
             "Unconditioned raw streams suffered from 'Severity Blindness', treating minor shipping complaints "
             "and counterfeit merchant fraud with identical priority. Adaption conditioning isolates P0 threats in real-time."
         )
+        causal_trace = {
+            "root_cause": "Async payment retry loop causing duplicate auth holds on mobile web checkout.",
+            "business_impact": "-3.8% mobile checkout conversion and customer panic over duplicate charges.",
+            "prescribed_action": "Deploy idempotency key fix to payment gateway; auto-reverse duplicate pending holds."
+        }
+        key_findings = [
+            {"label": "Quarantined P0s", "value": "89 Critical Signals (100% Traceability)", "severity": "critical"},
+            {"label": "High Severity P1", "value": "1,240 High Priority items assigned to sprints", "severity": "warning"},
+            {"label": "Zero Hallucination", "value": "All severity ratings linked to exact ticket IDs", "severity": "success"}
+        ]
         chart = {
             "chartType": "area",
-            "title": "P0 & P1 Critical Severity Trend (Last 7 Days)",
+            "title": "P0 Critical Incident Volume Trend (Oct 1–7, 2026)",
             "xKey": "category",
             "yKey": "count",
             "data": [
-                {"category": "Mon", "day": "Mon", "count": 28, "critical_count": 28, "value": 28, "medium_count": 85},
-                {"category": "Tue", "day": "Tue", "count": 34, "critical_count": 34, "value": 34, "medium_count": 92},
-                {"category": "Wed", "day": "Wed", "count": 42, "critical_count": 42, "value": 42, "medium_count": 78},
-                {"category": "Thu", "day": "Thu", "count": 39, "critical_count": 39, "value": 39, "medium_count": 104},
-                {"category": "Fri", "day": "Fri", "count": 25, "critical_count": 25, "value": 25, "medium_count": 88},
-                {"category": "Sat", "day": "Sat", "count": 19, "critical_count": 19, "value": 19, "medium_count": 64},
-                {"category": "Sun", "day": "Sun", "count": 14, "critical_count": 14, "value": 14, "medium_count": 52}
+                {"category": "Oct 1", "day": "Oct 1", "count": 8, "critical_count": 8, "value": 8},
+                {"category": "Oct 2", "day": "Oct 2", "count": 12, "critical_count": 12, "value": 12},
+                {"category": "Oct 3", "day": "Oct 3", "count": 15, "critical_count": 15, "value": 15},
+                {"category": "Oct 4", "day": "Oct 4", "count": 24, "critical_count": 24, "value": 24},
+                {"category": "Oct 5", "day": "Oct 5", "count": 18, "critical_count": 18, "value": 18},
+                {"category": "Oct 6", "day": "Oct 6", "count": 8, "critical_count": 8, "value": 8},
+                {"category": "Oct 7", "day": "Oct 7", "count": 4, "critical_count": 4, "value": 4}
             ]
         }
         suggestions = ["Review open P0 tickets", "Trigger automated rollback on checkout", "Generate executive briefing"]
+        directive = "Quarantine remaining unverified checkout sessions and apply idempotency patch."
 
-    # Default General Overview
-    else:
+    # Radar Chart: Multidimensional operational blast radius
+    elif "radar" in q or "dimension" in q or "matrix" in q or "impact" in q or "blast" in q:
+        summary = "Financial harm (92/100) and brand trust (84/100) represent the most vulnerable exposure vectors."
         reply = (
-            f"InsightFlow Copilot analyzed the active dataset for tenant {current_user.get('email')}. "
-            "Total records: 7,223 | Reliability Score: 9.4/10 Grade A+ | Noise sanitized: 14.2%. "
-            "Would you like to examine category distributions, sentiment ratios, or view the 3-hop causal reasoning trace?"
+            "Multi-dimensional operational blast radius across 6 vector axes: "
+            "Payment checkout latency and merchant fraud introduce high financial vulnerability (92/100 and 88/100), "
+            "whereas support agent turnaround remains relatively insulated (38/100)."
         )
+        causal_trace = {
+            "root_cause": "Off-platform escrow bypass exploited by unverified merchant accounts.",
+            "business_impact": "Direct credit card chargeback dispute fees ($42.5k annualized risk).",
+            "prescribed_action": "Implement real-time seller verification gate and mandate in-app payment protection."
+        }
+        key_findings = [
+            {"label": "Highest Vulnerability", "value": "Financial Loss (92/100) & Legal SLA (88/100)", "severity": "critical"},
+            {"label": "Moderate Vulnerability", "value": "Customer Churn (76/100)", "severity": "warning"},
+            {"label": "Well Insulated", "value": "Support Agent Turnaround (38/100)", "severity": "success"}
+        ]
         chart = {
-            "chartType": "bar",
-            "title": "Key Signal Telemetry",
+            "chartType": "radar",
+            "title": "Operational Blast Radius Matrix (Risk 0-100)",
             "xKey": "category",
             "yKey": "count",
             "data": [
-                {"category": "Raw Rows", "metric": "Raw Rows", "name": "Raw Rows", "count": 7223, "value": 7223, "fill": "#94A3B8"},
-                {"category": "Clean Signals", "metric": "Clean Signals", "name": "Clean Signals", "count": 6199, "value": 6199, "fill": "#4F46E5"},
-                {"category": "Deduplicated", "metric": "Deduplicated", "name": "Deduplicated", "count": 1024, "value": 1024, "fill": "#10B981"},
-                {"category": "Critical P0", "metric": "Critical P0", "name": "Critical P0", "count": 89, "value": 89, "fill": "#F43F5E"}
+                {"category": "Financial Harm", "count": 92, "value": 92},
+                {"category": "Brand Trust", "count": 84, "value": 84},
+                {"category": "Customer Churn", "count": 76, "value": 76},
+                {"category": "Support Overload", "count": 68, "value": 68},
+                {"category": "Engineering Debt", "count": 58, "value": 58},
+                {"category": "Legal / SLA Risk", "count": 88, "value": 88}
             ]
         }
-        suggestions = ["Show category breakdown", "Explain Severity Blindness", "View Kanban issue tracker"]
+        suggestions = ["Show severity breakdown", "Explain root cause of Fraud spikes", "Filter only Critical items"]
+        directive = "Enforce stricter merchant onboarding checks to lower legal and financial liability."
+
+    # Default General Overview
+    else:
+        summary = "7,002 verified customer signals conditioned with 98.4% confidence and 0 hallucinations."
+        reply = (
+            f"Noesis Copilot analyzed the active dataset for tenant {current_user.get('email')}. "
+            "Total verified records: 7,002 | Reliability Score: 9.4/10 Grade A+ | Noise sanitized: 14.2%. "
+            "Would you like to examine category distributions, sentiment ratios, or view the 3-hop causal reasoning trace?"
+        )
+        causal_trace = {
+            "root_cause": "Raw customer input contains unstructured emotional rants and unindexed complaints.",
+            "business_impact": "Product and support teams spend 40+ hours weekly manually triaging noise.",
+            "prescribed_action": "Apply Adaption living data pipeline recipes to extract actionable root causes automatically."
+        }
+        key_findings = [
+            {"label": "Total Dataset Records", "value": "7,002 Verified Touchpoints", "severity": "info"},
+            {"label": "Critical Incidents", "value": "89 Quarantined P0 Alerts", "severity": "critical"},
+            {"label": "Pipeline Reliability", "value": "9.4 / 10 Enterprise Grade", "severity": "success"}
+        ]
+        chart = {
+            "chartType": "bar",
+            "title": "Dataset Processing Telemetry (7,002 Signals)",
+            "xKey": "category",
+            "yKey": "count",
+            "data": [
+                {"category": "Raw Ingested", "name": "Raw Ingested", "count": 7002, "value": 7002, "fill": "#8996AB"},
+                {"category": "Conditioned", "name": "Conditioned", "count": 6012, "value": 6012, "fill": "#4F46E5"},
+                {"category": "Duplicates Pruned", "name": "Duplicates Pruned", "count": 990, "value": 990, "fill": "#158366"},
+                {"category": "Critical P0", "name": "Critical P0", "count": 89, "value": 89, "fill": "#BE3455"}
+            ]
+        }
+        suggestions = ["Show category breakdown", "Explain Severity Blindness", "View 3-Hop Causal Traces"]
+        directive = "Review quarantined P0 alerts in Decision Intelligence and trigger engineering triage."
 
     return {
+        "status": "success",
+        "summary": summary,
         "reply": reply,
         "answer": reply,
+        "confidence_score": "98.4%",
+        "telemetry_metrics": {
+            "sample_size": 7002,
+            "confidence": "98.4%",
+            "p0_quarantined": 89,
+            "processing_time_ms": 118,
+            "data_freshness": "Oct 1–7, 2026 Live"
+        },
+        "key_findings": key_findings,
+        "causal_trace": causal_trace,
+        "prescribed_directive": directive,
         "chart": chart,
         "suggested_actions": suggestions,
         "suggestions": suggestions,
         "tenant_id": current_user.get("id"),
-        "timestamp": "Just now",
-        "status": "success"
+        "timestamp": "Just now"
     }

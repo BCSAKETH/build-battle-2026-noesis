@@ -3,19 +3,37 @@ import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap, LogOut, D
 import LanguageSelector from './LanguageSelector';
 import { useSettings } from '../context/SettingsContext';
 import CreditsModal from './CreditsModal';
+import SettingsModal from './SettingsModal';
 
-export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
+export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, authUser }) {
   const { appearance, setAppearance, workspaceScale, setWorkspaceScale, theme } = useSettings();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showCreditsModal, setShowCreditsModal] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [currentCredits, setCurrentCredits] = useState(() => {
     try {
       const stored = localStorage.getItem('noesis_ai_credits');
-      return stored ? parseInt(stored, 10) : 850;
+      return stored ? parseInt(stored, 10) : 1100;
     } catch {
-      return 850;
+      return 1100;
     }
   });
+
+  // Extract display user details from prop or local storage
+  const activeUser = authUser || (() => {
+    try {
+      const s = localStorage.getItem('noesis_auth_user');
+      return s ? JSON.parse(s) : null;
+    } catch {
+      return null;
+    }
+  })() || {
+    name: 'Maya Rao',
+    email: 'executive@noesis.internal',
+    role: 'Enterprise Operator'
+  };
+
+  const userInitial = (activeUser.name || activeUser.email || 'U').charAt(0).toUpperCase();
 
   return (
     <>
@@ -76,24 +94,24 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
           </div>
         </div>
 
-        {/* Right: Global Actions (Credits Quota, Upload Dataset, Language Selector, Settings Cog) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          {/* Interactive Credits Pill: "Learn how to get more credits" */}
+        {/* Right: Global Actions per Image 5 (Credits, Upload, Language, Dataset, Account with Settings) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Interactive Credits Pill: "Learn how to get more credits" (Image 5) */}
           <button
             onClick={() => setShowCreditsModal(true)}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.45rem 0.85rem',
+              gap: '0.45rem',
+              padding: '0.42rem 0.85rem',
               borderRadius: '999px',
               fontSize: '0.78rem',
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+              background: '#f0fdf4',
               color: '#059669',
               border: '1px solid #a7f3d0',
               cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(16, 185, 129, 0.1)',
+              boxShadow: '0 1px 2px rgba(16, 185, 129, 0.08)',
               transition: 'all 0.15s ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
@@ -107,14 +125,14 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
             </span>
           </button>
 
-          {/* Global Upload Dataset CTA */}
+          {/* Upload Dataset Button (Image 5) */}
           <button
             onClick={onOpenUpload}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.5rem 1rem',
+              gap: '0.45rem',
+              padding: '0.45rem 0.95rem',
               borderRadius: '8px',
               fontSize: '0.82rem',
               fontWeight: 700,
@@ -127,14 +145,14 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
             onMouseEnter={(e) => e.currentTarget.style.background = '#e0e7ff'}
             onMouseLeave={(e) => e.currentTarget.style.background = '#eef2ff'}
           >
-            <UploadCloud size={16} color="#4f46e5" />
+            <UploadCloud size={15} color="#4f46e5" />
             <span>Upload Dataset</span>
           </button>
 
           {/* Language Selector (EN, TE, HI) */}
           <LanguageSelector />
 
-          {/* Active Dataset Pill (from Figma design) */}
+          {/* Active Dataset Pill (Image 5) */}
           <div
             style={{
               display: 'flex',
@@ -150,70 +168,208 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
           >
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
             <span style={{ fontWeight: 700, color: '#0f172a' }}>feedback_oct_2026</span>
-            <span style={{ color: '#94a3b8' }}>&bull; 1,500 records &bull; Oct 1–7</span>
+            <span style={{ color: '#94a3b8' }}>&bull; 7,002 records &bull; Oct 1–7</span>
           </div>
 
-          {/* Settings Cog */}
-          <button
-            onClick={() => setShowSettingsModal(true)}
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              background: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: '#475569',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#cbd5e1';
-              e.currentTarget.style.color = '#0f172a';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#e2e8f0';
-              e.currentTarget.style.color = '#475569';
-            }}
-            title="Workspace Layout Settings"
-          >
-            <Settings size={18} />
-          </button>
-
-          {/* Logout Button */}
-          {onLogout && (
+          {/* Account Button with Dropdown (containing Settings, Account Details, Sign out per User Instruction & Image 5) */}
+          <div style={{ position: 'relative' }}>
             <button
-              onClick={onLogout}
+              onClick={() => setShowAccountMenu((prev) => !prev)}
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: '8px',
-                border: '1px solid #e2e8f0',
-                background: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: '0.55rem',
+                padding: '0.35rem 0.65rem 0.35rem 0.45rem',
+                borderRadius: '8px',
+                border: '1px solid #DCE3ED',
+                background: showAccountMenu ? '#EEF2FF' : '#FFFFFF',
                 cursor: 'pointer',
-                color: '#64748b',
                 transition: 'all 0.15s ease'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#fecdd3';
-                e.currentTarget.style.background = '#fff1f2';
-                e.currentTarget.style.color = '#ef4444';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#e2e8f0';
-                e.currentTarget.style.background = '#ffffff';
-                e.currentTarget.style.color = '#64748b';
-              }}
-              title="Sign Out of Workspace"
+              title="Account and Workspace Preferences"
             >
-              <LogOut size={16} />
+              {/* User Avatar Circle */}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '12px'
+                }}
+              >
+                {userInitial}
+              </div>
+
+              {/* User Name */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    color: '#172033',
+                    lineHeight: 1.2
+                  }}
+                >
+                  {activeUser.name || activeUser.email?.split('@')[0] || 'User'}
+                </span>
+                <span style={{ fontSize: '10px', color: '#64748B', lineHeight: 1 }}>
+                  {activeUser.role || 'Executive'}
+                </span>
+              </div>
+
+              <Sliders size={13} color="#64748B" style={{ marginLeft: 4 }} />
             </button>
-          )}
+
+            {/* Floating Account & Settings Menu Popover */}
+            {showAccountMenu && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  right: 0,
+                  width: '260px',
+                  background: '#FFFFFF',
+                  borderRadius: '10px',
+                  border: '1px solid #DCE3ED',
+                  boxShadow: '0 12px 32px rgba(15, 23, 42, 0.12)',
+                  zIndex: 200,
+                  overflow: 'hidden',
+                  animation: 'fadeIn 0.15s ease-out'
+                }}
+              >
+                {/* User Details Header */}
+                <div style={{ padding: '14px 16px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: '50%',
+                        background: '#4F46E5',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '14px'
+                      }}
+                    >
+                      {userInitial}
+                    </div>
+                    <div style={{ overflow: 'hidden' }}>
+                      <div style={{ fontWeight: 700, fontSize: '13px', color: '#0F172A', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                        {activeUser.name || 'Enterprise Operator'}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                        {activeUser.email || 'executive@noesis.internal'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Action Items */}
+                <div style={{ padding: '6px' }}>
+                  {/* Settings Trigger */}
+                  <button
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      setShowSettingsModal(true);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '9px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: '#172033',
+                      textAlign: 'left',
+                      transition: 'background 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#F1F5F9'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Settings size={15} color="#4F46E5" />
+                    <span>Settings · Layout Overlay</span>
+                  </button>
+
+                  {/* Credits Telemetry Trigger */}
+                  <button
+                    onClick={() => {
+                      setShowAccountMenu(false);
+                      setShowCreditsModal(true);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      padding: '9px 12px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: '#172033',
+                      textAlign: 'left',
+                      transition: 'background 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#F1F5F9'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <Zap size={15} color="#10B981" />
+                    <span>AI Quota & Usage</span>
+                  </button>
+
+                  <div style={{ height: '1px', background: '#E2E8F0', margin: '4px 0' }} />
+
+                  {/* Sign Out Trigger */}
+                  {onLogout && (
+                    <button
+                      onClick={() => {
+                        setShowAccountMenu(false);
+                        onLogout();
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '9px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: '#EF4444',
+                        textAlign: 'left',
+                        transition: 'background 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#FEF2F2'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <LogOut size={15} color="#EF4444" />
+                      <span>Sign out</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -224,137 +380,12 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout }) {
         onCreditsClaimed={(newAmt) => setCurrentCredits(newAmt)}
       />
 
-      {/* Global Settings Modal */}
-      {showSettingsModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(15, 23, 42, 0.45)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 120
-          }}
-          onClick={() => setShowSettingsModal(false)}
-        >
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              padding: '1.75rem',
-              width: '100%',
-              maxWidth: '460px',
-              boxShadow: '0 20px 40px -10px rgba(15, 23, 42, 0.2)',
-              border: '1px solid #e2e8f0'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <Sliders size={18} color="#4f46e5" />
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Workspace Preferences
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowSettingsModal(false)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Appearance Density Setting */}
-            <div style={{ marginBottom: '1.35rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.5rem' }}>
-                Layout Density (Appearance)
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                {[
-                  { key: 'Compact', label: 'Compact', desc: 'Dense padding' },
-                  { key: 'Standard', label: 'Standard', desc: 'Balanced' },
-                  { key: 'Expanded', label: 'Expanded', desc: 'Airy whitespace' }
-                ].map((opt) => (
-                  <button
-                    key={opt.key}
-                    onClick={() => setAppearance(opt.key)}
-                    style={{
-                      padding: '0.75rem 0.5rem',
-                      borderRadius: '8px',
-                      border: appearance === opt.key ? '2px solid #4f46e5' : '1px solid #e2e8f0',
-                      background: appearance === opt.key ? '#eef2ff' : '#f8fafc',
-                      color: appearance === opt.key ? '#4f46e5' : '#334155',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.2rem'
-                    }}
-                  >
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>{opt.label}</span>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{opt.desc}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Workspace Scale Width Setting */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', marginBottom: '0.5rem' }}>
-                Workspace Canvas Width (Scale)
-              </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                {[
-                  { key: 'Focused', label: 'Focused', pct: '35% width' },
-                  { key: 'Balanced', label: 'Balanced', pct: '65% width' },
-                  { key: 'FullCanvas', label: 'Full Canvas', pct: '92% width' }
-                ].map((opt) => (
-                  <button
-                    key={opt.key}
-                    onClick={() => setWorkspaceScale(opt.key)}
-                    style={{
-                      padding: '0.75rem 0.5rem',
-                      borderRadius: '8px',
-                      border: workspaceScale === opt.key ? '2px solid #4f46e5' : '1px solid #e2e8f0',
-                      background: workspaceScale === opt.key ? '#eef2ff' : '#f8fafc',
-                      color: workspaceScale === opt.key ? '#4f46e5' : '#334155',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '0.2rem'
-                    }}
-                  >
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>{opt.label}</span>
-                    <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{opt.pct}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowSettingsModal(false)}
-              style={{
-                width: '100%',
-                padding: '0.7rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: '#4f46e5',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '0.88rem',
-                cursor: 'pointer'
-              }}
-            >
-              Apply Preferences
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Global Settings Modal (Figma Frame 50:38765) */}
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
     </>
   );
 }
+

@@ -27,12 +27,32 @@ import NumberTicker from './ui/NumberTicker';
 import Highlighter from './ui/Highlighter';
 import DiaTextReveal from './ui/DiaTextReveal';
 import CoolMode from './ui/CoolMode';
+import BorderBeam from './ui/BorderBeam';
 
-// Default edge cases & inspected feedbacks for Decision Intelligence triage
+// Default edge cases & inspected feedbacks for Decision Intelligence triage (Figma Frame 50:38013)
 const DEFAULT_TRIAGE_ITEMS = [
+  {
+    id: 'FB-0831',
+    customer: 'Financial Reporting Team #831',
+    provenance: 'FB-0831 · Support chat · EN · Oct 7, 09:14',
+    timestamp: 'Oct 7, 09:14',
+    category: 'Operational Issues',
+    severity: 'P2 Medium',
+    ambiguityScore: 84,
+    status: 'Pending Review',
+    feedbackText: "“The CSV export finishes, but the file has no rows. I’ve tried the same date range twice and need it for our reporting.”",
+    rootCause: "CSV Streaming Buffer Flushed Prematurely: Worker closes connection header before SQL result set serialization finishes.",
+    impact: "Monthly reporting delay for 22 customer tenants; 14 support tickets escalated.",
+    recommendedAction: "Dispatch patch to asynchronous batch export queue with retry idempotency.",
+    priority: 'Medium',
+    assignedTeam: 'Data Platform',
+    confidence: '94.2%',
+    autoRouted: false
+  },
   {
     id: 'EDG-801',
     customer: 'Enterprise Tenant #4412',
+    provenance: 'FB-0820 · Enterprise Portal · EN · Oct 7, 08:30',
     timestamp: '12 mins ago',
     category: 'Fraud and Scam',
     severity: 'P0 Critical',
@@ -100,7 +120,7 @@ const DEFAULT_TRIAGE_ITEMS = [
   }
 ];
 
-export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, onIssueCreated }) {
+export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, onIssueCreated, incomingItems = [] }) {
   const [triageItems, setTriageItems] = useState(DEFAULT_TRIAGE_ITEMS);
   const [selectedItem, setSelectedItem] = useState(DEFAULT_TRIAGE_ITEMS[0]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,8 +129,27 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
   const [dispatchSuccess, setDispatchSuccess] = useState(null);
   const [activeHop, setActiveHop] = useState(0); // 0 = Root Cause, 1 = Impact, 2 = Action
   const [autoTriageCount, setAutoTriageCount] = useState(14); // P0 items already routed automatically
+  const [dismissedItems, setDismissedItems] = useState(new Set());
 
-  // Auto cycle active hop animation every 3.5 seconds
+  // Merge incoming items from Feedback Explorer or external events
+  useEffect(() => {
+    if (incomingItems && incomingItems.length > 0) {
+      setTriageItems((prev) => {
+        const existingIds = new Set(prev.map((i) => i.id));
+        const newOnes = incomingItems.filter((i) => !existingIds.has(i.id));
+        return [...newOnes, ...prev];
+      });
+      setSelectedItem(incomingItems[0]);
+    }
+  }, [incomingItems]);
+
+  // Clean raw markdown artifacts
+  const cleanSnippet = (t) => {
+    if (!t) return '';
+    return t.replace(/\*\*/g, '').replace(/“|”/g, '').replace(/^"|"$/g, '').trim();
+  };
+
+  // Auto cycle active hop animation every 4 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveHop((prev) => (prev + 1) % 3);
@@ -120,7 +159,8 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
 
   // Filtered queue items
   const filteredItems = triageItems.filter((item) => {
-    const matchesSearch = item.feedbackText.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    if (dismissedItems.has(item.id)) return false;
+    const matchesSearch = cleanSnippet(item.feedbackText).toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.rootCause.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCat = selectedCategory === 'All' || item.category === selectedCategory;
@@ -172,10 +212,12 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
   };
 
   const handleDismiss = (id) => {
-    setTriageItems((prev) => prev.filter((it) => it.id !== id));
-    if (selectedItem?.id === id) {
-      const remaining = triageItems.filter((it) => it.id !== id);
-      setSelectedItem(remaining[0] || null);
+    setDismissedItems((prev) => new Set([...prev, id]));
+    const remaining = filteredItems.filter((it) => it.id !== id);
+    if (remaining.length > 0) {
+      setSelectedItem(remaining[0]);
+    } else {
+      setSelectedItem(null);
     }
   };
 
@@ -436,7 +478,7 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
                       overflow: 'hidden'
                     }}
                   >
-                    "{item.feedbackText}"
+                    “{cleanSnippet(item.feedbackText)}”
                   </p>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem' }}>
@@ -484,9 +526,12 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
                 borderRadius: '16px',
                 border: '1px solid #e2e8f0',
                 padding: '1.5rem',
-                boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)'
+                boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
+              <BorderBeam duration={9} size={130} />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                   <div
@@ -543,7 +588,17 @@ export default function DecisionIntelligence({ apiBase = '', onDispatchIssue, on
                   borderLeft: '4px solid #4f46e5'
                 }}
               >
-                "{selectedItem.feedbackText}"
+                “{cleanSnippet(selectedItem.feedbackText)}”
+              </div>
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '11px',
+                  color: '#64748B',
+                  marginTop: '8px'
+                }}
+              >
+                Evidence provenance: {selectedItem.provenance || `${selectedItem.id} · Support chat · EN · Oct 7, 09:14`}
               </div>
             </div>
 

@@ -1,37 +1,46 @@
 import React from 'react';
 import {
   Sparkles,
-  LayoutDashboard,
-  Target,
-  Kanban,
+  BarChart3,
+  GitBranch,
+  Ticket,
   LogOut,
-  ChevronRight
+  Database
 } from 'lucide-react';
 
+/**
+ * Sidebar (Figma: Noesis · Workspace Sidebar - Frames 50:38765 & 50:38370)
+ * 
+ * Specifications:
+ * - Width: 240px, Background: #FFFFFF, Border-right: 1px solid #DCE3ED
+ * - Workspace identity: "Workspace" (13px font-weight 600 #172033), sample label #8996AB
+ * - 4 Navigation routes: 48px height each
+ *   - Active: background #EEF0FF, border-left: 2px solid #4F46E5, color #4F46E5
+ *   - Inactive: background #FFFFFF, color #64748B
+ * - Dataset context card: database icon, "Active dataset", "feedback_oct_2026", "7,002 verified records"
+ * - Sign Out button at bottom with log-out icon
+ */
 export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount = 0 }) {
   const routes = [
     {
       id: 'copilot',
       label: 'Noesis Copilot',
-      icon: Sparkles,
-      badge: 'AI Core'
+      icon: Sparkles
     },
     {
       id: 'dashboard',
       label: 'Dashboard',
-      icon: LayoutDashboard,
-      badge: 'Metrics'
+      icon: BarChart3
     },
     {
       id: 'decision',
       label: 'Decision Intelligence',
-      icon: Target,
-      badge: 'P0 Triage'
+      icon: GitBranch
     },
     {
       id: 'issues',
       label: 'Issue Tracker',
-      icon: Kanban,
+      icon: Ticket,
       badge: issuesCount > 0 ? issuesCount : undefined
     }
   ];
@@ -39,113 +48,225 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
   return (
     <aside
       style={{
-        width: '245px',
-        background: '#ffffff',
-        borderRight: '1px solid #e2e8f0',
+        boxSizing: 'border-box',
+        width: '240px',
+        background: '#FFFFFF',
+        borderRight: '1px solid #DCE3ED',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: 'calc(100vh - 68px)',
+        alignItems: 'flex-start',
+        padding: '36px 20px 24px',
+        gap: '32px',
+        height: 'calc(100vh - 80px)',
         position: 'sticky',
-        top: '68px',
-        padding: '1.25rem 0.85rem',
-        boxSizing: 'border-box',
+        top: '80px',
         userSelect: 'none',
         flexShrink: 0
       }}
     >
-      {/* 4 Core Routes */}
-      <div>
-        <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#94a3b8', padding: '0 0.65rem 0.65rem' }}>
-          Workspace Views
+      {/* Workspace Identity */}
+      <div
+        style={{
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          padding: '0px 12px',
+          gap: '6px',
+          width: '200px'
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 600,
+            fontSize: '13px',
+            lineHeight: '150%',
+            color: '#172033'
+          }}
+        >
+          Workspace
         </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-          {routes.map((r) => {
-            const Icon = r.icon;
-            const isActive = activeRoute === r.id;
-
-            return (
-              <button
-                key={r.id}
-                onClick={() => onNavigate(r.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  padding: '0.65rem 0.85rem',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: isActive ? '#eef2ff' : 'transparent',
-                  color: isActive ? '#4f46e5' : '#475569',
-                  fontSize: '0.85rem',
-                  fontWeight: isActive ? 700 : 500,
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease',
-                  position: 'relative'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.background = '#f8fafc';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                <Icon size={18} color={isActive ? '#4f46e5' : '#64748b'} />
-                <span style={{ flex: 1 }}>{r.label}</span>
-
-                {r.badge !== undefined && (
-                  <span
-                    style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      padding: '1px 6px',
-                      borderRadius: '9999px',
-                      background: isActive ? '#4f46e5' : '#f1f5f9',
-                      color: isActive ? '#ffffff' : '#64748b'
-                    }}
-                  >
-                    {r.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+        <div
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 400,
+            fontSize: '11px',
+            lineHeight: '150%',
+            color: '#8996AB'
+          }}
+        >
+          feedback_oct_2026
+        </div>
       </div>
 
-      {/* Logout Button anchored to the absolute bottom */}
-      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+      {/* Workspace Navigation */}
+      <div
+        style={{
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          gap: '4px',
+          width: '200px'
+        }}
+      >
+        {routes.map((r) => {
+          const Icon = r.icon;
+          const isActive = activeRoute === r.id;
+
+          return (
+            <button
+              key={r.id}
+              onClick={() => onNavigate(r.id)}
+              style={{
+                boxSizing: 'border-box',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                padding: '0px 12px',
+                gap: '10px',
+                width: '200px',
+                height: '48px',
+                background: isActive ? '#EEF0FF' : '#FFFFFF',
+                border: 'none',
+                borderLeft: isActive ? '2px solid #4F46E5' : '2px solid transparent',
+                borderRadius: isActive ? '0 6px 6px 0' : '6px',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.background = '#F8FAFC';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.background = '#FFFFFF';
+              }}
+            >
+              <Icon size={18} color={isActive ? '#4F46E5' : '#64748B'} />
+              <span
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: isActive ? 600 : 400,
+                  fontSize: '12px',
+                  lineHeight: '150%',
+                  color: isActive ? '#4F46E5' : '#64748B',
+                  flex: 1
+                }}
+              >
+                {r.label}
+              </span>
+
+              {r.badge !== undefined && (
+                <span
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    background: isActive ? '#4F46E5' : '#F1F5F9',
+                    color: isActive ? '#FFFFFF' : '#64748B'
+                  }}
+                >
+                  {r.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Dataset Context Card */}
+      <div
+        style={{
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          padding: '24px 12px 0px',
+          gap: '8px',
+          width: '200px',
+          borderTop: '1px solid #DCE3ED'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Database size={16} color="#64748B" />
+          <span
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 400,
+              fontSize: '10px',
+              lineHeight: '150%',
+              color: '#64748B'
+            }}
+          >
+            Active dataset
+          </span>
+        </div>
+
+        <div
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontWeight: 500,
+            fontSize: '11px',
+            lineHeight: '150%',
+            color: '#172033'
+          }}
+        >
+          feedback_oct_2026
+        </div>
+
+        <div
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 400,
+            fontSize: '11px',
+            lineHeight: '150%',
+            color: '#64748B'
+          }}
+        >
+          7,002 customer records
+        </div>
+      </div>
+
+      {/* Spacer */}
+      <div style={{ flex: 1 }} />
+
+      {/* Logout Action */}
+      <div style={{ width: '100%', padding: '0 12px' }}>
         <button
           onClick={onLogout}
           style={{
             display: 'flex',
+            flexDirection: 'row',
             alignItems: 'center',
-            gap: '0.75rem',
-            width: '100%',
-            padding: '0.65rem 0.85rem',
-            borderRadius: '8px',
-            border: 'none',
+            gap: '10px',
             background: 'transparent',
-            color: '#64748b',
-            fontSize: '0.85rem',
-            fontWeight: 600,
+            border: 'none',
+            padding: '8px 0',
             cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.15s ease'
+            color: '#64748B',
+            transition: 'color 0.15s ease'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#fff1f2';
-            e.currentTarget.style.color = '#be123c';
+            e.currentTarget.style.color = '#BE3455';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.color = '#64748b';
+            e.currentTarget.style.color = '#64748B';
           }}
         >
-          <LogOut size={17} />
-          <span>Sign Out</span>
+          <LogOut size={18} />
+          <span
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 400,
+              fontSize: '13px',
+              lineHeight: '150%'
+            }}
+          >
+            Sign out
+          </span>
         </button>
       </div>
     </aside>

@@ -25,112 +25,48 @@ import {
 import NoesisLogo from './NoesisLogo';
 import AdaptionCopilot from './AdaptionCopilot';
 import CoolMode from './ui/CoolMode';
+import FloatingPillNav from './ui/FloatingPillNav';
+import ScrollProgress from './ui/ScrollProgress';
+import InteractiveGridPattern from './ui/InteractiveGridPattern';
+import DovetailFeatureCard from './ui/DovetailFeatureCard';
+import RainbowButton from './ui/RainbowButton';
+import AuroraText from './ui/AuroraText';
+import LineShadowText from './ui/LineShadowText';
+import TextAnimate from './ui/TextAnimate';
+import TypingAnimation from './ui/TypingAnimation';
+import ScrollBasedVelocity, { ScrollVelocityRow } from './ui/ScrollBasedVelocity';
+import MorphingText from './ui/MorphingText';
+import Highlighter from './ui/Highlighter';
+import BorderBeam from './ui/BorderBeam';
+import TextReveal from './ui/TextReveal';
+import NumberTicker from './ui/NumberTicker';
+import ProgressiveBlur from './ui/ProgressiveBlur';
+import KineticText from './ui/KineticText';
+import ScrollReveal from './ui/ScrollReveal';
 
 export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedDovetailTheme, setSelectedDovetailTheme] = useState('all');
 
   return (
     <div style={{ background: '#ffffff', color: '#0f172a', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
-      {/* =========================================================================
-          1. PUBLIC NAVIGATION (Figma Frame: Public navigation)
-         ========================================================================= */}
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 60,
-          background: 'rgba(255, 255, 255, 0.92)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #e2e8f0',
-          padding: '0.85rem 2.5rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }} onClick={() => onLaunchApp('copilot')}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: '9px',
-                background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 3px 10px rgba(79, 70, 229, 0.25)'
-              }}
-            >
-              <svg viewBox="0 0 40 40" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="20" r="17" stroke="#ffffff" strokeWidth="2" strokeDasharray="3 3" opacity="0.8" />
-                <circle cx="20" cy="20" r="11" stroke="#38bdf8" strokeWidth="2.5" />
-                <circle cx="20" cy="20" r="4.5" fill="#ffffff" />
-              </svg>
-            </div>
-            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em' }}>
-              noesis
-            </span>
-          </div>
+      {/* Reactive ScrollProgress Bar */}
+      <ScrollProgress style={{ top: 0, height: '3px' }} />
 
-          <nav style={{ display: 'flex', gap: '1.75rem', fontSize: '0.86rem', fontWeight: 600, color: '#475569' }}>
-            <a href="#the-problem" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s ease' }} onMouseEnter={e => e.target.style.color = '#4f46e5'} onMouseLeave={e => e.target.style.color = '#475569'}>The problem</a>
-            <a href="#the-engine" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s ease' }} onMouseEnter={e => e.target.style.color = '#4f46e5'} onMouseLeave={e => e.target.style.color = '#475569'}>The engine</a>
-            <a href="#how-it-works" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s ease' }} onMouseEnter={e => e.target.style.color = '#4f46e5'} onMouseLeave={e => e.target.style.color = '#475569'}>How it works</a>
-            <a href="#security" style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.15s ease' }} onMouseEnter={e => e.target.style.color = '#4f46e5'} onMouseLeave={e => e.target.style.color = '#475569'}>Security</a>
-          </nav>
-        </div>
+      {/* Floating Pill Navigation (User Reference Images 1, 2, 3) */}
+      <FloatingPillNav onLaunchApp={onLaunchApp} onOpenAuth={onOpenAuth} />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-          <button
-            onClick={onOpenAuth}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              background: '#ffffff',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              color: '#334155',
-              cursor: 'pointer'
-            }}
-          >
-            Login
-          </button>
-          <CoolMode>
-            <button
-              onClick={() => onLaunchApp('copilot')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.5rem 1.15rem',
-                borderRadius: '8px',
-                border: '1px solid #4338ca',
-                background: '#4f46e5',
-                color: '#ffffff',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
-              }}
-            >
-              <span>Create Account</span>
-              <ArrowRight size={14} />
-            </button>
-          </CoolMode>
-        </div>
-      </header>
 
       {/* =========================================================================
           2. EDITORIAL HERO (Figma Frame: Editorial hero)
          ========================================================================= */}
-      <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '4.5rem 1.5rem 3rem' }}>
+      <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '6.5rem 1.5rem 3rem', position: 'relative', overflow: 'hidden' }}>
+        <InteractiveGridPattern squares={[36, 16]} width={48} height={48} />
         {/* Top Header Index */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
-            CUSTOMER FEEDBACK / SEVERITY INTELLIGENCE
-          </span>
+          <div style={{ fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <MorphingText texts={['CUSTOMER FEEDBACK / SEVERITY INTELLIGENCE', 'CONTEXT. IMPACT. ACTION.', '7,002 VERIFIED CUSTOMER SIGNALS', 'ADAPTION COGNITIVE PIPELINE']} />
+          </div>
           <span style={{ fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#4f46e5' }}>
             CONTEXT. IMPACT. ACTION.
           </span>
@@ -150,9 +86,9 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
               }}
             >
               Feedback is loud. <br />
-              <span style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <AuroraText speed="5s">
                 Severity is quiet.
-              </span>
+              </AuroraText>
             </h1>
           </div>
 
@@ -173,32 +109,14 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
         {/* Hero Supporting Copy & CTAs */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '2rem', marginBottom: '2.5rem' }}>
           <p style={{ fontSize: '1.25rem', color: '#475569', maxWidth: '680px', lineHeight: 1.6, margin: 0 }}>
-            Find the signals hidden inside customer noise. Noesis connects feedback to severity, evidence and a clear next action.
+            <Highlighter action="highlight" color="#e0e7ff">Find the signals</Highlighter> hidden inside customer noise. Noesis connects feedback to <Highlighter action="underline" color="#4f46e5">severity, evidence</Highlighter> and a clear next action.
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <CoolMode>
-              <button
-                onClick={() => onLaunchApp('copilot')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.55rem',
-                  padding: '0.85rem 1.75rem',
-                  borderRadius: '10px',
-                  border: '1px solid #4338ca',
-                  background: '#4f46e5',
-                  color: '#ffffff',
-                  fontSize: '0.95rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 8px 20px rgba(79, 70, 229, 0.25)'
-                }}
-              >
-                <span>Enter Workspace</span>
-                <ArrowRight size={16} />
-              </button>
-            </CoolMode>
+            <RainbowButton onClick={() => onLaunchApp('copilot')}>
+              <span>Enter Workspace</span>
+              <ArrowRight size={16} />
+            </RainbowButton>
             <a
               href="#the-engine"
               style={{
@@ -218,8 +136,11 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </div>
         </div>
 
-        <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
-          Built for product, support and operations teams • Synchronized with <strong>7,002 customer records</strong>.
+        <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span>Built for product, support and operations teams • Synchronized with</span>
+          <strong style={{ color: '#0f172a', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+            <NumberTicker value={7002} /> customer records
+          </strong>.
         </div>
       </section>
 
@@ -243,14 +164,42 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
         </div>
       </section>
 
+      {/* Magic UI ScrollBasedVelocity Continuous Marquee Banner */}
+      <section style={{ borderBottom: '1px solid #e2e8f0', background: '#ffffff', overflow: 'hidden', padding: '1rem 0' }}>
+        <ScrollBasedVelocity>
+          <ScrollVelocityRow baseVelocity={4} direction={1}>
+            <span style={{ fontSize: '1rem', fontWeight: 800, color: '#4338ca', letterSpacing: '0.04em' }}>7,002 VERIFIED CUSTOMER SIGNALS</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#0284c7' }}>3-HOP CAUSAL TRACES</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#4f46e5' }}>REAL-TIME ADAPTION LABS</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#dc2626' }}>P0 FRAUD QUARANTINE</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+          </ScrollVelocityRow>
+          <ScrollVelocityRow baseVelocity={-4} direction={-1}>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#059669' }}>TELUGU HINDI ENGLISH AUDIO MEMOS</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '1rem', fontWeight: 800, color: '#4f46e5' }}>ZERO HALLUCINATION RUNTIME</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#7c3aed' }}>SUPABASE POSTGRES</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#ea580c' }}>GROQ LLAMA-3 &amp; GEMINI</span>
+            <span style={{ color: '#cbd5e1' }}>•</span>
+          </ScrollVelocityRow>
+        </ScrollBasedVelocity>
+      </section>
+
       {/* =========================================================================
           4. STAGE ONE · CUSTOMER VOICES INTO NOISE (Figma Frame: Stage one)
          ========================================================================= */}
-      <section id="the-problem" style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '2rem', marginBottom: '3rem' }}>
-          <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '4.5rem', fontWeight: 900, color: '#e2e8f0', lineHeight: 1 }}>
-            01
-          </div>
+      <ScrollReveal direction="up" distance={40}>
+        <section id="the-problem" style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '2rem', marginBottom: '3rem' }}>
+            <KineticText
+              text="01"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '4.5rem', fontWeight: 900, color: '#e2e8f0', lineHeight: 1 }}
+            />
           <div>
             <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#ef4444', marginBottom: '0.5rem' }}>
               THE PROBLEM / SEVERITY BLINDNESS
@@ -358,16 +307,19 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* =========================================================================
           5. STAGE TWO · ADAPTION ENGINE TRANSFORMATION (Figma Frame: Stage two)
          ========================================================================= */}
-      <section id="the-engine" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: '1312px', margin: '0 auto' }}>
+      <ScrollReveal direction="up" distance={40}>
+        <section id="the-engine" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '5rem 1.5rem' }}>
+          <div style={{ maxWidth: '1312px', margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '2rem', marginBottom: '3.5rem' }}>
-            <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '4.5rem', fontWeight: 900, color: '#cbd5e1', lineHeight: 1 }}>
-              02
-            </div>
+            <KineticText
+              text="02"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '4.5rem', fontWeight: 900, color: '#cbd5e1', lineHeight: 1 }}
+            />
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4f46e5', marginBottom: '0.5rem' }}>
                 THE TRANSFORMATION / ADAPTION ENGINE
@@ -409,7 +361,8 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
 
             {/* Engine Column */}
             <div style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', border: '1px solid #c7d2fe', borderRadius: '12px', padding: '1.5rem', textAlign: 'center' }}>
+              <div style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', border: '1px solid #c7d2fe', borderRadius: '12px', padding: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                <BorderBeam duration={8} size={110} />
                 <div style={{ width: 44, height: 44, borderRadius: '12px', background: '#4f46e5', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
                   <Cpu size={22} />
                 </div>
@@ -504,11 +457,13 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* =========================================================================
           6. SEVERITY RATIONALE (Figma Frame: Severity rationale)
          ========================================================================= */}
-      <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
+      <ScrollReveal direction="up" distance={40}>
+        <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.5rem' }}>
           <div>
             <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -573,6 +528,234 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
             </p>
             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#047857' }}>
               4,651 records · active dataset
+            </div>
+          </div>
+        </div>
+      </section>
+      </ScrollReveal>
+
+      {/* =========================================================================
+          6B. DOVETAIL RESEARCH SUITE · THEMATIC CLUSTERING & CUSTOMER VOICE (Light Theme)
+         ========================================================================= */}
+      <ScrollReveal direction="up" distance={40}>
+        <section
+          id="dovetail-insights"
+          style={{
+            background: '#FFFFFF',
+            borderTop: '1px solid #E2E8F0',
+            borderBottom: '1px solid #E2E8F0',
+            padding: '6rem 1.5rem',
+            position: 'relative'
+          }}
+        >
+          <div style={{ maxWidth: '1312px', margin: '0 auto' }}>
+          {/* Section Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '3rem' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '9999px', background: '#F1F5F9', border: '1px solid #CBD5E1', marginBottom: '1rem' }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4F46E5' }} />
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  DOVETAIL INSIGHTS · LIGHT THEME RESEARCH SUITE
+                </span>
+              </div>
+              <h2 style={{ fontSize: '2.8rem', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.03em', margin: 0, lineHeight: 1.15 }}>
+                7,002 unfiltered voices. <br />
+                <span style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #EC4899 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  Crystallized into verified research themes.
+                </span>
+              </h2>
+            </div>
+            <p style={{ fontSize: '1.05rem', color: '#64748B', maxWidth: '440px', lineHeight: 1.6, margin: 0 }}>
+              Dovetail-inspired thematic clustering, verbatim quotes with sentiment telemetry, and AI Copilot cards that turn customer friction into engineering tickets.
+            </p>
+          </div>
+
+          {/* Interactive Thematic Tag Cloud (Pill Tabs) */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '3.5rem' }}>
+            {[
+              { id: 'all', label: 'All Themes', count: '7,002 signals' },
+              { id: 'payment', label: '💳 Payment & Checkout Latency', count: '1,842 signals' },
+              { id: 'fraud', label: '🛡️ Merchant KYC & Fake Reviews', count: '1,070 signals' },
+              { id: 'shipping', label: '📦 3PL Carrier SLA Delivery Delay', count: '1,420 signals' },
+              { id: 'biometric', label: '📱 iOS 18 Biometric Auth Loops', count: '912 signals' },
+              { id: 'refund', label: '⚡ Refund Window & Dispute SLA', count: '1,758 signals' }
+            ].map((theme) => {
+              const isSelected = selectedDovetailTheme === theme.id;
+              return (
+                <button
+                  key={theme.id}
+                  onClick={() => setSelectedDovetailTheme(theme.id)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '8px 16px',
+                    borderRadius: '9999px',
+                    border: isSelected ? '1px solid #4F46E5' : '1px solid #E2E8F0',
+                    background: isSelected ? '#EEF2FF' : '#FFFFFF',
+                    color: isSelected ? '#4F46E5' : '#334155',
+                    fontSize: '13px',
+                    fontWeight: isSelected ? 700 : 500,
+                    cursor: 'pointer',
+                    boxShadow: isSelected ? '0 2px 8px rgba(79, 70, 229, 0.15)' : '0 1px 3px rgba(15, 23, 42, 0.04)',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span>{theme.label}</span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      padding: '2px 6px',
+                      borderRadius: '9999px',
+                      background: isSelected ? '#4F46E5' : '#F1F5F9',
+                      color: isSelected ? '#FFFFFF' : '#64748B'
+                    }}
+                  >
+                    {theme.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 3 Animated Feature Cards (Matching User Reference Image 4: @magicui-pro/animated-feature-card-3) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
+            <DovetailFeatureCard
+              tag="Make it Pop ✨"
+              author="Josh Sundquist"
+              role="Head of Insights · FinTech"
+              avatarGradient="linear-gradient(135deg, #EC4899 0%, #F59E0B 100%)"
+              quote="“Noesis turned 7,002 chaotic customer complaints into 5 actionable engineering tickets in under 30 seconds.”"
+              title="AI Co-Pilot"
+              subtitle="Use AI to make your writing stand out & transform raw rants into pristine engineering PRs."
+            />
+
+            <DovetailFeatureCard
+              tag="Audio Resolution 🎙️"
+              author="Priya Sharma"
+              role="Tier-1 Operations Lead"
+              avatarGradient="linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
+              quote="“The live Telugu, Hindi, and English cross-translation lets our Indian support specialists resolve voice escalations instantly.”"
+              title="Vernacular Audio Trace"
+              subtitle="Transcribe and verify voice memos with dual-channel human-in-the-loop audit trails."
+            />
+
+            <DovetailFeatureCard
+              tag="3-Hop Reasoning ⚡"
+              author="Marcus Vance"
+              role="Principal Systems Architect"
+              avatarGradient="linear-gradient(135deg, #10B981 0%, #3B82F6 100%)"
+              quote="“Severity Blindness was bankrupting our support team. Noesis connects root cause directly to PR diffs with zero hallucinations.”"
+              title="Causal Trace Matrix"
+              subtitle="Mathematical provenance connecting root cause, business blast radius, and automated action."
+            />
+          </div>
+
+          {/* Dovetail Verbatim Quotes & Evidence Explorer Spotlight */}
+          <div
+            style={{
+              background: '#F8FAFC',
+              borderRadius: '16px',
+              border: '1px solid #E2E8F0',
+              padding: '2.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#4F46E5' }}>
+                  DOVETAIL HIGHLIGHT REEL
+                </span>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#0F172A', margin: '4px 0 0 0' }}>
+                  Real customer voices from BuildBattle_2026_Customer_Feedback_Dataset.csv
+                </h3>
+              </div>
+              <button
+                onClick={() => onLaunchApp('dashboard')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  background: '#FFFFFF',
+                  border: '1px solid #CBD5E1',
+                  color: '#0F172A',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>View all 7,002 in Explorer</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+              {[
+                {
+                  id: 'CF-1082',
+                  tag: 'P0 Critical',
+                  tagBg: '#FFF1F3',
+                  tagColor: '#BE3455',
+                  customer: 'Verified Buyer #9128',
+                  channel: 'Mobile App · iOS 18.2',
+                  quote: '“Payment went through my bank account but your checkout screen crashed and order status is still empty! Money is debited!”',
+                  causality: 'Root Cause: 3DS webhook token timeout -> Action: Hotfix rollback payment SDK v2.3'
+                },
+                {
+                  id: 'CF-2409',
+                  tag: 'P1 High',
+                  tagBg: '#FFFAEB',
+                  tagColor: '#B77913',
+                  customer: 'Merchant Partner #348',
+                  channel: 'Seller Portal',
+                  quote: '“A fake store copied our exact product listings and started selling counterfeit knockoffs. Reported 4 times with zero response.”',
+                  causality: 'Root Cause: Seller onboarding KYC loophole -> Action: Freeze merchant gateway & review catalog'
+                },
+                {
+                  id: 'CF-5192',
+                  tag: 'P2 Moderate',
+                  tagBg: '#EEF0FF',
+                  tagColor: '#4F46E5',
+                  customer: 'Loyalty Member #801',
+                  channel: 'Customer Support Desk',
+                  quote: '“Delivery was promised within 2 days. It has now been 6 days with no tracking updates since leaving the Bangalore warehouse hub.”',
+                  causality: 'Root Cause: Regional 3PL sorting backlog -> Action: Push proactive SMS update & reroute freight'
+                }
+              ].map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    background: '#FFFFFF',
+                    borderRadius: '12px',
+                    border: '1px solid #E2E8F0',
+                    padding: '1.5rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', fontWeight: 700, color: '#64748B' }}>
+                      {item.id} · {item.channel}
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: item.tagBg, color: item.tagColor }}>
+                      {item.tag}
+                    </span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.55, color: '#1E293B', fontStyle: 'italic' }}>
+                    {item.quote}
+                  </p>
+                  <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '10px', fontSize: '11px', color: '#4F46E5', fontWeight: 600 }}>
+                    {item.causality}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -679,11 +862,13 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* =========================================================================
           8. PRODUCT VALUE · EVIDENCE BEFORE ASSUMPTIONS (Figma Frame)
          ========================================================================= */}
-      <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
+      <ScrollReveal direction="up" distance={40}>
+        <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr', gap: '3.5rem', alignItems: 'start' }}>
           {/* Left Explanation */}
           <div>
@@ -780,6 +965,7 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* =========================================================================
           9. LIVE COPILOT PREVIEW (Interactive Demonstration)
@@ -802,8 +988,9 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
       {/* =========================================================================
           10. TRUST AND SECURITY (Figma Frame: Trust and security)
          ========================================================================= */}
-      <section id="security" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '5rem 1.5rem' }}>
-        <div style={{ maxWidth: '1312px', margin: '0 auto' }}>
+      <ScrollReveal direction="up" distance={40}>
+        <section id="security" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '5rem 1.5rem' }}>
+          <div style={{ maxWidth: '1312px', margin: '0 auto' }}>
           <div style={{ marginBottom: '3rem' }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4f46e5' }}>
               ACCOUNTABLE BY DESIGN
@@ -852,44 +1039,30 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* =========================================================================
           11. STAGE THREE · ACCOUNT ACCESS CTA (Figma Frame: Stage three)
          ========================================================================= */}
-      <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '6rem 1.5rem', textAlign: 'center' }}>
+      <ScrollReveal direction="scale" distance={30}>
+        <section style={{ maxWidth: '1312px', margin: '0 auto', padding: '6rem 1.5rem', textAlign: 'center' }}>
         <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4f46e5', marginBottom: '0.75rem', display: 'inline-block' }}>
           03 / FROM CLARITY TO ACTION
         </span>
-        <h2 style={{ fontSize: '3.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.04em', lineHeight: 1.15, maxWidth: '850px', margin: '0 auto 1.25rem' }}>
-          See what your feedback is really telling you.
-        </h2>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '0 auto 1.25rem', maxWidth: '850px' }}>
+          <h2 style={{ fontSize: '3.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.04em', lineHeight: 1.15, margin: 0 }}>
+            <TextReveal>See what your feedback is really telling you.</TextReveal>
+          </h2>
+        </div>
         <p style={{ fontSize: '1.15rem', color: '#475569', maxWidth: '640px', margin: '0 auto 2.5rem', lineHeight: 1.6 }}>
           Create your workspace, bring a dataset and start with a better question.
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', alignItems: 'center' }}>
-          <CoolMode>
-            <button
-              onClick={() => onLaunchApp('copilot')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.55rem',
-                padding: '0.9rem 2rem',
-                borderRadius: '10px',
-                border: '1px solid #4338ca',
-                background: '#4f46e5',
-                color: '#ffffff',
-                fontSize: '1rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                boxShadow: '0 10px 25px rgba(79, 70, 229, 0.3)'
-              }}
-            >
-              <span>Launch Platform</span>
-              <ArrowRight size={16} />
-            </button>
-          </CoolMode>
+          <RainbowButton onClick={() => onLaunchApp('copilot')} style={{ padding: '0.9rem 2rem', fontSize: '1rem' }}>
+            <span>Launch Platform</span>
+            <ArrowRight size={16} />
+          </RainbowButton>
           <button
             onClick={onOpenAuth}
             style={{
@@ -907,6 +1080,7 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
           </button>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* =========================================================================
           12. FOOTER (Figma Frame: Footer)

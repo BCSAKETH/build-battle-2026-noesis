@@ -1,121 +1,146 @@
 import React from 'react';
 
 /**
- * CloudSyncLoader
- * From Uiverse.io by andrew-manzyk
- * Used for Dataset Upload & Groq Ingestion Pipeline sync state.
+ * CloudSyncLoader (From Uiverse.io by andrew-manzyk)
+ * Cloud sync animation with spinning arrows, dynamic morphing cloud bubbles, and streaming lines.
  */
-export function CloudSyncLoader({ text = 'Living Data Conditioning In Progress...', scale = 0.85 }) {
+export default function CloudSyncLoader({
+  scale = 1,
+  cloudColor = '#4387f4',
+  arrowsColor = '#80b1ff',
+  timeAnimation = '1s',
+  className = ''
+}) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', padding: '1rem' }}>
-      <div
-        className="cloud-loader-wrapper"
-        style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'center center'
-        }}
-      >
-        <div className="loader">
-          <svg id="cloud" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <g id="shapes">
-              <g>
-                <circle cx="20" cy="60" r="15" fill="#4387f4" />
-                <circle cx="50" cy="45" r="20" fill="#4387f4" />
-                <circle cx="80" cy="60" r="15" fill="#4387f4" />
-              </g>
-            </g>
-            <rect x="20" y="60" width="60" height="15" fill="#4387f4" />
-            <g id="arrows">
-              <path
-                d="M50 48 L44 54 H48 V66 H52 V54 H56 Z"
-                fill="#80b1ff"
-              />
-              <path
-                d="M50 78 L56 72 H52 V60 H48 V72 H44 Z"
-                fill="#80b1ff"
-              />
-            </g>
-            <g id="lines">
-              <g>
-                <line x1="15" y1="80" x2="25" y2="92" stroke="#80b1ff" />
-                <line x1="45" y1="80" x2="55" y2="92" stroke="#80b1ff" />
-                <line x1="75" y1="80" x2="85" y2="92" stroke="#80b1ff" />
-              </g>
-            </g>
-          </svg>
-        </div>
-      </div>
-
-      {text && (
-        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#334155', textAlign: 'center' }}>
-          {text}
-        </div>
-      )}
-
+    <div
+      className={`cloud-sync-loader-wrapper ${className}`}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        transform: `scale(${scale})`,
+        transformOrigin: 'center center'
+      }}
+    >
       <style>{`
-        .loader {
-          --cloud-color: #4f46e5;
-          --arrows-color: #818cf8;
-          --time-animation: 1.2s;
-          display: inline-block;
+        .cloud-sync-loader {
+          --cloud-color: ${cloudColor};
+          --arrows-color: ${arrowsColor};
+          --time-animation: ${timeAnimation};
+          position: relative;
+          width: 100px;
+          height: 100px;
         }
 
-        .loader #cloud {
-          width: 90px;
-          height: 90px;
+        .cloud-sync-loader #cloud {
+          width: 100px;
+          height: 100px;
         }
 
-        .loader #cloud rect {
+        .cloud-sync-loader #cloud rect {
           fill: var(--cloud-color);
         }
 
-        .loader #cloud #arrows {
-          transform-origin: 50% 63%;
+        .cloud-sync-loader #cloud g:nth-child(3) {
+          transform-origin: 50% 72.8938%;
           fill: var(--arrows-color);
-          filter: drop-shadow(0 0 4px rgba(79, 70, 229, 0.4));
-          animation: rotation var(--time-animation) linear infinite;
+          filter: drop-shadow(0 0 6px rgba(67, 135, 244, 0.5));
+          animation: cloud-sync-rotation var(--time-animation) linear infinite;
         }
 
-        .loader #shapes g circle {
-          animation: cloud calc(var(--time-animation) * 2) linear infinite;
+        .cloud-sync-loader #shapes g g circle {
+          animation: cloud-sync-cloud calc(var(--time-animation) * 2) linear infinite;
           fill: var(--cloud-color);
         }
 
-        .loader #shapes g circle:nth-child(2) {
+        .cloud-sync-loader #shapes g g circle:nth-child(2) {
           animation-delay: calc((var(--time-animation) * 2) / -3);
         }
 
-        .loader #shapes g circle:nth-child(3) {
+        .cloud-sync-loader #shapes g g circle:nth-child(3) {
           animation-delay: calc((var(--time-animation) * 2) / -1.5);
         }
 
-        .loader #lines g line {
-          stroke-width: 4;
+        .cloud-sync-loader svg #lines g line {
           stroke: var(--arrows-color);
+          stroke-width: 4;
           transform-origin: 50% 50%;
-          animation: lines calc(var(--time-animation) / 1.33) linear infinite;
+          rotate: -65deg;
+          animation: cloud-sync-lines calc(var(--time-animation) / 1.33) linear infinite;
         }
 
-        @keyframes rotation {
-          0% { transform: rotate(0deg); }
-          50% { transform: rotate(180deg); }
-          100% { transform: rotate(360deg); }
+        @keyframes cloud-sync-rotation {
+          0% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(180deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
-        @keyframes lines {
-          0% { transform: translateY(-6px); opacity: 0.2; }
-          50% { opacity: 1; }
-          100% { transform: translateY(6px); opacity: 0.2; }
+        @keyframes cloud-sync-lines {
+          0% {
+            transform: translateY(-10px);
+          }
+          100% {
+            transform: translateY(8px);
+          }
         }
 
-        @keyframes cloud {
-          0% { cx: 20; cy: 60; r: 15; }
-          50% { cx: 50; cy: 45; r: 20; }
-          100% { cx: 80; cy: 60; r: 15; }
+        @keyframes cloud-sync-cloud {
+          0% {
+            cx: 25px;
+            cy: 58px;
+            r: 14px;
+          }
+          50% {
+            cx: 50px;
+            cy: 42px;
+            r: 19px;
+          }
+          100% {
+            cx: 75px;
+            cy: 58px;
+            r: 14px;
+          }
         }
       `}</style>
+
+      <div className="cloud-sync-loader">
+        <svg id="cloud" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g id="shapes">
+            <g>
+              <circle cx="25" cy="58" r="14" />
+              <circle cx="50" cy="42" r="19" />
+              <circle cx="75" cy="58" r="14" />
+            </g>
+          </g>
+          <rect x="25" y="55" width="50" height="18" rx="8" />
+          {/* Rotating Sync Arrows Icon */}
+          <g>
+            <path
+              d="M50 63a9.5 9.5 0 0 1 8.5 5.5l2.2-1.3v5.8h-5.8l2.3-1.4A6.8 6.8 0 1 0 50 76.8v2.7A9.5 9.5 0 1 1 50 63z"
+            />
+          </g>
+        </svg>
+
+        <svg
+          id="lines"
+          viewBox="0 0 100 100"
+          style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g>
+            <line x1="30" y1="30" x2="30" y2="44" strokeLinecap="round" />
+            <line x1="50" y1="20" x2="50" y2="34" strokeLinecap="round" />
+            <line x1="70" y1="30" x2="70" y2="44" strokeLinecap="round" />
+          </g>
+        </svg>
+      </div>
     </div>
   );
 }
-
-export default CloudSyncLoader;

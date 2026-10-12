@@ -7,23 +7,23 @@ const SettingsContext = createContext({
   workspaceScale: 'Balanced', // 'Focused' | 'Balanced' | 'FullCanvas'
   theme: 'light',
   language: 'en',
-  setAppearance: () => {},
-  setWorkspaceScale: () => {},
-  setLanguage: () => {},
-  setTheme: () => {},
+  setAppearance: () => { },
+  setWorkspaceScale: () => { },
+  setLanguage: () => { },
+  setTheme: () => { },
   getScaleWidth: () => '65%',
   getDensityStyles: () => ({})
 });
 
 export function SettingsProvider({ children }) {
-  // 1. Appearance Layout Density: 'Compact' (dense), 'Standard' (balanced), 'Expanded' (high whitespace)
+  // 1. Appearance Layout Density: 'Compact' (32px rows), 'Balanced' (48px rows), 'Spacious' (64px rows)
   const [appearance, setAppearanceState] = useState(() => {
-    return localStorage.getItem('noesis_appearance') || 'Standard';
+    return localStorage.getItem('noesis_appearance') || 'Balanced';
   });
 
-  // 2. Workspace Scale: 'Focused' (35%), 'Balanced' (65%), 'FullCanvas' (92%)
+  // 2. Workspace Scale: 'Compact' (1024px · 70%), 'Standard' (1280px · 85%), 'Wide' (1440px · 100%)
   const [workspaceScale, setWorkspaceScaleState] = useState(() => {
-    return localStorage.getItem('noesis_workspace_scale') || 'Balanced';
+    return localStorage.getItem('noesis_workspace_scale') || 'Wide';
   });
 
   // 3. Theme: Strictly Light Palette per Executive Directive
@@ -36,15 +36,43 @@ export function SettingsProvider({ children }) {
     return localStorage.getItem('noesis_lang') || 'en';
   });
 
-  // Sync layout attributes on document element
+  // Sync layout attributes and CSS custom properties on document element
   useEffect(() => {
-    document.documentElement.setAttribute('data-appearance', appearance.toLowerCase());
+    const root = document.documentElement;
+    root.setAttribute('data-appearance', appearance.toLowerCase());
     localStorage.setItem('noesis_appearance', appearance);
+
+    // Apply typography scale & row spacing variables
+    if (appearance === 'Compact') {
+      root.style.setProperty('--app-font-scale', '0.88');
+      root.style.setProperty('--app-row-height', '32px');
+      root.style.setProperty('--app-density-padding', '8px');
+    } else if (appearance === 'Spacious') {
+      root.style.setProperty('--app-font-scale', '1.12');
+      root.style.setProperty('--app-row-height', '64px');
+      root.style.setProperty('--app-density-padding', '24px');
+    } else {
+      root.style.setProperty('--app-font-scale', '1.0');
+      root.style.setProperty('--app-row-height', '48px');
+      root.style.setProperty('--app-density-padding', '16px');
+    }
   }, [appearance]);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-scale', workspaceScale.toLowerCase());
+    const root = document.documentElement;
+    root.setAttribute('data-scale', workspaceScale.toLowerCase());
     localStorage.setItem('noesis_workspace_scale', workspaceScale);
+
+    if (workspaceScale === 'Compact') {
+      root.style.setProperty('--app-workspace-max-width', '1024px');
+      root.style.setProperty('--app-workspace-pct', '70%');
+    } else if (workspaceScale === 'Standard') {
+      root.style.setProperty('--app-workspace-max-width', '1280px');
+      root.style.setProperty('--app-workspace-pct', '85%');
+    } else {
+      root.style.setProperty('--app-workspace-max-width', '1440px');
+      root.style.setProperty('--app-workspace-pct', '100%');
+    }
   }, [workspaceScale]);
 
   useEffect(() => {
@@ -120,16 +148,16 @@ export function SettingsProvider({ children }) {
     localStorage.setItem('noesis_theme', newTheme);
   };
 
-  // Helper function: returns calculated container max-width percentage
+  // Helper function: returns calculated container max-width string
   const getScaleWidth = () => {
     switch (workspaceScale) {
-      case 'Focused':
-        return '35%';
-      case 'FullCanvas':
-        return '92%';
-      case 'Balanced':
+      case 'Compact':
+        return '1024px';
+      case 'Standard':
+        return '1280px';
+      case 'Wide':
       default:
-        return '65%';
+        return '1440px';
     }
   };
 
@@ -137,12 +165,12 @@ export function SettingsProvider({ children }) {
   const getDensityStyles = () => {
     switch (appearance) {
       case 'Compact':
-        return { padding: '0.75rem', gap: '0.75rem', fontSize: '0.82rem' };
-      case 'Expanded':
-        return { padding: '2.5rem', gap: '2rem', fontSize: '0.94rem' };
-      case 'Standard':
+        return { padding: '0.75rem', gap: '0.75rem', fontSize: '0.82rem', rowHeight: '32px' };
+      case 'Spacious':
+        return { padding: '2.5rem', gap: '2rem', fontSize: '1.05rem', rowHeight: '64px' };
+      case 'Balanced':
       default:
-        return { padding: '1.5rem', gap: '1.25rem', fontSize: '0.88rem' };
+        return { padding: '1.5rem', gap: '1.25rem', fontSize: '0.92rem', rowHeight: '48px' };
     }
   };
 

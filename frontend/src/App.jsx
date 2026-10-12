@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2 } from 'lucide-react';
 import { supabase, fetchIssuesFromCloud } from './supabase';
 import { useSettings } from './context/SettingsContext';
-import LandingHero from './pages/LandingHero';
+import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
 import TopBar from './components/TopBar';
+import Sidebar from './components/Sidebar';
 import NoesisCopilot from './components/NoesisCopilot';
 import Dashboard from './components/Dashboard';
 import DecisionIntelligence from './components/DecisionIntelligence';
@@ -14,6 +15,7 @@ import DatasetUploadModal from './components/DatasetUploadModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { FloatingDock } from './components/ui/FloatingDock';
 import ScrollProgress from './components/ui/ScrollProgress';
+import SmoothCursor from './components/ui/SmoothCursor';
 
 // Dynamic API_BASE for local development and Vercel serverless monorepo deployment
 const API_BASE =
@@ -56,6 +58,7 @@ export default function App() {
 
   // Operational Issues State (Synced with Supabase Cloud)
   const [issues, setIssues] = useState([]);
+  const [customTriageItems, setCustomTriageItems] = useState([]);
 
   // Fetch initial issues from Supabase cloud / cache
   useEffect(() => {
@@ -100,7 +103,7 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Launch workspace from landing page CTA or 1-click roles
+  // Launch workspace from landing page CTA or authenticated state
   const handleLaunchWorkspace = (roleKey) => {
     let currentUser = authUser;
     if (!currentUser) {
@@ -109,21 +112,11 @@ export default function App() {
         if (stored) currentUser = JSON.parse(stored);
       } catch (e) {}
     }
-    if (!currentUser && roleKey) {
-      currentUser = {
-        role: typeof roleKey === 'string' ? roleKey : 'executive',
-        name: roleKey === 'support' ? 'Marcus Chen' : roleKey === 'trust_safety' ? 'Elena Rostova' : 'Sarah Vance',
-        title: roleKey === 'support' ? 'Support Operations Lead' : roleKey === 'trust_safety' ? 'Trust & Safety Director' : 'Chief Executive / VP Product',
-        email: `${typeof roleKey === 'string' ? roleKey : 'executive'}@noesis.internal`,
-        authenticated: true
-      };
-      localStorage.setItem('noesis_auth_user', JSON.stringify(currentUser));
-    }
 
     if (currentUser) {
       setAuthUser(currentUser);
       setViewMode('dashboard');
-      showToast(`Welcome to NOESIS, ${currentUser.name || currentUser.email}!`);
+      showToast(`Welcome back to NOESIS, ${currentUser.name || currentUser.email}!`);
     } else {
       setShowAuthModal(true);
     }
@@ -148,12 +141,20 @@ export default function App() {
   };
 
   // --------------------------------------------------------------------------
-  // Landing Page Mode (2D Narrative + 3D Horizontal Particles + Split Auth)
+  // Landing Page Mode (Figma Frame 50:36875: Noesis · Full landing page)
   // --------------------------------------------------------------------------
   if (viewMode === 'landing') {
     return (
       <>
-        <LandingHero onLaunchWorkspace={handleLaunchWorkspace} />
+        <SmoothCursor color="#4F46E5" />
+        <LandingPage
+          onLaunchApp={(route) => {
+            if (route) setActiveRoute(route);
+            handleLaunchWorkspace();
+          }}
+          onOpenAuth={() => setShowAuthModal(true)}
+          apiBase={API_BASE}
+        />
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
@@ -164,7 +165,7 @@ export default function App() {
   }
 
   // --------------------------------------------------------------------------
-  // Enterprise Workspace Mode (4 Core Routes with Settings Scale & Executive Theme)
+  // Enterprise Workspace Mode (Figma Frames 50:38765, 50:38370, 50:38013, 50:37555, 50:37433)
   // --------------------------------------------------------------------------
   const density = getDensityStyles();
 
@@ -173,14 +174,15 @@ export default function App() {
       className="workspace-shell"
       style={{
         minHeight: '100vh',
-        background: '#f8fafc',
+        background: '#F8FAFC',
         display: 'flex',
         flexDirection: 'column',
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
+        fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
       }}
     >
       {/* TopBar with Active Dataset, Credits Quota, Upload, Languages, Settings & Logout */}
       <TopBar
+        authUser={authUser}
         onOpenUpload={() => setShowUploadModal(true)}
         onReturnToLanding={() => setViewMode('landing')}
         onLogout={handleLogout}
@@ -189,29 +191,31 @@ export default function App() {
       {/* Reactive ScrollProgress Line */}
       <ScrollProgress />
 
-      {/* Main Workspace Body - Full Width (Sidebar completely removed per redesign) */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 68px)', width: '100%' }}>
-        {/* Full-width Viewport Canvas */}
+      {/* Main Workspace Body (Full-Width Clean Workspace Canvas) */}
+      <div style={{ display: 'flex', flex: 1, minHeight: 'calc(100vh - 80px)', width: '100%' }}>
+
+        {/* Viewport Canvas */}
         <main
           style={{
             flex: 1,
             width: '100%',
             minWidth: 0,
-            background: '#f8fafc',
+            background: '#F8FAFC',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             overflowY: 'auto',
-            paddingBottom: '100px' // Clearance for FloatingDock
+            paddingBottom: '130px'
           }}
         >
           <div
             style={{
               width: getScaleWidth(),
-              maxWidth: '1440px',
-              padding: density.padding || '1.75rem',
+              maxWidth: getScaleWidth(),
+              padding: 0,
               boxSizing: 'border-box',
-              minHeight: '100%'
+              minHeight: '100%',
+              transition: 'width 0.3s ease, max-width 0.3s ease'
             }}
           >
             <ErrorBoundary onReset={() => setActiveRoute('copilot')}>
@@ -229,13 +233,22 @@ export default function App() {
 
               {/* Route 2: Dashboard with Recharts & Briefing PDF (Phase 3) */}
               {activeRoute === 'dashboard' && (
-                <Dashboard apiBase={API_BASE} />
+                <Dashboard
+                  apiBase={API_BASE}
+                  onNavigateRoute={(r) => setActiveRoute(r)}
+                  onDispatchToDecision={(item) => {
+                    setCustomTriageItems((prev) => [item, ...prev]);
+                    setActiveRoute('decision');
+                    showToast(`Dispatched ${item.id} to Decision Intelligence!`);
+                  }}
+                />
               )}
 
               {/* Route 3: Autonomous Decision Intelligence (Phase 4) */}
               {activeRoute === 'decision' && (
                 <DecisionIntelligence
                   apiBase={API_BASE}
+                  incomingItems={customTriageItems}
                   onDispatchIssue={(newIssue) => {
                     setIssues((prev) => [newIssue, ...prev]);
                     showToast(`Dispatched ${newIssue.id} to Issue Tracker!`);
