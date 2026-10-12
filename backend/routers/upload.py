@@ -32,7 +32,7 @@ uploaded_datasets_cache: Dict[str, Any] = {}
 
 def auto_map_columns_with_groq(headers: List[str], sample_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
-    Uses Groq Llama-3 (llama-3.3-70b-versatile) to dynamically infer column semantics
+    Uses Groq API (openai/gpt-oss-120b or llama-3.3-70b-versatile) to dynamically infer column semantics
     from CSV headers and sample data rows. Falls back to semantic fuzzy matching.
     """
     groq_api_key = os.environ.get("GROQ_API_KEY")
@@ -47,7 +47,7 @@ def auto_map_columns_with_groq(headers: List[str], sample_rows: List[Dict[str, A
     if groq_api_key and groq_api_key.strip():
         try:
             from groq import Groq
-            client = Groq(api_key=groq_api_key)
+            client = Groq(api_key=groq_api_key.strip())
             prompt = f"""You are an enterprise schema mapping engine. Given the CSV headers and sample rows below, map the columns to these internal target fields:
 1. "feedback_text": The column containing customer reviews, complaints, or text comments.
 2. "category": The column representing the category, department, or issue type.
@@ -65,25 +65,30 @@ Output strict JSON only with no explanation:
   "rating": "<column name or null>"
 }}"""
 
-            completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.0,
-                response_format={"type": "json_object"}
-            )
-            raw_content = completion.choices[0].message.content
-            parsed = json.loads(raw_content)
-            for k in ["feedback_text", "category", "timestamp", "rating"]:
-                if parsed.get(k) in headers:
-                    mapping[k] = parsed[k]
-            mapping["provider"] = "Groq Llama-3.3-70B Live API"
-            return mapping
+            # Try available text models on Groq
+            for candidate_model in ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b", "llama-3.3-70b-versatile"]:
+                try:
+                    completion = client.chat.completions.create(
+                        model=candidate_model,
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.0,
+                        response_format={"type": "json_object"}
+                    )
+                    raw_content = completion.choices[0].message.content
+                    parsed = json.loads(raw_content)
+                    for k in ["feedback_text", "category", "timestamp", "rating"]:
+                        if parsed.get(k) in headers:
+                            mapping[k] = parsed[k]
+                    mapping["provider"] = f"Groq ({candidate_model}) Live AI"
+                    return mapping
+                except Exception:
+                    continue
         except Exception as e:
-            print("Groq auto-mapping warning (falling back to fuzzy matcher):", e)
+            print("Groq auto-mapping notice (falling back to semantic matcher):", e)
 
     # Robust Semantic Fuzzy Fallback
     h_lower = {h.lower().strip(): h for h in headers}
-    
+
     # 1. Text column detection
     text_synonyms = ["review", "feedback", "comment", "text", "description", "body", "message", "complaint", "content", "summary"]
     for syn in text_synonyms:
@@ -164,47 +169,56 @@ async def upload_csv_dataset(
 ):
     """
     Multi-Tenant CSV Ingestion & Groq Auto-Mapping:
-    1. Reads multipart CSV file.
-    2. Uses Groq Llama-3 to automatically infer column mapping without hardcoded schemas.
-    3. Analyzes sentiment and risk per record.
-    4. Persists dataset into Supabase public.user_datasets scoped to current_user['id'].
+    1. Reads multipart CSV file with multi-encoding fallback.
+    2. Uses Groq to automatically infer column mapping without hardcoded schemas.
+    3. Fast-analyzes sentiment and risk per record.
+    4. Persists dataset metadata into Supabase user_datasets.
     5. Caches parsed dataset in-memory for immediate dashboard rendering.
     """
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files (.csv) are accepted.")
 
     contents = await file.read()
-    try:
-        df = pd.read_csv(io.BytesIO(contents))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse CSV file: {str(e)}")
+    df = None
+    parse_errors = []
 
-    if df.empty:
-        raise HTTPException(status_code=400, detail="Uploaded CSV file is empty.")
+    # Robust multi-encoding detection
+    for enc in ["utf-8", "utf-8-sig", "latin-1", "cp1252"]:
+        try:
+            df = pd.read_csv(io.BytesIO(contents), encoding=enc, on_bad_lines='skip')
+            break
+        except Exception as e:
+            parse_errors.append(f"{enc}: {e}")
 
-    headers = list(df.columns)
+    if df is None or df.empty:
+        raise HTTPException(status_code=400, detail=f"Failed to parse CSV file: {'; '.join(parse_errors[:2])}")
+
+    headers = [str(c).strip() for c in df.columns]
     sample_rows = df.head(3).to_dict(orient="records")
 
     # Call Groq Auto-Mapper
     column_mapping = auto_map_columns_with_groq(headers, sample_rows)
-    text_col = column_mapping.get("feedback_text")
-    cat_col = column_mapping.get("category")
+    text_col = column_mapping.get("feedback_text") or (headers[0] if headers else None)
+    cat_col = column_mapping.get("category") or (headers[1] if len(headers) > 1 else None)
     time_col = column_mapping.get("timestamp")
 
-    # Ingest and normalize records
+    # Extract column series safely
+    text_series = df[text_col].fillna("").astype(str).tolist() if text_col in df.columns else [""] * len(df)
+    cat_series = df[cat_col].fillna("General Feedback").astype(str).tolist() if cat_col in df.columns else ["General Feedback"] * len(df)
+    time_series = df[time_col].fillna("2026-10-12").astype(str).tolist() if time_col and time_col in df.columns else ["2026-10-12"] * len(df)
+
     normalized_records = []
-    for idx, row in df.iterrows():
-        review_text = str(row[text_col]) if text_col and pd.notna(row[text_col]) else ""
-        category_val = str(row[cat_col]) if cat_col and pd.notna(row[cat_col]) else "General Feedback"
-        timestamp_val = str(row[time_col]) if time_col and pd.notna(row[time_col]) else "2026-10-12"
-
-        analysis = analyze_record(review_text, category_val)
-
+    total_len = len(df)
+    for i in range(total_len):
+        rev = text_series[i]
+        cat = cat_series[i]
+        tim = time_series[i]
+        analysis = analyze_record(rev, cat)
         normalized_records.append({
-            "id": f"UP-{idx + 1:04d}",
-            "review": review_text,
-            "category": category_val,
-            "timestamp": timestamp_val,
+            "id": f"UP-{i + 1:04d}",
+            "review": rev,
+            "category": cat,
+            "timestamp": tim,
             "sentiment": analysis["sentiment"],
             "severity": analysis["severity"],
             "urgency": analysis["urgency"],
@@ -212,17 +226,18 @@ async def upload_csv_dataset(
         })
 
     # Cache dataset in memory
-    uploaded_datasets_cache[current_user["id"]] = normalized_records
+    user_id = current_user.get("id") or "00000000-0000-0000-0000-000000000001"
+    uploaded_datasets_cache[user_id] = normalized_records
 
     # Stream to Supabase public.user_datasets
     supabase_stored = False
     try:
+        user_uuid = user_id if user_id != "00000000-0000-0000-0000-000000000001" else None
         payload = json.dumps({
-            "user_id": current_user["id"],
-            "filename": file.filename,
-            "record_count": len(normalized_records),
-            "column_mapping": column_mapping,
-            "is_active": True
+            "user_id": user_uuid,
+            "dataset_name": file.filename,
+            "total_records": len(normalized_records),
+            "column_mapping": column_mapping
         }).encode("utf-8")
 
         req = urllib.request.Request(
@@ -242,12 +257,14 @@ async def upload_csv_dataset(
     except Exception as e:
         print("Supabase dataset persistence notice:", e)
 
+    provider_name = column_mapping.get("provider", "Groq Llama-3 Auto-Mapping")
     return {
         "success": True,
         "filename": file.filename,
         "total_records": len(normalized_records),
         "column_mapping": column_mapping,
-        "mapped_provider": column_mapping.get("provider"),
+        "mapped_provider": provider_name,
+        "groq_provider": provider_name,
         "supabase_stored": supabase_stored,
         "sample_preview": normalized_records[:5]
     }

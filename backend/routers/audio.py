@@ -70,13 +70,9 @@ async def process_audio_notes(
         except Exception:
             pass
 
-    # Process via google.genai if key is present and audio payload is valid
+    # Process via Gemini if key is present and audio payload is valid
     if gemini_api_key and gemini_api_key.strip() and len(audio_bytes) > 100:
         try:
-            from google import genai
-            from google.genai import types
-
-            client = genai.Client(api_key=gemini_api_key)
             prompt = (
                 f"You are an enterprise operations resolution assistant for customer ticket {issue_id} ({title}). "
                 f"Listen to this operator voice memo (spoken in Telugu, Hindi, or English). "
@@ -87,15 +83,29 @@ async def process_audio_notes(
                 f'{{"detected_language": "...", "transcript": "...", "translated_resolution": "..."}}'
             )
 
-            response = client.models.generate_content(
-                model="gemini-1.5-flash",
-                contents=[
+            raw_text = ""
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=gemini_api_key.strip())
+                model = genai.GenerativeModel("gemini-3.8-flash")
+                response = model.generate_content([
                     prompt,
-                    types.Part.from_bytes(data=audio_bytes, mime_type=content_type)
-                ]
-            )
+                    {"mime_type": content_type, "data": audio_bytes}
+                ])
+                raw_text = response.text.strip()
+            except Exception:
+                from google import genai
+                from google.genai import types
+                client = genai.Client(api_key=gemini_api_key.strip())
+                response = client.models.generate_content(
+                    model="gemini-3.8-flash",
+                    contents=[
+                        prompt,
+                        types.Part.from_bytes(data=audio_bytes, mime_type=content_type)
+                    ]
+                )
+                raw_text = response.text.strip()
 
-            raw_text = response.text.strip()
             if "{" in raw_text and "}" in raw_text:
                 cleaned_json = raw_text[raw_text.find("{"):raw_text.rfind("}") + 1]
                 parsed = json.loads(cleaned_json)
@@ -104,7 +114,7 @@ async def process_audio_notes(
                 translated_res = parsed.get("translated_resolution", "")
                 success_ai = True
         except Exception as e:
-            print("Gemini google.genai processing notice (using deterministic fallback):", e)
+            print("Gemini processing notice (using deterministic fallback):", e)
 
     # Deterministic High-Fidelity Regional Simulation Fallback
     if not success_ai:
