@@ -422,7 +422,11 @@ export default function AdaptionCopilot({ apiBase = '' }) {
                               <XAxis dataKey="category" tick={{ fontSize: 10, fill: '#64748b' }} />
                               <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
                               <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '8px', fontSize: '12px' }} />
-                              <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                                {m.chart.data.map((entry, index) => (
+                                  <Cell key={`adapt-bar-${index}`} fill={entry.fill || '#4f46e5'} />
+                                ))}
+                              </Bar>
                             </BarChart>
                           )}
                         </ResponsiveContainer>
