@@ -43,6 +43,7 @@ import NumberTicker from './ui/NumberTicker';
 import ProgressiveBlur from './ui/ProgressiveBlur';
 import KineticText from './ui/KineticText';
 import ScrollReveal from './ui/ScrollReveal';
+import CognitiveCubeAssembly from './ui/CognitiveCubeAssembly';
 
 export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
   const [activeTab, setActiveTab] = useState('all');
@@ -193,270 +194,774 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
       {/* =========================================================================
           4. STAGE ONE · CUSTOMER VOICES INTO NOISE (Figma Frame: Stage one)
          ========================================================================= */}
+      {/* =========================================================================
+          4. STAGE ONE · CUSTOMER VOICES INTO NOISE (Figma Node 50:36925)
+         ========================================================================= */}
       <ScrollReveal direction="up" distance={40}>
-        <section id="the-problem" style={{ maxWidth: '1312px', margin: '0 auto', padding: '5rem 1.5rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '2rem', marginBottom: '3rem' }}>
-            <KineticText
-              text="01"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '4.5rem', fontWeight: 900, color: '#e2e8f0', lineHeight: 1 }}
-            />
-          <div>
-            <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#ef4444', marginBottom: '0.5rem' }}>
-              THE PROBLEM / SEVERITY BLINDNESS
+        <section id="the-problem" style={{ maxWidth: '1312px', margin: '0 auto', padding: '5.5rem 1.5rem' }}>
+          {/* Header with Ghost 01 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '2rem', marginBottom: '2.5rem', alignItems: 'flex-start' }}>
+            <div
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '5.2rem',
+                fontWeight: 900,
+                color: '#DCE3ED',
+                lineHeight: 0.85,
+                letterSpacing: '-0.05em',
+                userSelect: 'none'
+              }}
+            >
+              01
             </div>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.2, margin: '0 0 1rem 0' }}>
-              The loudest complaint isn’t always the most urgent.
-            </h2>
-            <p style={{ fontSize: '1.1rem', color: '#475569', lineHeight: 1.6, maxWidth: '820px', margin: 0 }}>
-              When every signal arrives with the same visual weight, a billing failure and a feature request occupy identical space. Real risk disappears inside unstructured noise.
-            </p>
-          </div>
-        </div>
-
-        {/* Customer Voices Simulation vs Fragment Cloud */}
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '2rem', marginBottom: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.75rem' }}>
-            {/* Voice 1 */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#ef4444', background: '#fee2e2', padding: '2px 8px', borderRadius: '4px' }}>
-                  SUPPORT CHAT
-                </span>
-                <span style={{ width: 24, height: 24, borderRadius: '50%', background: '#e2e8f0', fontSize: '0.68rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  AK
-                </span>
-              </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
-                “I was charged twice.”
-              </div>
-            </div>
-
-            {/* Voice 2 */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#10b981', background: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>
-                  APP REVIEW
-                </span>
-                <span style={{ width: 24, height: 24, borderRadius: '50%', background: '#e2e8f0', fontSize: '0.68rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  MJ
-                </span>
-              </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
-                “Love the new layout!”
-              </div>
-            </div>
-
-            {/* Voice 3 */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#f59e0b', background: '#fef3c7', padding: '2px 8px', borderRadius: '4px' }}>
-                  CUSTOMER CALL
-                </span>
-                <span style={{ width: 24, height: 24, borderRadius: '50%', background: '#e2e8f0', fontSize: '0.68rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  SR
-                </span>
-              </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
-                “Checkout keeps timing out.”
-              </div>
-            </div>
-
-            {/* Voice 4 */}
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6366f1', background: '#e0e7ff', padding: '2px 8px', borderRadius: '4px' }}>
-                  SURVEY RESPONSE
-                </span>
-                <span style={{ width: 24, height: 24, borderRadius: '50%', background: '#e2e8f0', fontSize: '0.68rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  ND
-                </span>
-              </div>
-              <div style={{ fontSize: '0.92rem', fontWeight: 600, color: '#0f172a' }}>
-                “Could you add dark mode?”
-              </div>
-            </div>
-          </div>
-
-          {/* Unstructured Fragment Cloud */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', opacity: 0.85, padding: '1rem', background: '#ffffff', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            {[
-              'Payment retry failed', 'Great service', 'Export is empty', 'Still loading…',
-              'Charged twice', 'Add dark mode', 'Can’t check out', 'Missing receipt',
-              'Looks good', 'Status stale', 'Please help', 'Slow response', 'Failed webhooks',
-              'Fraudulent seller detected', 'Invoice incorrect'
-            ].map((tag, i) => (
-              <span key={i} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: 500 }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
             <div>
-              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#ef4444', letterSpacing: '0.04em' }}>
-                DIFFERENT IMPACT. IDENTICAL INBOX.
-              </span>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0 0 0' }}>
-                No context. No weight. No shared order of urgency.
+              <div
+                style={{
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: '#EF4444',
+                  marginBottom: '0.5rem'
+                }}
+              >
+                THE PROBLEM / SEVERITY BLINDNESS
+              </div>
+              <h2
+                style={{
+                  fontSize: '2.6rem',
+                  fontWeight: 800,
+                  color: '#0F172A',
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.15,
+                  margin: '0 0 1rem 0'
+                }}
+              >
+                The loudest complaint isn’t always the most urgent.
+              </h2>
+              <p
+                style={{
+                  fontSize: '1.08rem',
+                  color: '#475569',
+                  lineHeight: 1.6,
+                  maxWidth: '840px',
+                  margin: 0
+                }}
+              >
+                When every signal arrives with the same visual weight, a billing failure and a feature request occupy identical space. Real risk disappears inside unstructured noise.
               </p>
             </div>
-            <a href="#the-engine" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem', fontWeight: 700, color: '#4f46e5' }}>
-              <span>Follow the signal through the noise</span>
-              <ArrowDown size={14} />
-            </a>
           </div>
-        </div>
-      </section>
+
+          {/* Unified Problem Card (Figma Node 50:36925) */}
+          <div
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '20px',
+              padding: '2rem 2.25rem',
+              boxShadow: '0 8px 30px rgba(15, 23, 42, 0.04)',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            {/* Top Row: 4 Customer Voice Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.25rem', marginBottom: '1.75rem' }}>
+              {/* Voice 1: Support Chat */}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(15, 23, 42, 0.02)';
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      color: '#E11D48',
+                      background: '#FFE4E6',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.03em'
+                    }}
+                  >
+                    SUPPORT CHAT
+                  </span>
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#F1F5F9',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    AK
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.96rem', fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
+                  “I was charged twice.”
+                </div>
+              </div>
+
+              {/* Voice 2: App Review */}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(15, 23, 42, 0.02)';
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      color: '#16A34A',
+                      background: '#DCFCE7',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.03em'
+                    }}
+                  >
+                    APP REVIEW
+                  </span>
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#F1F5F9',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    MJ
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.96rem', fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
+                  “Love the new layout!”
+                </div>
+              </div>
+
+              {/* Voice 3: Customer Call */}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(15, 23, 42, 0.02)';
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      color: '#D97706',
+                      background: '#FEF3C7',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.03em'
+                    }}
+                  >
+                    CUSTOMER CALL
+                  </span>
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#F1F5F9',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    SR
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.96rem', fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
+                  “Checkout keeps timing out.”
+                </div>
+              </div>
+
+              {/* Voice 4: Survey Response */}
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  borderRadius: '12px',
+                  border: '1px solid #E2E8F0',
+                  padding: '1.15rem 1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.02)',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(15, 23, 42, 0.06)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(15, 23, 42, 0.02)';
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      color: '#7C3AED',
+                      background: '#EDE9FE',
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      letterSpacing: '0.03em'
+                    }}
+                  >
+                    SURVEY RESPONSE
+                  </span>
+                  <span
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#F1F5F9',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      color: '#334155',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    ND
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.96rem', fontWeight: 700, color: '#0F172A', lineHeight: 1.3 }}>
+                  “Could you add dark mode?”
+                </div>
+              </div>
+            </div>
+
+            {/* Middle: Unstructured Pile Fragment Cloud */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.65rem',
+                padding: '1.25rem 1.5rem',
+                background: '#F8FAFC',
+                borderRadius: '12px',
+                border: '1px solid #E2E8F0',
+                marginBottom: '1.5rem'
+              }}
+            >
+              {[
+                'Payment retry failed',
+                'Great service',
+                'Export is empty',
+                'Still loading…',
+                'Charged twice',
+                'Add dark mode',
+                'Can’t check out',
+                'Missing receipt',
+                'Looks good',
+                'Status stale',
+                'Please help',
+                'Slow response',
+                'Failed webhooks',
+                'Fraudulent seller detected',
+                'Invoice incorrect'
+              ].map((tag, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: '0.78rem',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    color: '#475569',
+                    fontWeight: 600,
+                    boxShadow: '0 1px 2px rgba(15, 23, 42, 0.02)',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#CBD5E1';
+                    e.currentTarget.style.color = '#0F172A';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#E2E8F0';
+                    e.currentTarget.style.color = '#475569';
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Bottom Bar: Different Impact. Identical Inbox. */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingTop: '1.25rem',
+                borderTop: '1px solid #F1F5F9'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#EF4444', letterSpacing: '0.04em' }}>
+                  DIFFERENT IMPACT. IDENTICAL INBOX.
+                </span>
+                {/* Concentric Dot Ring */}
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 18,
+                    height: 18,
+                    borderRadius: '50%',
+                    background: 'rgba(99, 102, 241, 0.15)'
+                  }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366F1' }} />
+                </span>
+                <span style={{ fontSize: '0.82rem', color: '#64748B' }}>
+                  No context. No weight. No shared order of urgency.
+                </span>
+              </div>
+
+              <a
+                href="#the-engine"
+                style={{
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  color: '#4F46E5',
+                  transition: 'color 0.15s ease'
+                }}
+              >
+                <span>Follow the signal through the noise</span>
+                <ArrowDown size={14} style={{ animation: 'bounceDown 2s infinite' }} />
+              </a>
+            </div>
+          </div>
+        </section>
       </ScrollReveal>
 
       {/* =========================================================================
-          5. STAGE TWO · ADAPTION ENGINE TRANSFORMATION (Figma Frame: Stage two)
+          5. STAGE TWO · ADAPTION ENGINE TRANSFORMATION (Figma Node 50:37001)
          ========================================================================= */}
       <ScrollReveal direction="up" distance={40}>
-        <section id="the-engine" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '5rem 1.5rem' }}>
+        <section id="the-engine" style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '5.5rem 1.5rem' }}>
           <div style={{ maxWidth: '1312px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '2rem', marginBottom: '3.5rem' }}>
-            <KineticText
-              text="02"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '4.5rem', fontWeight: 900, color: '#cbd5e1', lineHeight: 1 }}
-            />
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4f46e5', marginBottom: '0.5rem' }}>
-                THE TRANSFORMATION / ADAPTION ENGINE
+            {/* Header with Ghost 02 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '2rem', marginBottom: '3rem', alignItems: 'flex-start' }}>
+              <div
+                style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '5.2rem',
+                  fontWeight: 900,
+                  color: '#DCE3ED',
+                  lineHeight: 0.85,
+                  letterSpacing: '-0.05em',
+                  userSelect: 'none'
+                }}
+              >
+                02
               </div>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.2, margin: '0 0 1rem 0' }}>
-                From scattered voices to structured intelligence.
-              </h2>
-              <p style={{ fontSize: '1.1rem', color: '#475569', lineHeight: 1.6, maxWidth: '820px', margin: 0 }}>
-                The Adaption Engine reads context, identifies severity, and connects each signal to evidence. Not sentiment. Severity.
-              </p>
-            </div>
-          </div>
-
-          {/* Chaos to Engine to Structure Architecture Card */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr 1.2fr', gap: '1.5rem', background: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '2rem', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.04)', marginBottom: '3rem' }}>
-            {/* Input Column */}
-            <div style={{ borderRight: '1px solid #f1f5f9', paddingRight: '1.5rem' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                INPUT / 7,002 SIGNALS
-              </span>
-              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0.5rem 0' }}>
-                Raw Unstructured Ingestion
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
-                7,002 signals. Multi-channel streams across App Store, Support, Zendesk.
-              </p>
-              <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
-                <div style={{ padding: '0.5rem', borderRadius: '6px', background: '#f8fafc', fontSize: '0.75rem', color: '#475569' }}>
-                  • Payment charge retry loops
+              <div>
+                <div
+                  style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    color: '#4F46E5',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  THE TRANSFORMATION / ADAPTION ENGINE
                 </div>
-                <div style={{ padding: '0.5rem', borderRadius: '6px', background: '#f8fafc', fontSize: '0.75rem', color: '#475569' }}>
-                  • Escrow fraud accusations
-                </div>
-                <div style={{ padding: '0.5rem', borderRadius: '6px', background: '#f8fafc', fontSize: '0.75rem', color: '#475569' }}>
-                  • Broken checkout modals
-                </div>
-              </div>
-            </div>
-
-            {/* Engine Column */}
-            <div style={{ padding: '0 1rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <div style={{ background: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', border: '1px solid #c7d2fe', borderRadius: '12px', padding: '1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                <BorderBeam duration={8} size={110} />
-                <div style={{ width: 44, height: 44, borderRadius: '12px', background: '#4f46e5', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem' }}>
-                  <Cpu size={22} />
-                </div>
-                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                  ADAPTION ENGINE
-                </span>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '0.35rem 0' }}>
-                  CONTEXT → IMPACT → SEVERITY
-                </div>
-                <p style={{ fontSize: '0.8rem', color: '#475569', margin: 0 }}>
-                  Not sentiment analysis. Severity intelligence. Groq Llama-3 + Gemini 3.8 Causal Reasoning.
+                <h2
+                  style={{
+                    fontSize: '2.6rem',
+                    fontWeight: 800,
+                    color: '#0F172A',
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1.15,
+                    margin: '0 0 1rem 0'
+                  }}
+                >
+                  From scattered voices to structured intelligence.
+                </h2>
+                <p
+                  style={{
+                    fontSize: '1.08rem',
+                    color: '#475569',
+                    lineHeight: 1.6,
+                    maxWidth: '840px',
+                    margin: 0
+                  }}
+                >
+                  The Adaption Engine reads context, identifies severity, and connects each signal to evidence. Not sentiment. Severity.
                 </p>
               </div>
             </div>
 
-            {/* Output Column */}
-            <div style={{ borderLeft: '1px solid #f1f5f9', paddingLeft: '1.5rem' }}>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                OUTPUT / PRIORITIZED & TRACED
-              </span>
-              <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', margin: '0.5rem 0' }}>
-                Organized Severity Arrays
+            {/* 3-Column Architecture Card (Figma Node 50:37001) */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1.55fr 1.25fr',
+                gap: '2rem',
+                alignItems: 'stretch',
+                background: '#FFFFFF',
+                borderRadius: '20px',
+                border: '1px solid #E2E8F0',
+                padding: '2.25rem',
+                boxShadow: '0 8px 30px rgba(15, 23, 42, 0.04)',
+                marginBottom: '3.5rem'
+              }}
+            >
+              {/* Column 1: Raw Unstructured Ingestion */}
+              <div style={{ borderRight: '1px solid #F1F5F9', paddingRight: '1.75rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    INPUT / 7,002 SIGNALS
+                  </span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', margin: '0.5rem 0' }}>
+                    Raw Unstructured Ingestion
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: '#64748B', lineHeight: 1.5, margin: '0 0 1.5rem' }}>
+                    7,002 signals. Multi-channel streams across App Store, Support, Zendesk.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', fontSize: '0.78rem', color: '#334155', fontWeight: 600 }}>
+                    • Payment charge retry loops
+                  </div>
+                  <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', fontSize: '0.78rem', color: '#334155', fontWeight: 600 }}>
+                    • Escrow fraud accusations
+                  </div>
+                  <div style={{ padding: '0.65rem 0.85rem', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', fontSize: '0.78rem', color: '#334155', fontWeight: 600 }}>
+                    • Broken checkout modals
+                  </div>
+                </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', background: '#fff1f2', border: '1px solid #fecdd3' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#e11d48' }}>P0 / Critical (Crimson)</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#e11d48' }}>89</span>
+
+              {/* Column 2: Adaption Engine (Center Stage with Laser Trace) */}
+              <div style={{ padding: '0 0.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative' }}>
+                {/* Connecting Laser Trace Dot on Top Edge */}
+                <div style={{ position: 'absolute', top: '-18px', left: '20px', display: 'flex', alignItems: 'center', gap: '8px', zIndex: 2 }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 18,
+                      height: 18,
+                      borderRadius: '50%',
+                      background: 'rgba(79, 70, 229, 0.15)',
+                      border: '1.5px solid #4F46E5'
+                    }}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#4F46E5' }} />
+                  </span>
+                  <div style={{ width: '60px', height: '2px', background: 'linear-gradient(90deg, #4F46E5 0%, transparent 100%)' }} />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', background: '#fffbeb', border: '1px solid #fde68a' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#d97706' }}>P1 / High (Amber)</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#d97706' }}>412</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', background: '#eef2ff', border: '1px solid #c7d2fe' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#4f46e5' }}>P2 / Moderate (Indigo)</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#4f46e5' }}>1,850</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0.75rem', borderRadius: '6px', background: '#ecfdf5', border: '1px solid #a7f3d0' }}>
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#059669' }}>P3 / Low (Emerald)</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#059669' }}>4,651</span>
+
+                <div
+                  style={{
+                    background: 'linear-gradient(180deg, #F0F4FF 0%, #EEF2FF 100%)',
+                    border: '1.5px solid #C7D2FE',
+                    borderRadius: '16px',
+                    padding: '2rem 1.75rem',
+                    textAlign: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 24px rgba(79, 70, 229, 0.08)'
+                  }}
+                >
+                  <BorderBeam duration={8} size={110} />
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '12px',
+                      background: '#4F46E5',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 0.85rem',
+                      boxShadow: '0 4px 14px rgba(79, 70, 229, 0.3)'
+                    }}
+                  >
+                    <Cpu size={22} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: '#4F46E5',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    ADAPTION ENGINE
+                  </span>
+                  <div style={{ fontSize: '1.18rem', fontWeight: 800, color: '#0F172A', margin: '0.45rem 0' }}>
+                    CONTEXT → IMPACT → SEVERITY
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: '#475569', margin: 0, lineHeight: 1.5 }}>
+                    Not sentiment analysis. Severity intelligence. Groq Llama-3 + Gemini 3.8 Causal Reasoning.
+                  </p>
                 </div>
               </div>
-              <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.75rem' }}>
-                Every signal has an owner, evidence and a next step.
-              </p>
+
+              {/* Column 3: Organized Severity Arrays */}
+              <div style={{ borderLeft: '1px solid #F1F5F9', paddingLeft: '1.75rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    OUTPUT / PRIORITIZED & TRACED
+                  </span>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A', margin: '0.5rem 0' }}>
+                    Organized Severity Arrays
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem', margin: '1rem 0' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      background: '#FFF1F2',
+                      border: '1px solid #FECDD3'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#BE123C' }}>P0 / Critical (Crimson)</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#BE123C' }}>89</span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      background: '#FFFBEB',
+                      border: '1px solid #FDE68A'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#B45309' }}>P1 / High (Amber)</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#B45309' }}>412</span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      background: '#EEF2FF',
+                      border: '1px solid #C7D2FE'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#4338CA' }}>P2 / Moderate (Indigo)</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#4338CA' }}>1,850</span>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      background: '#ECFDF5',
+                      border: '1px solid #A7F3D0'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#047857' }}>P3 / Low (Emerald)</span>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#047857' }}>4,651</span>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: '0.78rem', color: '#64748B', margin: 0 }}>
+                  Every signal has an owner, evidence and a next step.
+                </p>
+              </div>
+            </div>
+
+            {/* 3D Cognitive Assembly Showcase (Figma Node 65:259) */}
+            <div
+              style={{
+                background: '#FFFFFF',
+                borderRadius: '20px',
+                border: '1px solid #E2E8F0',
+                padding: '2.5rem 2rem',
+                boxShadow: '0 8px 30px rgba(15, 23, 42, 0.04)',
+                marginBottom: '3rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center'
+              }}
+            >
+              <div style={{ marginBottom: '1.25rem' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    color: '#4F46E5',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  3D COGNITIVE ASSEMBLY · LIVING MULTI-HOP SYNTHESIS
+                </span>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0F172A', margin: '6px 0 8px' }}>
+                  Interactive 8-Cube Isometric Data Matrix
+                </h3>
+                <p style={{ fontSize: '0.9rem', color: '#64748B', maxWidth: '640px', margin: 0 }}>
+                  Move your mouse to tilt the 3D perspective. Click the assembly to trigger real-time Cognitive Dispersion &amp; Reassembly.
+                </p>
+              </div>
+
+              {/* The 8-Cube Isometric Assembly from Figma 65:259 */}
+              <CognitiveCubeAssembly scale={1.05} />
+            </div>
+
+            {/* 3 Process Steps */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+              <div style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '1.65rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#4F46E5' }}>01</span>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: '0.35rem 0' }}>Read context</div>
+                <p style={{ fontSize: '0.84rem', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+                  Channel, history, account and user flow traces.
+                </p>
+              </div>
+              <div style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '1.65rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#06B6D4' }}>02</span>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: '0.35rem 0' }}>Assess impact</div>
+                <p style={{ fontSize: '0.84rem', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+                  Financial harm, operational block, or experience degradation.
+                </p>
+              </div>
+              <div style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '1.65rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#10B981' }}>03</span>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', margin: '0.35rem 0' }}>Assign severity</div>
+                <p style={{ fontSize: '0.84rem', color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+                  P0–P3 tiers supported by rigorous causal trace evidence.
+                </p>
+              </div>
+            </div>
+
+            {/* Surfaced Signal in Practice Card */}
+            <div
+              style={{
+                background: '#FFFFFF',
+                borderRadius: '14px',
+                border: '1px solid #E2E8F0',
+                padding: '1.5rem 1.75rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '1rem'
+              }}
+            >
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#4F46E5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  SIGNAL, SURFACED / ILLUSTRATIVE WORKSPACE
+                </span>
+                <div style={{ fontSize: '1.08rem', fontWeight: 800, color: '#0F172A', marginTop: '0.25rem' }}>
+                  Duplicate charges after payment retry
+                </div>
+                <p style={{ fontSize: '0.84rem', color: '#64748B', margin: '2px 0 0 0' }}>
+                  18 related reports. Financial impact, not just negative sentiment.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#EF4444', background: '#FEE2E2', padding: '4px 12px', borderRadius: '6px' }}>
+                  P0 · Critical
+                </span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', background: '#F1F5F9', padding: '4px 12px', borderRadius: '6px' }}>
+                  N-1041 · Open
+                </span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#059669' }}>
+                  Directly routed to Issue Tracker →
+                </span>
+              </div>
             </div>
           </div>
-
-          {/* 3 Process Steps */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#4f46e5' }}>01</span>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0' }}>Read context</div>
-              <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>Channel, history, account and user flow traces.</p>
-            </div>
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#06b6d4' }}>02</span>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0' }}>Assess impact</div>
-              <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>Financial harm, operational block, or experience degradation.</p>
-            </div>
-            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#10b981' }}>03</span>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0' }}>Assign severity</div>
-              <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>P0–P3 tiers supported by rigorous causal trace evidence.</p>
-            </div>
-          </div>
-
-          {/* Surfaced Signal in Practice Card */}
-          <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#4f46e5', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                SIGNAL, SURFACED / ILLUSTRATIVE WORKSPACE
-              </span>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginTop: '0.25rem' }}>
-                Duplicate charges after payment retry
-              </div>
-              <p style={{ fontSize: '0.82rem', color: '#64748b', margin: '2px 0 0 0' }}>
-                18 related reports. Financial impact, not just negative sentiment.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ef4444', background: '#fee2e2', padding: '4px 12px', borderRadius: '6px' }}>
-                P0 · Critical
-              </span>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155', background: '#f1f5f9', padding: '4px 12px', borderRadius: '6px' }}>
-                N-1041 · Open
-              </span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#059669' }}>
-                Directly routed to Issue Tracker →
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
       </ScrollReveal>
 
       {/* =========================================================================

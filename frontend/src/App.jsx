@@ -199,6 +199,7 @@ export default function App() {
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
       }}
     >
+      <SmoothCursor />
       <CinematicIntroSplash />
       {/* TopBar with Active Dataset, Credits Quota, Upload, Languages, Settings & Logout */}
       <TopBar

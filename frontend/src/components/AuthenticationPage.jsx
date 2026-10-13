@@ -14,7 +14,7 @@ import { supabase } from '../supabase';
 import BorderBeam from './ui/BorderBeam';
 import AuroraText from './ui/AuroraText';
 import Highlighter from './ui/Highlighter';
-import IsometricCubeConveyor from './ui/IsometricCubeConveyor';
+import CognitiveCubeAssembly from './ui/CognitiveCubeAssembly';
 import NoesisSignatureLogo from './ui/NoesisSignatureLogo';
 import AuthPortalTransition from './ui/AuthPortalTransition';
 
@@ -301,9 +301,9 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
             }}
           />
 
-          {/* 3D Isometric Stacked Cubes Conveyor (Uiverse Admin12121) */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '220px', position: 'relative' }}>
-            <IsometricCubeConveyor scale={0.85} />
+          {/* 3D Isometric Cognitive Assembly (Figma Node 65:259) */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '260px', position: 'relative' }}>
+            <CognitiveCubeAssembly scale={0.92} />
           </div>
 
 
