@@ -359,12 +359,15 @@ export default function DatasetUploadModal({ isOpen, onClose, onUploadSuccess, a
           };
         });
 
-        // 4. Background sync to Supabase user_datasets
+        // 4. Background sync to Supabase user_datasets (scoped per-user)
         try {
+          const { data: { user } } = await supabase.auth.getUser();
           await supabase.from('user_datasets').insert([{
+            user_id: user?.id || null,
             dataset_name: selectedFile.name,
             total_records: normalizedRecords.length,
-            column_mapping: mapping
+            column_mapping: mapping,
+            records: normalizedRecords.slice(0, 50)
           }]);
         } catch (supErr) {
           console.warn('Supabase cloud sync notice:', supErr);

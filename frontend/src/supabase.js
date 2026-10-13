@@ -5,13 +5,32 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJ
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Helper methods with cloud persistence & local fallback
+/**
+ * Get active Supabase auth user
+ */
+export async function getCurrentAuthUser() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+/**
+ * Fetch issues scoped to current authenticated user + shared system baseline issues
+ */
 export async function fetchIssuesFromCloud() {
   try {
-    const { data, error } = await supabase
-      .from('issues')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const user = await getCurrentAuthUser();
+    let query = supabase.from('issues').select('*').order('created_at', { ascending: false });
+    
+    if (user?.id) {
+      // Scoped: User's own tickets + baseline demo tickets (user_id IS NULL)
+      query = query.or(`user_id.eq.${user.id},user_id.is.null`);
+    }
+
+    const { data, error } = await query;
     
     if (error) throw error;
     if (data && data.length > 0) {
@@ -64,11 +83,20 @@ export async function fetchIssuesFromCloud() {
   ];
 }
 
+/**
+ * Persist new issue to Supabase tagged with current authenticated user_id
+ */
 export async function createIssueInCloud(issue) {
   try {
+    const user = await getCurrentAuthUser();
+    const payload = {
+      ...issue,
+      user_id: user?.id || null
+    };
+
     const { data, error } = await supabase
       .from('issues')
-      .insert([issue])
+      .insert([payload])
       .select();
     if (!error && data && data.length > 0) {
       return data[0];
@@ -79,6 +107,9 @@ export async function createIssueInCloud(issue) {
   return issue;
 }
 
+/**
+ * Update issue in Supabase
+ */
 export async function updateIssueInCloud(id, updates) {
   try {
     const { data, error } = await supabase
@@ -95,11 +126,20 @@ export async function updateIssueInCloud(id, updates) {
   return null;
 }
 
+/**
+ * Persist executive decision report to Supabase tagged with user_id
+ */
 export async function saveReportToCloud(report) {
   try {
+    const user = await getCurrentAuthUser();
+    const payload = {
+      ...report,
+      user_id: user?.id || null
+    };
+
     const { data, error } = await supabase
       .from('saved_reports')
-      .insert([report])
+      .insert([payload])
       .select();
     if (!error && data && data.length > 0) {
       return data[0];
@@ -108,4 +148,32 @@ export async function saveReportToCloud(report) {
     console.warn('Supabase save report fallback to local:', err);
   }
   return report;
+}
+
+/**
+ * Persist uploaded CSV dataset metadata to Supabase public.user_datasets per user
+ */
+export async function saveUserDatasetToCloud({ filename, recordCount, columnMapping, sampleRecords = [] }) {
+  try {
+    const user = await getCurrentAuthUser();
+    const payload = {
+      user_id: user?.id || null,
+      dataset_name: filename,
+      total_records: recordCount,
+      column_mapping: columnMapping,
+      records: sampleRecords.slice(0, 50)
+    };
+
+    const { data, error } = await supabase
+      .from('user_datasets')
+      .insert([payload])
+      .select();
+
+    if (!error && data && data.length > 0) {
+      return data[0];
+    }
+  } catch (err) {
+    console.warn('Supabase save dataset notice:', err);
+  }
+  return null;
 }

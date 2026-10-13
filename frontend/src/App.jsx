@@ -60,7 +60,7 @@ export default function App() {
   const [issues, setIssues] = useState([]);
   const [customTriageItems, setCustomTriageItems] = useState([]);
 
-  // Fetch initial issues from Supabase cloud / cache
+  // Fetch initial issues from Supabase cloud / cache (scoped per user)
   useEffect(() => {
     const loadIssues = async () => {
       try {
@@ -73,17 +73,34 @@ export default function App() {
       }
     };
     loadIssues();
-  }, []);
+  }, [authUser?.id]);
 
-  // Listen to Supabase Auth state changes
+  // Restore live Supabase Auth session on mount and listen to auth state changes
   useEffect(() => {
+    // 1. Initial live session restore directly from Supabase
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const u = {
+          id: session.user.id,
+          email: session.user.email,
+          name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+          role: session.user.user_metadata?.role || 'executive',
+          authenticated: true
+        };
+        setAuthUser(u);
+        localStorage.setItem('noesis_auth_user', JSON.stringify(u));
+      }
+    });
+
+    // 2. Real-time auth listener
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const u = {
           id: session.user.id,
           email: session.user.email,
           name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
-          role: session.user.user_metadata?.role || 'executive'
+          role: session.user.user_metadata?.role || 'executive',
+          authenticated: true
         };
         setAuthUser(u);
         localStorage.setItem('noesis_auth_user', JSON.stringify(u));

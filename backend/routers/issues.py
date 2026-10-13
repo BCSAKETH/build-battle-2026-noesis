@@ -87,7 +87,7 @@ def get_issues(current_user: Dict[str, Any] = Depends(get_current_user)) -> List
     # Attempt Supabase REST fetch with RLS tenant filter
     if SUPABASE_URL and SUPABASE_ANON_KEY:
         try:
-            filter_query = f"or=(user_id.eq.{user_id},user_id.eq.00000000-0000-0000-0000-000000000001)"
+            filter_query = f"or=(user_id.eq.{user_id},user_id.is.null,user_id.eq.00000000-0000-0000-0000-000000000001)"
             url = f"{SUPABASE_URL}/rest/v1/issues?select=*&{filter_query}&order=created_at.desc"
             req = urllib.request.Request(
                 url,

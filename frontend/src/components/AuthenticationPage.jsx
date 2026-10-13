@@ -47,21 +47,59 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // 1-Click Role Login handler
-  const handleRoleLogin = (role, title, name) => {
-    const userSession = {
-      role,
-      name,
-      title,
-      email: `${role}@noesis.internal`,
-      authenticated: true,
-      timestamp: new Date().toISOString()
-    };
-    localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
-    onLoginSuccess(userSession);
+  // 1-Click Role Login handler — Authenticates against REAL Supabase Auth credentials
+  const handleRoleLogin = async (role, title, name) => {
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      const roleEmail = `${role}@noesis.internal`;
+      let { data, error } = await supabase.auth.signInWithPassword({
+        email: roleEmail,
+        password: 'Password2026!'
+      });
+
+      // If user isn't in Supabase auth yet, auto-register via RPC and sign in
+      if (error) {
+        await supabase.rpc('register_user_direct', {
+          user_email: roleEmail,
+          user_password: 'Password2026!',
+          user_full_name: name,
+          user_role: role
+        });
+        const retry = await supabase.auth.signInWithPassword({
+          email: roleEmail,
+          password: 'Password2026!'
+        });
+        if (retry.error) throw retry.error;
+        data = retry.data;
+      }
+
+      const displayName = data.user?.user_metadata?.full_name || name;
+      const userSession = {
+        id: data.user.id,
+        role,
+        name: displayName,
+        title,
+        email: data.user.email,
+        authenticated: true,
+        supabase_uid: data.user.id,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
+      setSuccessMsg(`Authenticated as ${displayName} via live Supabase session.`);
+      setTimeout(() => {
+        onLoginSuccess(userSession);
+      }, 400);
+    } catch (err) {
+      console.error('Role auth error:', err);
+      setErrorMsg(err.message || 'Supabase authentication failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Live Supabase Auth
+  // Live Supabase Auth Form Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -70,66 +108,85 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
 
     try {
       if (activeTab === 'login') {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        let { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password
         });
-        if (error) {
-          if (error.message.toLowerCase().includes('not confirmed') || error.message.toLowerCase().includes('email not confirmed')) {
-            // Bypass email confirmation for evaluation
-            const displayName = email.split('@')[0] || 'Saketh';
-            const userSession = {
-              role: 'executive',
-              name: displayName.charAt(0).toUpperCase() + displayName.slice(1),
-              title: 'Enterprise Operator',
-              email: email.trim(),
-              authenticated: true
-            };
-            localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
-            setSuccessMsg(`Email confirmation bypassed for evaluation. Welcome, ${userSession.name}!`);
-            setTimeout(() => {
-              onLoginSuccess(userSession);
-            }, 600);
-            return;
-          }
-          throw error;
+
+        // Handle unconfirmed email by auto-confirming via RPC and retrying
+        if (error && (error.message.toLowerCase().includes('not confirmed') || error.message.toLowerCase().includes('email not confirmed'))) {
+          await supabase.rpc('confirm_user_by_email', { user_email: email.trim() });
+          const retry = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password
+          });
+          if (retry.error) throw retry.error;
+          data = retry.data;
+          error = null;
         }
+
+        if (error) throw error;
 
         const displayName = data.user?.user_metadata?.full_name || data.user?.email?.split('@')[0] || 'Executive User';
         const userSession = {
+          id: data.user.id,
           role: data.user?.user_metadata?.role || 'executive',
           name: displayName,
           title: 'Enterprise Operator',
-          email: data.user?.email,
-          authenticated: true
+          email: data.user.email,
+          authenticated: true,
+          supabase_uid: data.user.id
         };
         localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
-        onLoginSuccess(userSession);
+        setSuccessMsg(`Welcome back, ${displayName}! Verified with Supabase.`);
+        setTimeout(() => {
+          onLoginSuccess(userSession);
+        }, 500);
       } else {
         const displayName = fullName.trim() || email.split('@')[0];
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: {
-              full_name: displayName,
-              role: 'executive'
-            }
-          }
+        
+        // Register in Supabase auth via register_user_direct RPC for instant confirmation
+        const { error: regError } = await supabase.rpc('register_user_direct', {
+          user_email: email.trim(),
+          user_password: password,
+          user_full_name: displayName,
+          user_role: 'executive'
         });
-        if (error) throw error;
-        setSuccessMsg(`Account created for ${displayName}! Entering your workspace...`);
+
+        if (regError) {
+          // Fallback to standard signUp
+          const { error: signUpError } = await supabase.auth.signUp({
+            email: email.trim(),
+            password,
+            options: {
+              data: { full_name: displayName, role: 'executive' }
+            }
+          });
+          if (signUpError) throw signUpError;
+          await supabase.rpc('confirm_user_by_email', { user_email: email.trim() });
+        }
+
+        // Sign in immediately with official Supabase auth to establish active JWT session
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password
+        });
+        if (authError) throw authError;
+
+        setSuccessMsg(`Account created & verified for ${displayName}! Entering workspace...`);
         const userSession = {
-          role: 'executive',
+          id: authData.user.id,
+          role: authData.user?.user_metadata?.role || 'executive',
           name: displayName,
           title: 'Enterprise Operator',
-          email: email.trim(),
-          authenticated: true
+          email: authData.user.email,
+          authenticated: true,
+          supabase_uid: authData.user.id
         };
         localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
         setTimeout(() => {
           onLoginSuccess(userSession);
-        }, 900);
+        }, 600);
       }
     } catch (err) {
       console.warn('Auth note:', err);
