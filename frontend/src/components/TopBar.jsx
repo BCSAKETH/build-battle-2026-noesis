@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap, LogOut, Database } from 'lucide-react';
+import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap, LogOut, Database, Sparkles } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import { useSettings } from '../context/SettingsContext';
 import CreditsModal from './CreditsModal';
 import SettingsModal from './SettingsModal';
+import AdaptionStudioModal from './AdaptionStudioModal';
+import NoesisSignatureLogo from './ui/NoesisSignatureLogo';
 
 export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, authUser }) {
   const { appearance, setAppearance, workspaceScale, setWorkspaceScale, theme } = useSettings();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showCreditsModal, setShowCreditsModal] = useState(false);
+  const [showAdaptionStudioModal, setShowAdaptionStudioModal] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [currentCredits, setCurrentCredits] = useState(() => {
     try {
@@ -52,50 +55,50 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
           boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)'
         }}
       >
-        {/* Left: Noesis Logo (Clean Orbital Iris, No "v4.8" text per directive) */}
-        <div
+        {/* Left: Unified Noesis Signature Logo */}
+        <NoesisSignatureLogo
+          size={36}
+          showBadge={true}
           onClick={onReturnToLanding}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.85rem',
-            cursor: 'pointer',
-            userSelect: 'none'
-          }}
-          title="Return to Story Landing"
-        >
-          {/* Orbital Iris SVG */}
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)'
-            }}
-          >
-            <svg viewBox="0 0 40 40" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="20" cy="20" r="17" stroke="#ffffff" strokeWidth="2" strokeDasharray="3 3" opacity="0.8" />
-              <circle cx="20" cy="20" r="11" stroke="#38bdf8" strokeWidth="2.5" />
-              <circle cx="20" cy="20" r="4.5" fill="#ffffff" />
-            </svg>
-          </div>
+          badgeText="INSIGHTFLOW"
+        />
 
-          <div>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-              NOESIS
-            </div>
-            <div style={{ fontSize: '0.66rem', fontWeight: 600, color: '#64748b', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              Human Cognitive Decision Engine
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Global Actions per Image 5 (Credits, Upload, Language, Dataset, Account with Settings) */}
+        {/* Right: Global Actions (Adaption Studio, Credits, Upload, Language, Dataset, Account) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {/* Adaption Engine Studio Trigger (8 Peak Capabilities) */}
+          <button
+            onClick={() => setShowAdaptionStudioModal(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.42rem 0.85rem',
+              borderRadius: '999px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              background: '#EEF2FF',
+              color: '#4F46E5',
+              border: '1px solid #C7D2FE',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(79, 70, 229, 0.1)',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.background = '#E0E7FF';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.background = '#EEF2FF';
+            }}
+            title="Open Adaption Labs Engine Studio (8 Peak Capabilities)"
+          >
+            <Sparkles size={14} color="#4F46E5" />
+            <span>Adaption Studio</span>
+            <span style={{ fontSize: '10px', background: '#4F46E5', color: '#fff', padding: '1px 6px', borderRadius: '999px', fontWeight: 800 }}>
+              8 ACTIVE
+            </span>
+          </button>
           {/* Interactive Credits Pill: "Learn how to get more credits" (Image 5) */}
           <button
             onClick={() => setShowCreditsModal(true)}
@@ -378,6 +381,12 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
         isOpen={showCreditsModal}
         onClose={() => setShowCreditsModal(false)}
         onCreditsClaimed={(newAmt) => setCurrentCredits(newAmt)}
+      />
+
+      {/* Global Adaption Engine Studio Modal (8 Peak Capabilities) */}
+      <AdaptionStudioModal
+        isOpen={showAdaptionStudioModal}
+        onClose={() => setShowAdaptionStudioModal(false)}
       />
 
       {/* Global Settings Modal (Figma Frame 50:38765) */}

@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { FloatingDock } from './components/ui/FloatingDock';
 import ScrollProgress from './components/ui/ScrollProgress';
 import SmoothCursor from './components/ui/SmoothCursor';
+import CinematicIntroSplash from './components/ui/CinematicIntroSplash';
 
 // Dynamic API_BASE for local development and Vercel serverless monorepo deployment
 const API_BASE =
@@ -163,6 +164,7 @@ export default function App() {
   if (viewMode === 'landing') {
     return (
       <>
+        <CinematicIntroSplash />
         <SmoothCursor color="#4F46E5" />
         <LandingPage
           onLaunchApp={(route) => {
@@ -197,6 +199,7 @@ export default function App() {
         fontFamily: "'Inter', system-ui, -apple-system, sans-serif"
       }}
     >
+      <CinematicIntroSplash />
       {/* TopBar with Active Dataset, Credits Quota, Upload, Languages, Settings & Logout */}
       <TopBar
         authUser={authUser}

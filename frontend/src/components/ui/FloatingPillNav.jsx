@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import CoolMode from './CoolMode';
+import NoesisSignatureLogo from './NoesisSignatureLogo';
 
 /**
  * FloatingPillNav (Inspired by User-Provided Reference Images 1, 2, 3)
@@ -57,45 +58,14 @@ export default function FloatingPillNav({ onLaunchApp, onOpenAuth }) {
           transition: 'all 0.3s ease'
         }}
       >
-        {/* Brand Orb */}
-        <a
-          href="#"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            textDecoration: 'none',
-            marginRight: '6px'
-          }}
-        >
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #FF6B6B 0%, #FFA07A 50%, #9B51E0 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(155, 81, 224, 0.3)'
-            }}
-          >
-            <span style={{ color: '#FFFFFF', fontWeight: 800, fontSize: '13px', fontStyle: 'italic', fontFamily: "'Outfit', sans-serif" }}>
-              N
-            </span>
-          </div>
-          <span
-            style={{
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 800,
-              fontSize: '13px',
-              letterSpacing: '-0.02em',
-              color: '#0F172A'
-            }}
-          >
-            NOESIS
-          </span>
-        </a>
+        {/* Unified Noesis Signature Logo */}
+        <div style={{ marginRight: '8px' }}>
+          <NoesisSignatureLogo
+            size={28}
+            showBadge={false}
+            showText={true}
+          />
+        </div>
 
         {/* Nav Links (Pill Tabs) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>

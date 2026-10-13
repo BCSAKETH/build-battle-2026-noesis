@@ -15,26 +15,11 @@ import BorderBeam from './ui/BorderBeam';
 import AuroraText from './ui/AuroraText';
 import Highlighter from './ui/Highlighter';
 import IsometricCubeConveyor from './ui/IsometricCubeConveyor';
+import NoesisSignatureLogo from './ui/NoesisSignatureLogo';
+import AuthPortalTransition from './ui/AuthPortalTransition';
 
 /**
  * AuthenticationPage (Figma: Noesis · Authentication - Frame 50:37373)
- * 
- * Exact 1440x1024px split-screen design:
- * - Left panel (720px): Brand & Cognitive Engine Hero
- *   - Noesis logo & Brand mark
- *   - Headline: "Human Cognitive Decision Engine."
- *   - Subhead: "Transform unconditioned customer voices into mathematically triaged, executive-ready directives."
- *   - Visual assembly: Isometric cubes & signal path "VOICES -> ADAPTION ENGINE -> CLARITY"
- *   - Engine principles: "Context-aware" • "Evidence-grounded" • "Action-oriented"
- *   - Copyright: "© 2026 Noesis · Customer-feedback severity intelligence"
- * - Right panel (720px): Authentication panel
- *   - "YOUR WORKSPACE" | "← Back to Noesis"
- *   - "Welcome back." (44px) / "Login to your Noesis workspace." (15px)
- *   - Tabs: "Login" | "Create Account"
- *   - Supabase login form (Work email, Password with eye toggle, Keep me signed in, Login CTA)
- *   - 1-Click Instant Demo Roles (Executive, Support, Trust & Safety)
- *   - "Authentication powered by Supabase"
- *   - Legal notice
  */
 export default function AuthenticationPage({ onBack, onLoginSuccess }) {
   const [activeTab, setActiveTab] = useState('login'); // 'login' | 'signup'
@@ -46,6 +31,8 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [portalActive, setPortalActive] = useState(false);
+  const [pendingSession, setPendingSession] = useState(null);
 
   // 1-Click Role Login handler — Authenticates against REAL Supabase Auth credentials
   const handleRoleLogin = async (role, title, name) => {
@@ -88,9 +75,8 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
       };
       localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
       setSuccessMsg(`Authenticated as ${displayName} via live Supabase session.`);
-      setTimeout(() => {
-        onLoginSuccess(userSession);
-      }, 400);
+      setPendingSession(userSession);
+      setPortalActive(true);
     } catch (err) {
       console.error('Role auth error:', err);
       setErrorMsg(err.message || 'Supabase authentication failed.');
@@ -139,9 +125,8 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
         };
         localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
         setSuccessMsg(`Welcome back, ${displayName}! Verified with Supabase.`);
-        setTimeout(() => {
-          onLoginSuccess(userSession);
-        }, 500);
+        setPendingSession(userSession);
+        setPortalActive(true);
       } else {
         const displayName = fullName.trim() || email.split('@')[0];
         
@@ -184,9 +169,8 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
           supabase_uid: authData.user.id
         };
         localStorage.setItem('noesis_auth_user', JSON.stringify(userSession));
-        setTimeout(() => {
-          onLoginSuccess(userSession);
-        }, 600);
+        setPendingSession(userSession);
+        setPortalActive(true);
       }
     } catch (err) {
       console.warn('Auth note:', err);
@@ -204,9 +188,19 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
         width: '100%',
         minHeight: '100vh',
         background: '#F8FAFC',
-        fontFamily: "'Inter', sans-serif"
+        fontFamily: "'Inter', sans-serif",
+        position: 'relative'
       }}
     >
+      {/* Cinematic Flashlight / Spotlight Portal Transition */}
+      <AuthPortalTransition
+        isActive={portalActive}
+        userEmail={pendingSession?.email || ''}
+        onComplete={() => {
+          if (pendingSession) onLoginSuccess(pendingSession);
+        }}
+      />
+
       {/* =========================================================================
           LEFT PANEL: Brand & Cognitive Engine Hero (Full Window Half-Span)
          ========================================================================= */}
@@ -225,33 +219,13 @@ export default function AuthenticationPage({ onBack, onLoginSuccess }) {
       >
         {/* Top: Logo & Narrative */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {/* Noesis Brand Mark */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={onBack}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: '6px',
-                background: '#4F46E5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)'
-              }}
-            >
-              <Layers size={18} color="#FFFFFF" />
-            </div>
-            <span
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: '22px',
-                color: '#172033',
-                letterSpacing: '-0.03em'
-              }}
-            >
-              noesis
-            </span>
+          {/* Unified Noesis Signature Brand Mark */}
+          <div style={{ display: 'inline-flex', cursor: 'pointer' }} onClick={onBack}>
+            <NoesisSignatureLogo
+              size={36}
+              showBadge={true}
+              badgeText="AUTH PORTAL"
+            />
           </div>
 
           {/* Eyebrow & Headline & Description (Figma Frame 50:37373) */}
