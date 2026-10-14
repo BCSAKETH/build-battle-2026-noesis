@@ -22,6 +22,7 @@ import {
   MessageSquare,
   Zap
 } from 'lucide-react';
+import NoesisSignatureLogo from './ui/NoesisSignatureLogo';
 import NoesisLogo from './NoesisLogo';
 import AdaptionCopilot from './AdaptionCopilot';
 import CoolMode from './ui/CoolMode';
@@ -56,6 +57,38 @@ export default function LandingPage({ onLaunchApp, onOpenAuth, apiBase = '' }) {
 
       {/* Floating Pill Navigation (User Reference Images 1, 2, 3) */}
       <FloatingPillNav onLaunchApp={onLaunchApp} onOpenAuth={onOpenAuth} />
+
+      {/* Top Right Signature Logo (Enters at top right after initial hero animation) */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '28px',
+          zIndex: 99,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: 'rgba(255, 255, 255, 0.92)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          padding: '6px 14px 6px 10px',
+          borderRadius: '9999px',
+          border: '1px solid rgba(220, 227, 237, 0.9)',
+          boxShadow: '0 8px 24px -2px rgba(15, 23, 42, 0.08)',
+          animation: 'fadeInSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        title="NOESIS · Human Cognitive Decision Engine"
+      >
+        <NoesisSignatureLogo
+          size={28}
+          showBadge={true}
+          showText={true}
+          badgeText="INSIGHTFLOW"
+        />
+      </div>
 
 
       {/* =========================================================================

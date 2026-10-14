@@ -7,6 +7,7 @@ import {
   LogOut,
   Database
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Sidebar (Figma: Noesis · Workspace Sidebar - Frames 50:38765 & 50:38370)
@@ -21,25 +22,27 @@ import {
  * - Sign Out button at bottom with log-out icon
  */
 export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount = 0 }) {
+  const { t } = useTranslation();
+
   const routes = [
     {
       id: 'copilot',
-      label: 'Noesis Copilot',
+      label: t('nav.copilot', 'Noesis Copilot'),
       icon: Sparkles
     },
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: t('nav.dashboard', 'Dashboard'),
       icon: BarChart3
     },
     {
       id: 'decision',
-      label: 'Decision Intelligence',
+      label: t('nav.decision', 'Decision Intelligence'),
       icon: GitBranch
     },
     {
       id: 'issues',
-      label: 'Issue Tracker',
+      label: t('nav.issues', 'Issue Tracker'),
       icon: Ticket,
       badge: issuesCount > 0 ? issuesCount : undefined
     }
@@ -85,7 +88,7 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
             color: '#172033'
           }}
         >
-          Workspace
+          {t('sidebar.workspace', 'Workspace')}
         </div>
         <div
           style={{
@@ -96,7 +99,7 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
             color: '#8996AB'
           }}
         >
-          feedback_oct_2026
+          {t('sidebar.dataset_name', 'feedback_oct_2026')}
         </div>
       </div>
 
@@ -201,7 +204,7 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
               color: '#64748B'
             }}
           >
-            Active dataset
+            {t('sidebar.active_dataset', 'Active dataset')}
           </span>
         </div>
 
@@ -214,7 +217,7 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
             color: '#172033'
           }}
         >
-          feedback_oct_2026
+          {t('sidebar.dataset_name', 'feedback_oct_2026')}
         </div>
 
         <div
@@ -226,7 +229,7 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
             color: '#64748B'
           }}
         >
-          7,002 customer records
+          {t('sidebar.records_verified', '7,002 verified records')}
         </div>
       </div>
 
@@ -265,7 +268,7 @@ export default function Sidebar({ activeRoute, onNavigate, onLogout, issuesCount
               lineHeight: '150%'
             }}
           >
-            Sign out
+            {t('sidebar.sign_out', 'Sign out')}
           </span>
         </button>
       </div>

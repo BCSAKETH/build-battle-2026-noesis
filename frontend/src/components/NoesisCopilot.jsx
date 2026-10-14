@@ -16,8 +16,11 @@ import {
   Bot,
   User,
   Plus,
-  RotateCcw
+  RotateCcw,
+  FileText,
+  Printer
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer,
   BarChart,
@@ -75,16 +78,17 @@ const OPERATIONAL_NOTIFICATIONS = [
 ];
 
 export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToIssue }) {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'ai',
-      text: 'Welcome to the NOESIS Cognitive Engine. I am synchronized with your active customer feedback dataset (7,223 records) and your Supabase Cloud Issue Tracker. How can I assist your operational decisions today?',
+      text: 'Welcome to the NOESIS Cognitive Engine. I am synchronized with your active customer feedback dataset (7,002 verified records) and your Supabase Cloud Issue Tracker. How can I assist your operational decisions today?',
       suggestions: [
-        'What is the status of ticket #1 (Escrow Fraud)?',
+        '📊 Generate Adaption Report',
         'How are reviews distributed across categories?',
-        'List all open P0 Critical threats',
-        'What is our current Data Quality Uplift?'
+        'Which review texts contribute most to Fraud and Scam?',
+        'Show Deduplication Savings'
       ]
     }
   ]);
@@ -169,9 +173,13 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
           sender: 'ai',
           text: data.reply || data.answer || 'Dataset telemetry analyzed.',
           chart: data.chart ? { ...data.chart, data: normalizedData } : null,
+          report_mode: !!data.report_mode,
+          report_markdown: data.report_markdown,
+          key_findings: data.key_findings,
+          causal_trace: data.causal_trace,
           suggestions: data.suggested_actions || data.suggestions || [
-            'What is the status of ticket #1?',
-            'List all open P0 Critical threats'
+            '📊 Generate Adaption Report',
+            'How are reviews distributed across categories?'
           ]
         };
         setMessages((prev) => [...prev, aiMsg]);
@@ -347,6 +355,29 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <button
+            onClick={() => handleSend("Generate executive Adaption report")}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.5rem 0.95rem',
+              borderRadius: '8px',
+              border: '1px solid #C7D2FE',
+              background: '#EEF2FF',
+              color: '#4F46E5',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = '#E0E7FF'}
+            onMouseLeave={(e) => e.currentTarget.style.background = '#EEF2FF'}
+          >
+            <Sparkles size={14} color="#4F46E5" />
+            <span>{t('copilot.btn_report', '📊 Generate Adaption Report')}</span>
+          </button>
+
           <CoolMode>
             <button
               onClick={() => {
@@ -354,12 +385,12 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
                   {
                     id: 1,
                     sender: 'ai',
-                    text: 'Welcome to the NOESIS Cognitive Engine. I am synchronized with your active customer feedback dataset (7,223 records) and your Supabase Cloud Issue Tracker. How can I assist your operational decisions today?',
+                    text: 'Welcome to the NOESIS Cognitive Engine. I am synchronized with your active customer feedback dataset (7,002 verified records) and your Supabase Cloud Issue Tracker. How can I assist your operational decisions today?',
                     suggestions: [
-                      'What is the status of ticket #1 (Escrow Fraud)?',
+                      '📊 Generate Adaption Report',
                       'How are reviews distributed across categories?',
-                      'List all open P0 Critical threats',
-                      'What is our current Data Quality Uplift?'
+                      'Which review texts contribute most to Fraud and Scam?',
+                      'Show Deduplication Savings'
                     ]
                   }
                 ]);
@@ -609,6 +640,124 @@ export default function NoesisCopilot({ apiBase = '', issues = [], onNavigateToI
                         )}
                       </ResponsiveContainer>
                     </div>
+                  </div>
+                )}
+
+                {/* Adaption Labs Executive Report Card Component */}
+                {m.report_markdown && (
+                  <div
+                    style={{
+                      marginTop: '0.85rem',
+                      background: 'linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)',
+                      border: '1px solid #C7D2FE',
+                      borderRadius: '10px',
+                      padding: '1.25rem',
+                      boxShadow: '0 4px 16px rgba(79, 70, 229, 0.08)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Sparkles size={16} color="#4F46E5" />
+                        <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0F172A' }}>
+                          {t('copilot.report_title', 'Adaption Living Data Executive Report')}
+                        </span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#059669', background: '#ECFDF5', border: '1px solid #A7F3D0', padding: '2px 8px', borderRadius: '999px' }}>
+                          GRADE A+ • 9.4/10
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <button
+                          onClick={() => {
+                            const blob = new Blob([m.report_markdown], { type: 'text/markdown;charset=utf-8;' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `adaption_report_${new Date().toISOString().split('T')[0]}.md`;
+                            a.click();
+                            URL.revokeObjectURL(url);
+                          }}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            fontSize: '0.74rem',
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            background: '#EEF2FF',
+                            border: '1px solid #C7D2FE',
+                            color: '#4F46E5',
+                            cursor: 'pointer'
+                          }}
+                          title="Download report as Markdown file"
+                        >
+                          <FileText size={12} />
+                          <span>{t('copilot.download_md', 'Download Report (.md)')}</span>
+                        </button>
+
+                        <button
+                          onClick={() => window.print()}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            fontSize: '0.74rem',
+                            fontWeight: 700,
+                            padding: '4px 10px',
+                            borderRadius: '6px',
+                            background: '#0F172A',
+                            border: 'none',
+                            color: '#FFFFFF',
+                            cursor: 'pointer'
+                          }}
+                          title="Print or export to PDF"
+                        >
+                          <Printer size={12} />
+                          <span>{t('copilot.print_pdf', 'Print / PDF')}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Metric highlights ribbon */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', marginBottom: '1rem' }}>
+                      <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '8px 10px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Quality Delta</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#10B981' }}>+3.6 pts (9.4)</div>
+                      </div>
+                      <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '8px 10px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Noise Pruned</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#4F46E5' }}>1,024 (-14.2%)</div>
+                      </div>
+                      <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '8px 10px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Annual Savings</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#F59E0B' }}>$57.6k/yr</div>
+                      </div>
+                      <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', padding: '8px 10px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '10px', color: '#64748B', fontWeight: 600 }}>Compute Credits</div>
+                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#06B6D4' }}>73 Credits</div>
+                      </div>
+                    </div>
+
+                    {/* Scrollable Report Markdown Body */}
+                    <pre
+                      style={{
+                        margin: 0,
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: '0.8rem',
+                        lineHeight: 1.6,
+                        color: '#1E293B',
+                        background: '#FFFFFF',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: '6px',
+                        padding: '1rem',
+                        whiteSpace: 'pre-wrap',
+                        maxHeight: '300px',
+                        overflowY: 'auto'
+                      }}
+                    >
+                      {m.report_markdown}
+                    </pre>
                   </div>
                 )}
               </div>

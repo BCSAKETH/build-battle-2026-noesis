@@ -1,26 +1,16 @@
 import React, { useState } from 'react';
 import { UploadCloud, Settings, Sliders, Check, X, Shield, Globe, Zap, LogOut, Database, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import LanguageSelector from './LanguageSelector';
 import { useSettings } from '../context/SettingsContext';
-import CreditsModal from './CreditsModal';
 import SettingsModal from './SettingsModal';
-import AdaptionStudioModal from './AdaptionStudioModal';
 import NoesisSignatureLogo from './ui/NoesisSignatureLogo';
 
 export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, authUser }) {
+  const { t } = useTranslation();
   const { appearance, setAppearance, workspaceScale, setWorkspaceScale, theme } = useSettings();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showCreditsModal, setShowCreditsModal] = useState(false);
-  const [showAdaptionStudioModal, setShowAdaptionStudioModal] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const [currentCredits, setCurrentCredits] = useState(() => {
-    try {
-      const stored = localStorage.getItem('noesis_ai_credits');
-      return stored ? parseInt(stored, 10) : 1100;
-    } catch {
-      return 1100;
-    }
-  });
 
   // Extract display user details from prop or local storage
   const activeUser = authUser || (() => {
@@ -63,72 +53,9 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
           badgeText="INSIGHTFLOW"
         />
 
-        {/* Right: Global Actions (Adaption Studio, Credits, Upload, Language, Dataset, Account) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          {/* Adaption Engine Studio Trigger (8 Peak Capabilities) */}
-          <button
-            onClick={() => setShowAdaptionStudioModal(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.42rem 0.85rem',
-              borderRadius: '999px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              background: '#EEF2FF',
-              color: '#4F46E5',
-              border: '1px solid #C7D2FE',
-              cursor: 'pointer',
-              boxShadow: '0 1px 3px rgba(79, 70, 229, 0.1)',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.background = '#E0E7FF';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.background = '#EEF2FF';
-            }}
-            title="Open Adaption Labs Engine Studio (8 Peak Capabilities)"
-          >
-            <Sparkles size={14} color="#4F46E5" />
-            <span>Adaption Studio</span>
-            <span style={{ fontSize: '10px', background: '#4F46E5', color: '#fff', padding: '1px 6px', borderRadius: '999px', fontWeight: 800 }}>
-              8 ACTIVE
-            </span>
-          </button>
-          {/* Interactive Credits Pill: "Learn how to get more credits" (Image 5) */}
-          <button
-            onClick={() => setShowCreditsModal(true)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              padding: '0.42rem 0.85rem',
-              borderRadius: '999px',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              background: '#f0fdf4',
-              color: '#059669',
-              border: '1px solid #a7f3d0',
-              cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(16, 185, 129, 0.08)',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            title="Click to view AI credit telemetry & get more credits"
-          >
-            <Zap size={14} color="#10b981" />
-            <span>{currentCredits} / 1,000 Credits</span>
-            <span style={{ color: '#047857', textDecoration: 'underline', fontWeight: 600, fontSize: '0.72rem', marginLeft: '3px' }}>
-              Learn how to get more credits
-            </span>
-          </button>
-
-          {/* Upload Dataset Button (Image 5) */}
+        {/* Right: Global Actions (Upload Dataset, Language Selector, Dataset Badge, Account) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          {/* Upload Dataset Button */}
           <button
             onClick={onOpenUpload}
             style={{
@@ -149,13 +76,13 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
             onMouseLeave={(e) => e.currentTarget.style.background = '#eef2ff'}
           >
             <UploadCloud size={15} color="#4f46e5" />
-            <span>Upload Dataset</span>
+            <span>{t('topbar.upload_dataset', 'Upload Dataset')}</span>
           </button>
 
           {/* Language Selector (EN, TE, HI) */}
           <LanguageSelector />
 
-          {/* Active Dataset Pill (Image 5) */}
+          {/* Active Dataset Pill */}
           <div
             style={{
               display: 'flex',
@@ -170,11 +97,11 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
             }}
           >
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
-            <span style={{ fontWeight: 700, color: '#0f172a' }}>feedback_oct_2026</span>
-            <span style={{ color: '#94a3b8' }}>&bull; 7,002 records &bull; Oct 1–7</span>
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>{t('topbar.dataset_name', 'feedback_oct_2026')}</span>
+            <span style={{ color: '#94a3b8' }}>&bull; 7,002 {t('topbar.records', 'records')} &bull; Oct 1–7</span>
           </div>
 
-          {/* Account Button with Dropdown (containing Settings, Account Details, Sign out per User Instruction & Image 5) */}
+          {/* Account Button with Dropdown */}
           <div style={{ position: 'relative' }}>
             <button
               onClick={() => setShowAccountMenu((prev) => !prev)}
@@ -223,7 +150,7 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
                   {activeUser.name || activeUser.email?.split('@')[0] || 'User'}
                 </span>
                 <span style={{ fontSize: '10px', color: '#64748B', lineHeight: 1 }}>
-                  {activeUser.role || 'Executive'}
+                  {activeUser.role || t('topbar.operator', 'Enterprise Operator')}
                 </span>
               </div>
 
@@ -268,7 +195,7 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
                     </div>
                     <div style={{ overflow: 'hidden' }}>
                       <div style={{ fontWeight: 700, fontSize: '13px', color: '#0F172A', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
-                        {activeUser.name || 'Enterprise Operator'}
+                        {activeUser.name || t('topbar.operator', 'Enterprise Operator')}
                       </div>
                       <div style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                         {activeUser.email || 'executive@noesis.internal'}
@@ -305,36 +232,7 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
                     onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                   >
                     <Settings size={15} color="#4F46E5" />
-                    <span>Settings · Layout Overlay</span>
-                  </button>
-
-                  {/* Credits Telemetry Trigger */}
-                  <button
-                    onClick={() => {
-                      setShowAccountMenu(false);
-                      setShowCreditsModal(true);
-                    }}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '9px 12px',
-                      borderRadius: '6px',
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      color: '#172033',
-                      textAlign: 'left',
-                      transition: 'background 0.15s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = '#F1F5F9'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <Zap size={15} color="#10B981" />
-                    <span>AI Quota & Usage</span>
+                    <span>{t('topbar.settings', 'Settings · Layout Overlay')}</span>
                   </button>
 
                   <div style={{ height: '1px', background: '#E2E8F0', margin: '4px 0' }} />
@@ -366,7 +264,7 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
                       <LogOut size={15} color="#EF4444" />
-                      <span>Sign out</span>
+                      <span>{t('topbar.sign_out', 'Sign out')}</span>
                     </button>
                   )}
                 </div>
@@ -376,19 +274,6 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
         </div>
       </header>
 
-      {/* Global Credits Modal */}
-      <CreditsModal
-        isOpen={showCreditsModal}
-        onClose={() => setShowCreditsModal(false)}
-        onCreditsClaimed={(newAmt) => setCurrentCredits(newAmt)}
-      />
-
-      {/* Global Adaption Engine Studio Modal (8 Peak Capabilities) */}
-      <AdaptionStudioModal
-        isOpen={showAdaptionStudioModal}
-        onClose={() => setShowAdaptionStudioModal(false)}
-      />
-
       {/* Global Settings Modal (Figma Frame 50:38765) */}
       <SettingsModal
         isOpen={showSettingsModal}
@@ -397,4 +282,3 @@ export default function TopBar({ onOpenUpload, onReturnToLanding, onLogout, auth
     </>
   );
 }
-

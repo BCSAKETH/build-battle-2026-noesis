@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSettings } from '../context/SettingsContext';
+import i18n from '../i18n/i18n';
 
 const LANGUAGES = [
   { code: 'en', label: 'English', short: 'EN' },
@@ -14,6 +15,13 @@ const LANGUAGES = [
  */
 export default function LanguageSelector() {
   const { language, setLanguage } = useSettings();
+
+  const handleSelect = (code) => {
+    setLanguage(code);
+    i18n.changeLanguage(code);
+    localStorage.setItem('noesis_lang', code);
+    localStorage.setItem('insightflow_lang', code);
+  };
 
   return (
     <div
@@ -32,11 +40,11 @@ export default function LanguageSelector() {
       }}
     >
       {LANGUAGES.map((lang) => {
-        const active = language === lang.code;
+        const active = (language || i18n.language) === lang.code;
         return (
           <button
             key={lang.code}
-            onClick={() => setLanguage(lang.code)}
+            onClick={() => handleSelect(lang.code)}
             style={{
               flex: 1,
               height: '29px',

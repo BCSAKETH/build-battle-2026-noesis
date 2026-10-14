@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import CoolMode from './CoolMode';
-import NoesisSignatureLogo from './NoesisSignatureLogo';
 
 /**
  * FloatingPillNav (Inspired by User-Provided Reference Images 1, 2, 3)
@@ -58,14 +57,6 @@ export default function FloatingPillNav({ onLaunchApp, onOpenAuth }) {
           transition: 'all 0.3s ease'
         }}
       >
-        {/* Unified Noesis Signature Logo */}
-        <div style={{ marginRight: '8px' }}>
-          <NoesisSignatureLogo
-            size={28}
-            showBadge={false}
-            showText={true}
-          />
-        </div>
 
         {/* Nav Links (Pill Tabs) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
